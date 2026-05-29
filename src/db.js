@@ -33,6 +33,18 @@ db.exec(`
     key   TEXT PRIMARY KEY,
     value TEXT
   );
+
+  CREATE TABLE IF NOT EXISTS users (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    provider    TEXT NOT NULL,        -- 'telegram' (sau này: 'zalo', 'dev')
+    provider_id TEXT NOT NULL,        -- id từ nhà cung cấp
+    name        TEXT,
+    username    TEXT,
+    photo_url   TEXT,
+    cover_image TEXT,                 -- ảnh bìa lịch (mỗi user 1 ảnh)
+    created_at  TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+    UNIQUE(provider, provider_id)
+  );
 `);
 
 // Migration: thêm cột nếu DB cũ chưa có
@@ -44,5 +56,10 @@ if (!cols.includes('images')) {
   // Mảng JSON các URL ảnh đính kèm trong nội dung ghi chú
   db.exec(`ALTER TABLE entries ADD COLUMN images TEXT NOT NULL DEFAULT '[]'`);
 }
+if (!cols.includes('user_id')) {
+  // Chủ sở hữu ghi chú (NULL = dữ liệu cũ, sẽ gán cho user đầu tiên đăng nhập)
+  db.exec(`ALTER TABLE entries ADD COLUMN user_id INTEGER`);
+}
+db.exec(`CREATE INDEX IF NOT EXISTS idx_entries_user ON entries(user_id, created_at DESC)`);
 
 module.exports = db;

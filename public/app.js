@@ -1,5 +1,13 @@
 'use strict';
 
+// Mọi API trả 401 (chưa/đã hết đăng nhập) -> chuyển về trang login
+const _fetch = window.fetch.bind(window);
+window.fetch = async (...args) => {
+  const res = await _fetch(...args);
+  if (res.status === 401) window.location.href = '/login.html';
+  return res;
+};
+
 // ===== Trạng thái =====
 let currentId = null;       // id ghi chú đang mở (null = bản nháp mới chưa lưu)
 let currentRating = 0;
@@ -558,8 +566,32 @@ async function loadWeather() {
   }
 }
 
+// ===== Người dùng + đăng xuất =====
+const userNameEl = document.getElementById('user-name');
+const logoutBtn = document.getElementById('logout-btn');
+
+async function loadMe() {
+  try {
+    const res = await fetch('/api/me');
+    const data = await res.json();
+    if (data.authenticated && data.user) {
+      userNameEl.textContent = data.user.name || data.user.username || 'Bạn';
+    }
+  } catch {
+    /* bỏ qua */
+  }
+}
+
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', async () => {
+    await fetch('/api/logout', { method: 'POST' });
+    window.location.href = '/login.html';
+  });
+}
+
 // ===== Khởi động =====
 (async function init() {
+  loadMe();
   await loadNotes();
   await showCalendar(); // trang chính: hiển thị lịch tháng hiện tại
   loadCover();

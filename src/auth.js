@@ -1,66 +1,138 @@
 'use strict';
 
 const express = require('express');
-const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
+const db = require('./db');
 
 const router = express.Router();
+const isProd = process.env.NODE_ENV === 'production';
 
-// Chặn brute-force: tối đa 10 lần thử login / 15 phút / IP
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Quá nhiều lần thử. Vui lòng đợi 15 phút.' },
-});
+// ===== Prepared statements cho users =====
+const stmtFindUser = db.prepare(`SELECT * FROM users WHERE provider = ? AND provider_id = ?`);
+const stmtGetUser = db.prepare(`SELECT * FROM users WHERE id = ?`);
+const stmtInsertUser = db.prepare(
+  `INSERT INTO users (provider, provider_id, name, username, photo_url) VALUES (?, ?, ?, ?, ?)`
+);
+const stmtUpdateUser = db.prepare(
+  `UPDATE users SET name = ?, username = ?, photo_url = ? WHERE id = ?`
+);
+const stmtCountUsers = db.prepare(`SELECT COUNT(*) AS n FROM users`);
 
-// Middleware bảo vệ các route cần đăng nhập
+// Tìm/tạo user theo (provider, provider_id). Lần đầu tạo user (DB rỗng) sẽ
+// "nhận" toàn bộ dữ liệu cũ chưa có chủ (user_id IS NULL) + ảnh bìa chung cũ.
+function upsertUser(provider, providerId, profile = {}) {
+  const pid = String(providerId);
+  const existing = stmtFindUser.get(provider, pid);
+  if (existing) {
+    stmtUpdateUser.run(profile.name || existing.name, profile.username || existing.username, profile.photo_url || existing.photo_url, existing.id);
+    return stmtGetUser.get(existing.id);
+  }
+
+  const wasEmpty = stmtCountUsers.get().n === 0;
+  const info = stmtInsertUser.run(provider, pid, profile.name || null, profile.username || null, profile.photo_url || null);
+  const userId = info.lastInsertRowid;
+
+  if (wasEmpty) {
+    // Gán dữ liệu cũ cho người dùng đầu tiên
+    db.prepare(`UPDATE entries SET user_id = ? WHERE user_id IS NULL`).run(userId);
+    const oldCover = db.prepare(`SELECT value FROM settings WHERE key = 'cover_image'`).get();
+    if (oldCover && oldCover.value) {
+      db.prepare(`UPDATE users SET cover_image = ? WHERE id = ?`).run(oldCover.value, userId);
+    }
+  }
+  return stmtGetUser.get(userId);
+}
+
+// ===== Xác thực dữ liệu Telegram Login Widget =====
+function verifyTelegram(data) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token || !data || !data.hash) return false;
+
+  const { hash, ...fields } = data;
+  const dataCheckString = Object.keys(fields)
+    .sort()
+    .map((k) => `${k}=${fields[k]}`)
+    .join('\n');
+  const secret = crypto.createHash('sha256').update(token).digest();
+  const computed = crypto.createHmac('sha256', secret).update(dataCheckString).digest('hex');
+
+  if (computed !== hash) return false;
+  // Chống replay: dữ liệu không quá 24h
+  const age = Math.floor(Date.now() / 1000) - Number(fields.auth_date || 0);
+  return age >= 0 && age < 86400;
+}
+
+// ===== Middleware bảo vệ =====
 function requireAuth(req, res, next) {
-  if (req.session && req.session.authenticated) {
+  if (req.session && req.session.userId) {
+    req.userId = req.session.userId;
     return next();
   }
   return res.status(401).json({ error: 'Chưa đăng nhập' });
 }
 
-// POST /api/login — nhận { password }, so với bcrypt hash trong env
-router.post('/login', loginLimiter, (req, res) => {
-  const { password } = req.body || {};
-  const hash = process.env.APP_PASSWORD_HASH;
+// Chặn dò: tối đa 20 lần gọi auth / 15 phút / IP
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
-  if (!hash) {
-    return res.status(500).json({ error: 'Server chưa cấu hình mật khẩu (APP_PASSWORD_HASH)' });
+// GET /auth/telegram — callback từ Telegram Login Widget (redirect mode)
+router.get('/auth/telegram', authLimiter, (req, res) => {
+  const data = req.query || {};
+  if (!verifyTelegram(data)) {
+    return res.status(401).send('Xác thực Telegram thất bại. <a href="/login.html">Thử lại</a>');
   }
-  if (typeof password !== 'string' || password.length === 0) {
-    return res.status(400).json({ error: 'Thiếu mật khẩu' });
-  }
-
-  const ok = bcrypt.compareSync(password, hash);
-  if (!ok) {
-    return res.status(401).json({ error: 'Sai mật khẩu' });
-  }
-
-  // Đăng nhập thành công — tái tạo session để tránh fixation
+  const name = [data.first_name, data.last_name].filter(Boolean).join(' ') || data.username || 'Người dùng';
+  const user = upsertUser('telegram', data.id, {
+    name,
+    username: data.username || null,
+    photo_url: data.photo_url || null,
+  });
   req.session.regenerate((err) => {
-    if (err) {
-      return res.status(500).json({ error: 'Lỗi tạo phiên đăng nhập' });
-    }
-    req.session.authenticated = true;
+    if (err) return res.status(500).send('Lỗi tạo phiên đăng nhập');
+    req.session.userId = user.id;
+    res.redirect('/');
+  });
+});
+
+// POST /auth/dev-login — chỉ chạy ở môi trường dev (local)
+router.post('/auth/dev-login', (req, res) => {
+  if (isProd) return res.status(404).json({ error: 'Không khả dụng' });
+  const dev = upsertUser('dev', '0', { name: 'Local Dev' });
+  req.session.regenerate((err) => {
+    if (err) return res.status(500).json({ error: 'Lỗi phiên' });
+    req.session.userId = dev.id;
     res.json({ ok: true });
   });
 });
 
-// POST /api/logout — hủy session
-router.post('/logout', (req, res) => {
+// POST /api/logout
+router.post('/api/logout', (req, res) => {
   req.session.destroy(() => {
     res.clearCookie('connect.sid');
     res.json({ ok: true });
   });
 });
 
-// GET /api/me — kiểm tra trạng thái đăng nhập (cho frontend)
-router.get('/me', (req, res) => {
-  res.json({ authenticated: !!(req.session && req.session.authenticated) });
+// GET /api/config — cấu hình công khai cho trang login (tên bot + cờ dev)
+router.get('/api/config', (req, res) => {
+  res.json({
+    botUsername: process.env.TELEGRAM_BOT_USERNAME || null,
+    dev: !isProd,
+  });
 });
 
-module.exports = { router, requireAuth };
+// GET /api/me — thông tin user hiện tại
+router.get('/api/me', (req, res) => {
+  const uid = req.session && req.session.userId;
+  if (!uid) return res.json({ authenticated: false });
+  const u = stmtGetUser.get(uid);
+  if (!u) return res.json({ authenticated: false });
+  res.json({ authenticated: true, user: { name: u.name, username: u.username, photo_url: u.photo_url } });
+});
+
+module.exports = { router, requireAuth, upsertUser };

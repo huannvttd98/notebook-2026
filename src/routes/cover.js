@@ -9,20 +9,17 @@ const { uploadDir, createUpload } = require('../upload');
 const router = express.Router();
 const upload = createUpload('cover');
 
-// Helpers đọc/ghi settings
-const getSetting = db.prepare(`SELECT value FROM settings WHERE key = ?`);
-const setSetting = db.prepare(
-  `INSERT INTO settings (key, value) VALUES (?, ?)
-   ON CONFLICT(key) DO UPDATE SET value = excluded.value`
-);
+// Ảnh bìa lưu theo từng user (cột users.cover_image)
+const getCover = db.prepare(`SELECT cover_image FROM users WHERE id = ?`);
+const setCover = db.prepare(`UPDATE users SET cover_image = ? WHERE id = ?`);
 
-// GET /api/cover — trả URL ảnh hiện tại (null nếu chưa có)
+// GET /api/cover — ảnh bìa của user hiện tại (null nếu chưa có)
 router.get('/', (req, res) => {
-  const row = getSetting.get('cover_image');
-  res.json({ url: row ? row.value : null });
+  const row = getCover.get(req.userId);
+  res.json({ url: row && row.cover_image ? row.cover_image : null });
 });
 
-// POST /api/cover — upload ảnh mới (field 'image')
+// POST /api/cover — upload ảnh bìa mới (field 'image')
 router.post('/', (req, res) => {
   upload.single('image')(req, res, (err) => {
     if (err) {
@@ -33,14 +30,13 @@ router.post('/', (req, res) => {
 
     const url = `/uploads/${req.file.filename}`;
 
-    // Xóa ảnh cũ (nếu có) để không phình ổ đĩa
-    const old = getSetting.get('cover_image');
-    if (old && old.value) {
-      const oldPath = path.join(uploadDir, path.basename(old.value));
-      fs.promises.unlink(oldPath).catch(() => {});
+    // Xóa ảnh bìa cũ của chính user này (nếu có)
+    const old = getCover.get(req.userId);
+    if (old && old.cover_image) {
+      fs.promises.unlink(path.join(uploadDir, path.basename(old.cover_image))).catch(() => {});
     }
 
-    setSetting.run('cover_image', url);
+    setCover.run(url, req.userId);
     res.json({ url });
   });
 });

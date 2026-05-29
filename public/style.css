@@ -74,6 +74,45 @@
 
 html, body { height: 100%; }
 
+/* ===== Trang đăng nhập ===== */
+.login-page {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--bg-doc);
+  color: var(--ink);
+  font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+}
+.login-card {
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 2.2rem 2rem;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, .12);
+}
+.login-card h1 { margin: 0 0 .3rem; }
+.login-card .muted { margin: 0 0 1.4rem; }
+.tg-login { display: flex; justify-content: center; min-height: 48px; }
+.dev-login {
+  margin-top: .8rem;
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: .6rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.dev-login:hover { background: var(--accent-dark); }
+.login-card .error { color: var(--danger); margin-top: 1rem; }
+
 body.app {
   margin: 0;
   display: flex;
@@ -186,6 +225,35 @@ input, textarea, button { font: inherit; color: inherit; }
 .weather-temp { font-weight: 700; color: var(--accent); }
 .weather-meta { color: var(--muted); font-size: .8rem; }
 .weather-loading { color: var(--muted); font-style: italic; }
+
+/* Thanh người dùng + đăng xuất (đáy sidebar) */
+.user-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-top: .6rem;
+  padding: .5rem .6rem;
+  border-top: 1px solid var(--border);
+}
+.user-name {
+  font-size: .85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.logout-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: .78rem;
+  padding: .25rem .55rem;
+  cursor: pointer;
+}
+.logout-btn:hover { color: var(--danger); border-color: var(--danger); }
 
 /* ===================== DOCUMENT ===================== */
 .doc {

@@ -5,14 +5,19 @@ Web app ghi nhật ký kiểu Notion. Nhẹ, chạy tốt trên server nhỏ (**
 - **Backend:** Node.js + Express
 - **Database:** SQLite (better-sqlite3) — file `db/notebook.db`, không cần DB server riêng
 - **Frontend:** HTML + Vanilla JS (không cần build)
-- **Bảo mật:** helmet + nén gzip (hiện **không có đăng nhập** — xem mục cuối nếu muốn bật lại)
+- **Đăng nhập:** Telegram (nhiều người dùng, mỗi người nhật ký riêng) + helmet + gzip
 
 ## Tính năng
 
+- **Đăng nhập bằng Telegram**, mỗi user có nhật ký riêng (dữ liệu cách ly hoàn toàn)
 - Sidebar liệt kê ghi chú + tìm kiếm; trang tài liệu tự động lưu (auto-save)
 - Đánh giá cảm xúc bằng icon 😢🙁😐🙂😄
-- **Lịch tháng**: mỗi ngày hiện cảm xúc của ghi chú; bên cạnh là **ảnh bìa** tải lên từ máy
+- **Lịch tháng**: ngày có ghi chú hiện 🔥; bên cạnh là **ảnh bìa** tải lên từ máy
 - Widget **thời tiết** theo thành phố cấu hình (Open-Meteo, miễn phí)
+
+> **Local (dev):** Telegram Widget không chạy trên localhost, nên khi `NODE_ENV=development`
+> app tự đăng nhập một tài khoản "Local Dev" (có nút "Đăng nhập Local (dev)" ở trang login).
+> Đăng nhập Telegram thật chỉ chạy trên server có tên miền HTTPS.
 
 ---
 
@@ -42,7 +47,8 @@ npm install --production
 
 # 3. Cấu hình môi trường
 cp .env.example .env
-nano .env                 # đặt WEATHER_CITY, NODE_ENV=production (PORT mặc định 3100)
+nano .env                 # đặt NODE_ENV=production, WEATHER_CITY, SESSION_SECRET,
+#                           TELEGRAM_BOT_TOKEN, TELEGRAM_BOT_USERNAME (xem mục Telegram bên dưới)
 
 # 4. Đảm bảo thư mục dữ liệu tồn tại & ghi được (DB + ảnh upload)
 mkdir -p db public/uploads
@@ -110,12 +116,13 @@ Crontab backup hằng ngày lúc 2h sáng:
 ## Cấu trúc dự án
 
 ```
-server.js                 # Điểm vào: Express app
-src/db.js                 # Kết nối SQLite + migration (entries, settings)
-src/routes/entries.js     # API CRUD nhật ký (+ rating, tìm kiếm)
+server.js                 # Điểm vào: Express app (session, auth, routes)
+src/db.js                 # SQLite + migration (entries, settings, users)
+src/auth.js               # Đăng nhập Telegram + upsertUser + requireAuth
+src/routes/entries.js     # API CRUD nhật ký (cách ly theo user_id)
 src/routes/weather.js     # Proxy thời tiết Open-Meteo (cache 10 phút)
-src/routes/cover.js       # Upload/lấy ảnh bìa (multer)
-public/                   # Frontend: index.html, app.js, style.css
+src/routes/cover.js       # Ảnh bìa lịch theo từng user (multer)
+public/                   # Frontend: index.html, app.js, style.css, login.html, login.js
 public/uploads/           # Ảnh người dùng tải lên (gitignored)
 ecosystem.config.js       # Cấu hình PM2
 deploy/nginx.conf         # Mẫu Nginx reverse proxy
@@ -124,14 +131,28 @@ docs/PLAN.md              # Kế hoạch
 
 ---
 
-## Bật lại đăng nhập (tùy chọn)
+## Đăng nhập Telegram (multi-user)
 
-Mã đăng nhập vẫn còn trong `src/auth.js` nhưng đang **tắt**. Để bật:
+Mỗi người đăng nhập bằng Telegram và có nhật ký riêng (dữ liệu cách ly hoàn toàn).
+**Bắt buộc tên miền HTTPS** (Telegram Widget không chạy localhost).
 
-1. Trong [server.js](server.js): `require` lại `express-session` + `./src/auth`, thêm middleware `session(...)`, mount `app.use('/api', authRouter)` và bọc `requireAuth` cho `/api/entries`.
-2. Tạo mật khẩu: `node scripts/set-password.js "matkhau"` → dán vào `.env`:
-   ```
-   SESSION_SECRET=<chuỗi ngẫu nhiên dài>
-   APP_PASSWORD_HASH=<hash vừa tạo>
-   ```
-3. Thêm lại trang `public/login.html` + `login.js` (đã gỡ).
+**Tạo bot:**
+1. Nhắn [@BotFather](https://t.me/BotFather) → `/newbot` → đặt tên → nhận **bot token**.
+2. `/setdomain` → chọn bot → nhập tên miền (vd `nhatky.example.com`). **Bắt buộc**, không có thì nút login không hiện.
+
+**Cấu hình `.env` trên server:**
+```
+NODE_ENV=production
+SESSION_SECRET=<openssl rand -hex 32>
+TELEGRAM_BOT_TOKEN=<token từ BotFather>
+TELEGRAM_BOT_USERNAME=<tên bot, không có @>
+```
+
+**Cơ chế:** Widget gửi dữ liệu kèm `hash` → server xác minh bằng HMAC-SHA256 với bot token
+→ tạo/đăng nhập user theo `telegram_id` → session lưu trong SQLite (`better-sqlite3-session-store`,
+không mất khi PM2 restart). Người đầu tiên đăng nhập **được gán toàn bộ nhật ký cũ**.
+
+> Thêm **Zalo** sau này: chỉ cần viết route `/auth/zalo/*` + nút login; bảng `users` đã
+> dùng `(provider, provider_id)` nên không phải đổi CSDL.
+
+> Ghi chú: file ảnh trong `public/uploads/` phục vụ tĩnh (URL khó đoán nhưng không khóa theo user).

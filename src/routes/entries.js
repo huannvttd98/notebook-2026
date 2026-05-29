@@ -11,22 +11,22 @@ const imgUpload = createUpload('note');
 
 const PAGE_SIZE = 10;
 
-// Prepared statements (tái sử dụng, chống SQL injection)
+// Prepared statements — TẤT CẢ đều ràng buộc user_id để cách ly dữ liệu giữa các user
 const stmtInsert = db.prepare(
-  `INSERT INTO entries (title, content, mood, rating) VALUES (?, ?, ?, ?)`
+  `INSERT INTO entries (title, content, mood, rating, user_id) VALUES (?, ?, ?, ?, ?)`
 );
 const stmtInsertDated = db.prepare(
-  `INSERT INTO entries (title, content, mood, rating, created_at) VALUES (?, ?, ?, ?, ?)`
+  `INSERT INTO entries (title, content, mood, rating, created_at, user_id) VALUES (?, ?, ?, ?, ?, ?)`
 );
-const stmtGetOne = db.prepare(`SELECT * FROM entries WHERE id = ?`);
+const stmtGetOne = db.prepare(`SELECT * FROM entries WHERE id = ? AND user_id = ?`);
 const stmtUpdate = db.prepare(
-  `UPDATE entries SET title = ?, content = ?, mood = ?, rating = ?, updated_at = datetime('now','localtime') WHERE id = ?`
+  `UPDATE entries SET title = ?, content = ?, mood = ?, rating = ?, updated_at = datetime('now','localtime') WHERE id = ? AND user_id = ?`
 );
 const stmtUpdateDated = db.prepare(
-  `UPDATE entries SET title = ?, content = ?, mood = ?, rating = ?, created_at = ?, updated_at = datetime('now','localtime') WHERE id = ?`
+  `UPDATE entries SET title = ?, content = ?, mood = ?, rating = ?, created_at = ?, updated_at = datetime('now','localtime') WHERE id = ? AND user_id = ?`
 );
-const stmtUpdateImages = db.prepare(`UPDATE entries SET images = ? WHERE id = ?`);
-const stmtDelete = db.prepare(`DELETE FROM entries WHERE id = ?`);
+const stmtUpdateImages = db.prepare(`UPDATE entries SET images = ? WHERE id = ? AND user_id = ?`);
+const stmtDelete = db.prepare(`DELETE FROM entries WHERE id = ? AND user_id = ?`);
 
 // Validate + chuẩn hóa input từ body
 function parseBody(body) {
@@ -51,8 +51,9 @@ function parseImages(entry) {
   }
 }
 
-// GET /api/entries?search=&page=&limit= — danh sách
+// GET /api/entries?search=&page=&limit= — danh sách (chỉ của user hiện tại)
 router.get('/', (req, res) => {
+  const uid = req.userId;
   const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
   const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
   const limit = Math.min(200, Math.max(1, Number.parseInt(req.query.limit, 10) || PAGE_SIZE));
@@ -63,21 +64,21 @@ router.get('/', (req, res) => {
   if (search) {
     const like = `%${search}%`;
     total = db
-      .prepare(`SELECT COUNT(*) AS n FROM entries WHERE title LIKE ? OR content LIKE ?`)
-      .get(like, like).n;
+      .prepare(`SELECT COUNT(*) AS n FROM entries WHERE user_id = ? AND (title LIKE ? OR content LIKE ?)`)
+      .get(uid, like, like).n;
     rows = db
       .prepare(
-        `SELECT * FROM entries WHERE title LIKE ? OR content LIKE ?
+        `SELECT * FROM entries WHERE user_id = ? AND (title LIKE ? OR content LIKE ?)
          ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`
       )
-      .all(like, like, limit, offset);
+      .all(uid, like, like, limit, offset);
   } else {
-    total = db.prepare(`SELECT COUNT(*) AS n FROM entries`).get().n;
+    total = db.prepare(`SELECT COUNT(*) AS n FROM entries WHERE user_id = ?`).get(uid).n;
     rows = db
       .prepare(
-        `SELECT * FROM entries ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`
+        `SELECT * FROM entries WHERE user_id = ? ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`
       )
-      .all(limit, offset);
+      .all(uid, limit, offset);
   }
 
   res.json({
@@ -89,46 +90,46 @@ router.get('/', (req, res) => {
   });
 });
 
-// GET /api/entries/:id — chi tiết 1 entry
+// GET /api/entries/:id — chi tiết 1 entry (phải thuộc về user)
 router.get('/:id', (req, res) => {
-  const entry = stmtGetOne.get(req.params.id);
+  const entry = stmtGetOne.get(req.params.id, req.userId);
   if (!entry) return res.status(404).json({ error: 'Không tìm thấy' });
   res.json(entry);
 });
 
-// POST /api/entries — tạo mới
+// POST /api/entries — tạo mới (gắn user_id)
 router.post('/', (req, res) => {
   const { title, content, mood, rating, date } = parseBody(req.body || {});
   if (!content) return res.status(400).json({ error: 'Nội dung không được để trống' });
 
   let info;
   if (date) {
-    info = stmtInsertDated.run(title || null, content, mood || null, rating, `${date} 12:00:00`);
+    info = stmtInsertDated.run(title || null, content, mood || null, rating, `${date} 12:00:00`, req.userId);
   } else {
-    info = stmtInsert.run(title || null, content, mood || null, rating);
+    info = stmtInsert.run(title || null, content, mood || null, rating, req.userId);
   }
-  res.status(201).json(stmtGetOne.get(info.lastInsertRowid));
+  res.status(201).json(stmtGetOne.get(info.lastInsertRowid, req.userId));
 });
 
-// PUT /api/entries/:id — cập nhật
+// PUT /api/entries/:id — cập nhật (chỉ ghi chú của user)
 router.put('/:id', (req, res) => {
-  const existing = stmtGetOne.get(req.params.id);
+  const existing = stmtGetOne.get(req.params.id, req.userId);
   if (!existing) return res.status(404).json({ error: 'Không tìm thấy' });
 
   const { title, content, mood, rating, date } = parseBody(req.body || {});
   if (!content) return res.status(400).json({ error: 'Nội dung không được để trống' });
 
   if (date) {
-    stmtUpdateDated.run(title || null, content, mood || null, rating, `${date} 12:00:00`, req.params.id);
+    stmtUpdateDated.run(title || null, content, mood || null, rating, `${date} 12:00:00`, req.params.id, req.userId);
   } else {
-    stmtUpdate.run(title || null, content, mood || null, rating, req.params.id);
+    stmtUpdate.run(title || null, content, mood || null, rating, req.params.id, req.userId);
   }
-  res.json(stmtGetOne.get(req.params.id));
+  res.json(stmtGetOne.get(req.params.id, req.userId));
 });
 
 // POST /api/entries/:id/images — đính kèm 1 ảnh vào ghi chú
 router.post('/:id/images', (req, res) => {
-  const entry = stmtGetOne.get(req.params.id);
+  const entry = stmtGetOne.get(req.params.id, req.userId);
   if (!entry) return res.status(404).json({ error: 'Không tìm thấy ghi chú' });
 
   imgUpload.single('image')(req, res, (err) => {
@@ -140,21 +141,21 @@ router.post('/:id/images', (req, res) => {
 
     const images = parseImages(entry);
     images.push(`/uploads/${req.file.filename}`);
-    stmtUpdateImages.run(JSON.stringify(images), req.params.id);
+    stmtUpdateImages.run(JSON.stringify(images), req.params.id, req.userId);
     res.json({ images });
   });
 });
 
 // DELETE /api/entries/:id/images — gỡ 1 ảnh khỏi ghi chú (body: { url })
 router.delete('/:id/images', (req, res) => {
-  const entry = stmtGetOne.get(req.params.id);
+  const entry = stmtGetOne.get(req.params.id, req.userId);
   if (!entry) return res.status(404).json({ error: 'Không tìm thấy ghi chú' });
 
   const url = (req.body || {}).url;
   let images = parseImages(entry);
   if (images.includes(url)) {
     images = images.filter((u) => u !== url);
-    stmtUpdateImages.run(JSON.stringify(images), req.params.id);
+    stmtUpdateImages.run(JSON.stringify(images), req.params.id, req.userId);
     fs.promises.unlink(path.join(uploadDir, path.basename(url))).catch(() => {});
   }
   res.json({ images });
@@ -162,13 +163,13 @@ router.delete('/:id/images', (req, res) => {
 
 // DELETE /api/entries/:id — xóa ghi chú (kèm xóa file ảnh của nó)
 router.delete('/:id', (req, res) => {
-  const entry = stmtGetOne.get(req.params.id);
+  const entry = stmtGetOne.get(req.params.id, req.userId);
   if (!entry) return res.status(404).json({ error: 'Không tìm thấy' });
 
   for (const url of parseImages(entry)) {
     fs.promises.unlink(path.join(uploadDir, path.basename(url))).catch(() => {});
   }
-  stmtDelete.run(req.params.id);
+  stmtDelete.run(req.params.id, req.userId);
   res.json({ ok: true });
 });
 
