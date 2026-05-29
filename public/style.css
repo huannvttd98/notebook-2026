@@ -1,22 +1,23 @@
 :root {
-  /* Bảng màu McLaren / Petronas */
-  --mcl-petronas-green: #00a19b;
-  --mcl-silver-arrow:   #e0e0e0;
-  --mcl-carbon-black:   #1c1c1c;
-  --mcl-deep-black:     #0b0b0b;
-  --mcl-ineos-red:      #e10600;
+  /* Bảng màu xanh lá (đậm -> kem) */
+  --green-forest: #245024;  /* xanh rừng đậm */
+  --green-mid:    #388538;  /* xanh lá vừa */
+  --green-sage:   #7aae6a;  /* xanh sage */
+  --green-light:  #cce08a;  /* xanh nhạt */
+  --green-cream:  #eef3df;  /* kem */
 
-  /* Vai trò giao diện (theme tối kiểu Notion) */
-  --bg-doc: #1f1f1f;
-  --bg-sidebar: #171717;
-  --bg-hover: #262626;
-  --bg-active: #2c2c2c;
-  --ink: #e6e6e6;
-  --muted: #9a9a9a;
-  --accent: var(--mcl-petronas-green);
-  --border: #2e2e2e;
-  --danger: var(--mcl-ineos-red);
-  --star: #f5c518;
+  /* Vai trò giao diện (theme sáng, nền trắng, nhấn xanh) */
+  --bg-doc: #ffffff;
+  --bg-sidebar: #f6f8f1;
+  --bg-hover: #eaf0df;
+  --bg-active: #dde9c9;
+  --ink: #1f2d16;
+  --muted: #6f7d5c;
+  --accent: #3a8a36;
+  --accent-dark: #2d6e2a;
+  --border: #dde3d2;
+  --danger: #d33a2c;
+  --star: #d8a200;
 }
 
 * { box-sizing: border-box; }
@@ -101,13 +102,13 @@ input, textarea, button { font: inherit; color: inherit; }
 .sidebar-search { padding: .4rem .3rem .6rem; }
 .sidebar-search input {
   width: 100%;
-  background: #222;
+  background: #eef3df;
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: .4rem .6rem;
   font-size: .85rem;
 }
-.sidebar-search input::placeholder { color: #6a6a6a; }
+.sidebar-search input::placeholder { color: #9aa88a; }
 .sidebar-search input:focus { outline: none; border-color: var(--accent); }
 
 .sidebar-section-label {
@@ -136,7 +137,7 @@ input, textarea, button { font: inherit; color: inherit; }
 }
 .note-item:hover { background: var(--bg-hover); }
 .note-item.active { background: var(--bg-active); }
-.note-item.active .note-name { color: #fff; }
+.note-item.active .note-name { color: var(--ink); }
 .note-icon { font-size: .95rem; flex-shrink: 0; }
 .note-name {
   flex: 1;
@@ -155,7 +156,7 @@ input, textarea, button { font: inherit; color: inherit; }
   flex-wrap: wrap;
   margin-top: .8rem;
   padding: .55rem .7rem;
-  background: #222;
+  background: #eef3df;
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: .85rem;
@@ -187,7 +188,23 @@ input, textarea, button { font: inherit; color: inherit; }
 }
 .doc-crumb { color: var(--muted); font-size: .9rem; }
 .doc-tools { display: flex; align-items: center; gap: .8rem; }
-.save-status { font-size: .8rem; color: var(--muted); }
+.save-status {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--muted);
+  padding: .18rem .6rem;
+  border-radius: 999px;
+  transition: background .2s, color .2s;
+}
+.save-status:empty { padding: 0; }
+.save-status.is-saving { background: #fff3d4; color: #9a7400; }
+.save-status.is-saved { background: #e1f0d3; color: var(--accent-dark); animation: status-pop .35s ease; }
+.save-status.is-error { background: #fbe1de; color: var(--danger); }
+@keyframes status-pop {
+  0% { transform: scale(.7); opacity: .3; }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); opacity: 1; }
+}
 .doc-tool {
   background: none;
   border: none;
@@ -215,11 +232,11 @@ input, textarea, button { font: inherit; color: inherit; }
   border: none;
   font-size: 2.4rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--ink);
   padding: 0;
   margin-bottom: .8rem;
 }
-.doc-title::placeholder { color: #4a4a4a; }
+.doc-title::placeholder { color: #9aa88a; }
 .doc-title:focus { outline: none; }
 
 .doc-meta {
@@ -239,7 +256,7 @@ input, textarea, button { font: inherit; color: inherit; }
   font-size: .85rem;
   width: 140px;
 }
-.doc-mood::placeholder { color: #5a5a5a; }
+.doc-mood::placeholder { color: #9aa88a; }
 .doc-mood:focus { outline: none; }
 
 .doc-content {
@@ -251,12 +268,12 @@ input, textarea, button { font: inherit; color: inherit; }
   line-height: 1.7;
   padding: 0;
 }
-.doc-content::placeholder { color: #4a4a4a; }
+.doc-content::placeholder { color: #9aa88a; }
 .doc-content:focus { outline: none; }
 
 /* Ô chọn ngày của ghi chú */
 .doc-date-input {
-  background: #2a2a2a;
+  background: #eef3df;
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--ink);
@@ -291,7 +308,7 @@ input, textarea, button { font: inherit; color: inherit; }
   border: none;
   border-radius: 50%;
   background: rgba(0, 0, 0, .65);
-  color: #fff;
+  color: var(--ink);
   cursor: pointer;
   font-size: .85rem;
   line-height: 1;
@@ -308,7 +325,7 @@ input, textarea, button { font: inherit; color: inherit; }
   display: inline-flex;
   align-items: center;
   gap: .35rem;
-  background: #2a2a2a;
+  background: #eef3df;
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: .45rem .9rem;
@@ -404,14 +421,14 @@ input, textarea, button { font: inherit; color: inherit; }
   justify-content: center;
   gap: .4rem;
   background: var(--accent);
-  color: #06201f;
+  color: #fff;
   font-weight: 700;
   padding: .55rem 1rem;
   border-radius: 8px;
   cursor: pointer;
   text-align: center;
 }
-.cover-upload:hover { background: #00807b; color: #fff; }
+.cover-upload:hover { background: var(--accent-dark); color: #fff; }
 .cover-status { font-size: .82rem; text-align: center; min-height: 1em; }
 
 .cal-header {
@@ -421,7 +438,7 @@ input, textarea, button { font: inherit; color: inherit; }
   gap: 1.2rem;
   margin-bottom: 1.5rem;
 }
-.cal-title { font-size: 1.5rem; font-weight: 800; color: #fff; min-width: 180px; text-align: center; }
+.cal-title { font-size: 1.5rem; font-weight: 800; color: var(--ink); min-width: 180px; text-align: center; }
 .cal-nav {
   background: none;
   border: 1px solid var(--border);
@@ -473,12 +490,48 @@ input, textarea, button { font: inherit; color: inherit; }
   font-size: 1.8rem;
   line-height: 1;
 }
-.cal-cell.has-entry { cursor: pointer; }
-.cal-cell.has-entry:hover { border-color: var(--accent); background: var(--bg-hover); }
-.cal-cell.today { border-color: var(--accent); }
-.cal-cell.today .cal-day { color: var(--accent); font-weight: 700; }
+.cal-cell.has-entry {
+  cursor: pointer;
+  background: #eef6e2;
+  border-color: #cfe3b6;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.cal-cell.has-entry:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(58, 138, 54, .25);
+}
+.cal-cell.today {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: rgba(58, 138, 54, .08);
+}
+.cal-cell.today .cal-day {
+  color: #fff;
+  font-weight: 700;
+  background: var(--accent);
+  border-radius: 999px;
+  width: 1.5em;
+  height: 1.5em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
-.cal-hint { margin-top: 1.2rem; text-align: center; font-size: .85rem; }
+.cal-hint {
+  margin: 1.4rem auto 0;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .82rem;
+  color: var(--accent-dark);
+  background: #eef6e2;
+  border: 1px solid #cfe3b6;
+  padding: .5rem .9rem;
+  border-radius: 999px;
+}
+.cal-hint::before { content: "👆"; }
 .muted { color: var(--muted); }
 
 /* ===================== RESPONSIVE ===================== */

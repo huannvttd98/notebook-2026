@@ -78,6 +78,11 @@ function displayTitle(e) {
 
 function setStatus(text) {
   statusEl.textContent = text;
+  statusEl.className = 'save-status';
+  if (!text) return;
+  if (text.includes('✓')) statusEl.classList.add('is-saved');
+  else if (text.includes('⚠') || text.includes('Lỗi') || text.includes('Cần')) statusEl.classList.add('is-error');
+  else statusEl.classList.add('is-saving');
 }
 
 // ===== Đánh giá cảm xúc (chọn 1 icon) =====
