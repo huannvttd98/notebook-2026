@@ -266,38 +266,37 @@ input, textarea, button { font: inherit; color: inherit; }
 .calendar-view {
   flex: 1;
   overflow-y: auto;
-  padding: 2rem 2.5rem 4rem;
-  max-width: 1240px;
+  padding: 2.5rem 3rem 4rem;
+  max-width: 1500px;
   margin: 0 auto;
   width: 100%;
 }
-/* Chia 2 cột: lịch (trái) | ảnh (phải) */
+/* Chia 2 cột: lịch (trái) | ảnh (phải) — cao bằng nhau */
 .cal-split {
   display: flex;
-  gap: 2rem;
-  align-items: flex-start;
+  gap: 2.5rem;
+  align-items: stretch;
 }
-.cal-left { flex: 1 1 60%; min-width: 0; }
+.cal-left { flex: 1.6 1 0; min-width: 0; display: flex; flex-direction: column; }
 .cal-right {
-  flex: 1 1 40%;
-  position: sticky;
-  top: 0;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: .8rem;
+  justify-content: center;   /* căn giữa khối ảnh theo chiều dọc */
+  gap: .9rem;
 }
 
 .cover-panel {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 3;       /* khớp ảnh phong cảnh, ít bị cắt */
   background: var(--bg-sidebar);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, .45);
 }
 .cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cover-placeholder {
@@ -366,7 +365,7 @@ input, textarea, button { font: inherit; color: inherit; }
 
 .cal-cell {
   position: relative;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1.25 / 1;
   background: var(--bg-sidebar);
   border: 1px solid var(--border);
   border-radius: 10px;
