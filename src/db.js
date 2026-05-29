@@ -28,6 +28,11 @@ db.exec(`
     updated_at TEXT
   );
   CREATE INDEX IF NOT EXISTS idx_entries_created ON entries(created_at DESC);
+
+  CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT
+  );
 `);
 
 // Migration: thêm cột rating (đánh giá 0-5) nếu DB cũ chưa có

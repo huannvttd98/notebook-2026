@@ -10,6 +10,13 @@ let saveTimer = null;
 
 // ===== Phần tử DOM =====
 const newBtn = document.getElementById('new-note');
+const openCalBtn = document.getElementById('open-calendar');
+const docEl = document.querySelector('.doc');
+const calView = document.getElementById('calendar-view');
+const calGrid = document.getElementById('cal-grid');
+const calTitle = document.getElementById('cal-title');
+const calPrev = document.getElementById('cal-prev');
+const calNext = document.getElementById('cal-next');
 const searchEl = document.getElementById('search');
 const noteListEl = document.getElementById('note-list');
 const idEl = document.getElementById('entry-id');
@@ -22,7 +29,13 @@ const statusEl = document.getElementById('save-status');
 const deleteBtn = document.getElementById('delete-note');
 const ratingEl = document.getElementById('rating');
 const ratingClearBtn = document.getElementById('rating-clear');
-const starEls = ratingEl ? Array.from(ratingEl.querySelectorAll('.star')) : [];
+const faceEls = ratingEl ? Array.from(ratingEl.querySelectorAll('.face')) : [];
+
+// Icon cảm xúc theo mức 1-5
+const FACES = ['😢', '🙁', '😐', '🙂', '😄'];
+function faceFor(rating) {
+  return rating >= 1 && rating <= 5 ? FACES[rating - 1] : '';
+}
 
 // ===== Tiện ích =====
 function escapeHtml(str) {
@@ -53,16 +66,16 @@ function setStatus(text) {
   statusEl.textContent = text;
 }
 
-// ===== Đánh giá sao =====
+// ===== Đánh giá cảm xúc (chọn 1 icon) =====
 function paintRating(value) {
-  starEls.forEach((s) => s.classList.toggle('active', Number(s.dataset.value) <= value));
+  faceEls.forEach((f) => f.classList.toggle('active', Number(f.dataset.value) === value));
 }
 function setRating(value, save = true) {
   currentRating = value;
   paintRating(value);
   if (save) scheduleSave();
 }
-starEls.forEach((s) => s.addEventListener('click', () => setRating(Number(s.dataset.value))));
+faceEls.forEach((f) => f.addEventListener('click', () => setRating(Number(f.dataset.value))));
 if (ratingClearBtn) ratingClearBtn.addEventListener('click', () => setRating(0));
 
 // ===== Sidebar: danh sách ghi chú =====
@@ -86,7 +99,7 @@ function renderNoteList(entries) {
       <button type="button" class="note-item${e.id === currentId ? ' active' : ''}" data-id="${e.id}">
         <span class="note-icon">📄</span>
         <span class="note-name">${escapeHtml(displayTitle(e))}</span>
-        ${e.rating ? `<span class="note-stars">${'★'.repeat(e.rating)}</span>` : ''}
+        ${e.rating ? `<span class="note-face">${faceFor(e.rating)}</span>` : ''}
       </button>`
     )
     .join('');
@@ -100,6 +113,7 @@ noteListEl.addEventListener('click', (e) => {
 // ===== Mở 1 ghi chú =====
 async function selectNote(id) {
   await flushNow(); // lưu nốt ghi chú đang mở trước khi chuyển
+  showDoc();
   const res = await fetch(`/api/entries/${id}`);
   if (!res.ok) return;
   const entry = await res.json();
@@ -132,6 +146,7 @@ function highlightActive() {
 // ===== Tạo ghi chú mới (bản nháp) =====
 function newNote() {
   flushNow();
+  showDoc();
   currentId = null;
   idEl.value = '';
   titleEl.value = '';
@@ -247,6 +262,124 @@ searchEl.addEventListener('input', () => {
   }, 300);
 });
 
+// ===== Chuyển đổi view: lịch / tài liệu =====
+function showDoc() {
+  if (calView) calView.hidden = true;
+  if (docEl) docEl.hidden = false;
+}
+async function showCalendar() {
+  await flushNow();
+  if (docEl) docEl.hidden = true;
+  if (calView) calView.hidden = false;
+  await renderCalendar();
+}
+if (openCalBtn) openCalBtn.addEventListener('click', showCalendar);
+
+// ===== Lịch tháng =====
+const now = new Date();
+let calYear = now.getFullYear();
+let calMonth = now.getMonth(); // 0-11
+
+function pad2(n) { return String(n).padStart(2, '0'); }
+
+async function renderCalendar() {
+  // Lấy toàn bộ ghi chú, gom theo ngày (giữ bài mới nhất mỗi ngày)
+  const res = await fetch('/api/entries?limit=200');
+  const data = await res.json();
+  const byDate = new Map();
+  for (const e of data.entries) {
+    const date = (e.created_at || '').split(' ')[0];
+    if (!date) continue;
+    const prev = byDate.get(date);
+    if (!prev || e.id > prev.id) byDate.set(date, e);
+  }
+
+  calTitle.textContent = `Tháng ${calMonth + 1}, ${calYear}`;
+
+  const firstDow = new Date(calYear, calMonth, 1).getDay(); // 0=CN..6=T7
+  const lead = (firstDow + 6) % 7; // số ô trống đầu (tuần bắt đầu T2)
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+  const isThisMonth = today.getFullYear() === calYear && today.getMonth() === calMonth;
+
+  let html = '';
+  for (let i = 0; i < lead; i++) html += '<div class="cal-cell empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${pad2(calMonth + 1)}-${pad2(d)}`;
+    const entry = byDate.get(dateStr);
+    const isToday = isThisMonth && today.getDate() === d;
+    html += `
+      <div class="cal-cell${entry ? ' has-entry' : ''}${isToday ? ' today' : ''}"
+           ${entry ? `data-id="${entry.id}"` : ''}
+           ${entry ? `title="${escapeHtml(displayTitle(entry))}"` : ''}>
+        <span class="cal-day">${d}</span>
+        <span class="cal-face">${entry && entry.rating ? faceFor(entry.rating) : ''}</span>
+      </div>`;
+  }
+  calGrid.innerHTML = html;
+}
+
+calGrid.addEventListener('click', (e) => {
+  const id = e.target.closest('.has-entry')?.dataset.id;
+  if (id) { showDoc(); selectNote(Number(id)); }
+});
+calPrev.addEventListener('click', () => {
+  calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+});
+calNext.addEventListener('click', () => {
+  calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+});
+
+// ===== Ảnh bìa (cột phải của lịch) =====
+const coverImg = document.getElementById('cover-img');
+const coverPlaceholder = document.getElementById('cover-placeholder');
+const coverInput = document.getElementById('cover-input');
+const coverStatus = document.getElementById('cover-status');
+
+function showCover(url) {
+  if (url) {
+    coverImg.src = url;
+    coverImg.hidden = false;
+    coverPlaceholder.hidden = true;
+  } else {
+    coverImg.hidden = true;
+    coverPlaceholder.hidden = false;
+  }
+}
+
+async function loadCover() {
+  try {
+    const res = await fetch('/api/cover');
+    const data = await res.json();
+    showCover(data.url);
+  } catch {
+    showCover(null);
+  }
+}
+
+if (coverInput) {
+  coverInput.addEventListener('change', async () => {
+    const file = coverInput.files[0];
+    if (!file) return;
+    coverStatus.textContent = 'Đang tải lên…';
+    const fd = new FormData();
+    fd.append('image', file);
+    try {
+      const res = await fetch('/api/cover', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Lỗi');
+      showCover(data.url);
+      coverStatus.textContent = '✓ Đã cập nhật ảnh';
+    } catch (err) {
+      coverStatus.textContent = '⚠ ' + err.message;
+    } finally {
+      coverInput.value = '';
+    }
+  });
+}
+
 // ===== Thời tiết =====
 async function loadWeather() {
   const el = document.getElementById('weather');
@@ -267,12 +400,8 @@ async function loadWeather() {
 
 // ===== Khởi động =====
 (async function init() {
-  const entries = await loadNotes();
-  if (entries.length) {
-    loadIntoEditor(entries[0]);
-    highlightActive();
-  } else {
-    newNote();
-  }
+  await loadNotes();
+  await showCalendar(); // trang chính: hiển thị lịch tháng hiện tại
+  loadCover();
   loadWeather();
 })();

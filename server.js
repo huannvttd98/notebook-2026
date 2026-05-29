@@ -9,6 +9,7 @@ const compression = require('compression');
 
 const entriesRouter = require('./src/routes/entries');
 const weatherRouter = require('./src/routes/weather');
+const coverRouter = require('./src/routes/cover');
 
 const app = express();
 const PORT = parseInt(process.env.PORT, 10) || 3000;
@@ -23,6 +24,7 @@ app.use(express.json({ limit: '1mb' }));
 // API (không cần đăng nhập)
 app.use('/api/entries', entriesRouter);
 app.use('/api/weather', weatherRouter);
+app.use('/api/cover', coverRouter);
 
 // Frontend tĩnh
 app.use(express.static(path.join(__dirname, 'public')));

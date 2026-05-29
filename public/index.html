@@ -13,6 +13,7 @@
       <span class="workspace">📔 Nhật ký</span>
     </div>
 
+    <button type="button" id="open-calendar" class="new-note">📅 Lịch tháng</button>
     <button type="button" id="new-note" class="new-note">＋ Trang mới</button>
 
     <div class="sidebar-search">
@@ -27,8 +28,40 @@
     </div>
   </aside>
 
+  <!-- ===== Lịch tháng (chia 2 cột: lịch | ảnh) ===== -->
+  <section id="calendar-view" class="calendar-view" hidden>
+    <div class="cal-split">
+      <!-- Cột trái: lịch -->
+      <div class="cal-left">
+        <div class="cal-header">
+          <button type="button" id="cal-prev" class="cal-nav" aria-label="Tháng trước">‹</button>
+          <h2 id="cal-title" class="cal-title">Tháng</h2>
+          <button type="button" id="cal-next" class="cal-nav" aria-label="Tháng sau">›</button>
+        </div>
+        <div class="cal-weekdays">
+          <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+        </div>
+        <div id="cal-grid" class="cal-grid"></div>
+        <p class="cal-hint muted">Bấm vào ngày có cảm xúc để mở ghi chú.</p>
+      </div>
+
+      <!-- Cột phải: ảnh -->
+      <div class="cal-right">
+        <div class="cover-panel">
+          <img id="cover-img" class="cover-img" alt="Ảnh bìa" hidden />
+          <div id="cover-placeholder" class="cover-placeholder">🖼️<span>Chưa có ảnh</span></div>
+        </div>
+        <label class="cover-upload">
+          📤 Tải ảnh lên
+          <input type="file" id="cover-input" accept="image/*" hidden />
+        </label>
+        <span id="cover-status" class="cover-status muted"></span>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== Vùng tài liệu bên phải ===== -->
-  <main class="doc">
+  <main class="doc" hidden>
     <div class="doc-topbar">
       <span id="doc-crumb" class="doc-crumb">Ghi chú</span>
       <span class="doc-tools">
@@ -43,13 +76,13 @@
 
       <div class="doc-meta">
         <span id="entry-date" class="doc-date"></span>
-        <div id="rating" class="rating" role="radiogroup" aria-label="Đánh giá">
-          <button type="button" class="star" data-value="1" aria-label="1 sao">★</button>
-          <button type="button" class="star" data-value="2" aria-label="2 sao">★</button>
-          <button type="button" class="star" data-value="3" aria-label="3 sao">★</button>
-          <button type="button" class="star" data-value="4" aria-label="4 sao">★</button>
-          <button type="button" class="star" data-value="5" aria-label="5 sao">★</button>
-          <button type="button" id="rating-clear" class="rating-clear" title="Xóa đánh giá">✕</button>
+        <div id="rating" class="rating" role="radiogroup" aria-label="Cảm xúc">
+          <button type="button" class="face" data-value="1" aria-label="Rất buồn">😢</button>
+          <button type="button" class="face" data-value="2" aria-label="Buồn">🙁</button>
+          <button type="button" class="face" data-value="3" aria-label="Bình thường">😐</button>
+          <button type="button" class="face" data-value="4" aria-label="Vui">🙂</button>
+          <button type="button" class="face" data-value="5" aria-label="Rất vui">😄</button>
+          <button type="button" id="rating-clear" class="rating-clear" title="Xóa cảm xúc">✕</button>
         </div>
         <input type="text" id="mood" class="doc-mood" placeholder="+ tâm trạng" maxlength="50" />
       </div>
