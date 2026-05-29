@@ -71,12 +71,27 @@ router.get('/', async (req, res) => {
     const g = await geocode();
     const url =
       `https://api.open-meteo.com/v1/forecast?latitude=${g.lat}&longitude=${g.lon}` +
-      `&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`;
+      `&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m` +
+      `&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=7&timezone=auto`;
     const wRes = await fetch(url);
     if (!wRes.ok) throw new Error('Weather API lỗi ' + wRes.status);
     const w = await wRes.json();
     const cur = w.current || {};
     const [desc, icon] = describe(cur.weather_code);
+
+    // Dự báo 7 ngày
+    const d = w.daily || {};
+    const daily = (d.time || []).map((date, i) => {
+      const [dDesc, dIcon] = describe(d.weather_code ? d.weather_code[i] : undefined);
+      return {
+        date,
+        code: d.weather_code ? d.weather_code[i] : null,
+        icon: dIcon,
+        description: dDesc,
+        tmax: d.temperature_2m_max ? Math.round(d.temperature_2m_max[i]) : null,
+        tmin: d.temperature_2m_min ? Math.round(d.temperature_2m_min[i]) : null,
+      };
+    });
 
     const data = {
       city: g.name,
@@ -87,6 +102,7 @@ router.get('/', async (req, res) => {
       description: desc,
       icon,
       time: cur.time,
+      daily,
     };
 
     cache = { at: now, data };

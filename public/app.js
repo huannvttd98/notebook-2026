@@ -549,8 +549,16 @@ if (coverInput) {
 }
 
 // ===== Thời tiết =====
+const WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+function dayLabel(dateStr, index) {
+  if (index === 0) return 'Hôm nay';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return WEEKDAYS[new Date(y, m - 1, d).getDay()];
+}
+
 async function loadWeather() {
   const el = document.getElementById('weather');
+  const fc = document.getElementById('forecast');
   if (!el) return;
   try {
     const res = await fetch('/api/weather');
@@ -561,8 +569,22 @@ async function loadWeather() {
       <span class="weather-temp">${Math.round(w.temperature)}°C</span>
       <span class="weather-meta">${escapeHtml(w.description)} · ${escapeHtml(w.city)}</span>
     `;
+    // Dự báo 7 ngày (danh sách dọc)
+    if (fc && Array.isArray(w.daily) && w.daily.length) {
+      fc.innerHTML = w.daily
+        .map(
+          (day, i) => `
+          <div class="fc-row" title="${escapeHtml(day.description)}">
+            <span class="fc-day">${dayLabel(day.date, i)}</span>
+            <span class="fc-icon">${day.icon}</span>
+            <span class="fc-temp"><b>${day.tmax}°</b> <span class="fc-min">${day.tmin}°</span></span>
+          </div>`
+        )
+        .join('');
+    }
   } catch {
     el.innerHTML = '<span class="weather-meta">Không lấy được thời tiết</span>';
+    if (fc) fc.innerHTML = '';
   }
 }
 
