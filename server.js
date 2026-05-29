@@ -31,16 +31,18 @@ app.use('/api/cover', coverRouter);
 const publicDir = path.join(__dirname, 'public');
 app.use(express.static(publicDir, { index: false }));
 
-// Version cache: ưu tiên biến môi trường ASSET_VERSION,
-// nếu không có thì dùng thời gian sửa CSS/JS (tự đổi khi file thay đổi)
+// Version cache:
+// - Production: dùng ASSET_VERSION trong .env (kiểm soát thủ công khi deploy)
+// - Local/dev: dùng thời gian sửa file CSS/JS để LUÔN tải bản mới (khỏi cache)
 function assetVersion() {
-  if (process.env.ASSET_VERSION) return process.env.ASSET_VERSION;
+  const isProd = process.env.NODE_ENV === 'production';
+  if (isProd && process.env.ASSET_VERSION) return process.env.ASSET_VERSION;
   try {
     const css = fs.statSync(path.join(publicDir, 'style.css')).mtimeMs;
     const js = fs.statSync(path.join(publicDir, 'app.js')).mtimeMs;
     return String(Math.floor(Math.max(css, js)));
   } catch {
-    return '1';
+    return process.env.ASSET_VERSION || '1';
   }
 }
 

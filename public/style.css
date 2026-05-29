@@ -190,9 +190,13 @@ input, textarea, button { font: inherit; color: inherit; }
 /* ===================== DOCUMENT ===================== */
 .doc {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;        /* thanh trên cố định; phần dưới cuộn */
   display: flex;
   flex-direction: column;
+}
+.doc-scroll {
+  flex: 1;
+  overflow-y: auto;        /* cả ảnh bìa + nội dung cuộn cùng nhau (kiểu Notion) */
 }
 
 .doc-topbar {
@@ -242,10 +246,7 @@ input, textarea, button { font: inherit; color: inherit; }
   width: 100%;
   max-width: 760px;
   margin: 0 auto;
-  padding: 3rem 3.5rem 6rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  padding: 1.6rem 3.5rem 4rem;
 }
 
 .doc-title {
@@ -281,10 +282,12 @@ input, textarea, button { font: inherit; color: inherit; }
 .doc-mood:focus { outline: none; }
 
 .doc-content {
-  min-height: 40vh;
+  width: 100%;
+  min-height: 50vh;
+  overflow: hidden;       /* tự giãn theo nội dung (auto-grow trong JS) */
   background: none;
   border: none;
-  resize: vertical;
+  resize: none;
   font-size: 1.05rem;
   line-height: 1.7;
   padding: 0;
@@ -305,21 +308,74 @@ input, textarea, button { font: inherit; color: inherit; }
 .doc-date-input::-webkit-calendar-picker-indicator { filter: invert(.8); cursor: pointer; }
 
 /* Ảnh trong ghi chú */
-.note-images {
+/* Ảnh bìa full-width ở đầu ghi chú (kiểu Notion) — nhiều ảnh thành slider */
+.cover-slider { position: relative; }
+.note-cover {
   display: flex;
-  flex-wrap: wrap;
-  gap: .8rem;
-  margin: .9rem 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
 }
-.note-images:empty { margin: 0; }
-.note-img {
+.note-cover::-webkit-scrollbar { display: none; }
+.note-cover:empty { display: none; }
+.cover-photo {
   position: relative;
-  width: 200px;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--border);
+  flex: 0 0 100%;
+  scroll-snap-align: start;
 }
-.note-img img { width: 100%; display: block; }
+.cover-photo img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Nút ‹ › và chấm — chỉ hiện khi có nhiều ảnh */
+.slider-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .45);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  line-height: 1;
+  z-index: 2;
+}
+.slider-arrow.prev { left: 10px; }
+.slider-arrow.next { right: 10px; }
+.slider-arrow:hover { background: rgba(0, 0, 0, .65); }
+.cover-slider.has-multi .slider-arrow { display: flex; }
+
+.slider-dots {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  display: none;
+  justify-content: center;
+  gap: 6px;
+  z-index: 2;
+}
+.cover-slider.has-multi .slider-dots { display: flex; }
+.slider-dots .dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .55);
+  cursor: pointer;
+}
+.slider-dots .dot.active { background: #fff; }
 .note-img-del {
   position: absolute;
   top: 6px;

@@ -33,6 +33,10 @@ const faceEls = ratingEl ? Array.from(ratingEl.querySelectorAll('.face')) : [];
 const noteImagesEl = document.getElementById('note-images');
 const noteImageInput = document.getElementById('note-image-input');
 const imageStatus = document.getElementById('image-status');
+const coverSlider = document.getElementById('cover-slider');
+const sliderPrev = document.getElementById('slider-prev');
+const sliderNext = document.getElementById('slider-next');
+const sliderDots = document.getElementById('slider-dots');
 
 // Icon cảm xúc theo mức 1-5
 const FACES = ['😢', '🙁', '😐', '🙂', '😄'];
@@ -151,6 +155,7 @@ function loadIntoEditor(entry) {
   crumbEl.textContent = displayTitle(entry);
   deleteBtn.hidden = false;
   renderImages(parseEntryImages(entry));
+  autoGrow();
   setStatus('');
   dirty = false;
 }
@@ -186,6 +191,7 @@ function newNote() {
   crumbEl.textContent = 'Ghi chú mới';
   deleteBtn.hidden = true;
   renderImages([]);
+  autoGrow();
   setStatus('');
   dirty = false;
   highlightActive();
@@ -276,18 +282,59 @@ function renderImages(images) {
   currentImages = images || [];
   if (!currentImages.length) {
     noteImagesEl.innerHTML = '';
+    setupSlider();
     return;
   }
   noteImagesEl.innerHTML = currentImages
     .map(
       (url) => `
-      <div class="note-img">
-        <img src="${escapeHtml(url)}" alt="ảnh ghi chú" />
+      <div class="cover-photo">
+        <img src="${escapeHtml(url)}" alt="ảnh bìa" />
         <button type="button" class="note-img-del" data-url="${escapeHtml(url)}" title="Gỡ ảnh">✕</button>
       </div>`
     )
     .join('');
+  setupSlider();
 }
+
+// ===== Slider ảnh (chỉ kích hoạt khi có >= 2 ảnh) =====
+function setupSlider() {
+  const n = currentImages.length;
+  coverSlider.classList.toggle('has-multi', n > 1);
+  sliderDots.innerHTML =
+    n > 1
+      ? currentImages
+          .map((_, i) => `<button type="button" class="dot${i === 0 ? ' active' : ''}" data-i="${i}"></button>`)
+          .join('')
+      : '';
+  noteImagesEl.scrollLeft = 0;
+}
+
+function currentSlide() {
+  const w = noteImagesEl.clientWidth || 1;
+  return Math.round(noteImagesEl.scrollLeft / w);
+}
+function scrollToSlide(i) {
+  noteImagesEl.scrollTo({ left: i * noteImagesEl.clientWidth, behavior: 'smooth' });
+}
+if (sliderPrev) sliderPrev.addEventListener('click', () => scrollToSlide(Math.max(0, currentSlide() - 1)));
+if (sliderNext) sliderNext.addEventListener('click', () => scrollToSlide(Math.min(currentImages.length - 1, currentSlide() + 1)));
+if (sliderDots) sliderDots.addEventListener('click', (e) => {
+  const i = e.target.closest('.dot')?.dataset.i;
+  if (i != null) scrollToSlide(Number(i));
+});
+// Cập nhật chấm active khi vuốt/cuộn
+if (noteImagesEl) noteImagesEl.addEventListener('scroll', () => {
+  const active = currentSlide();
+  sliderDots.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === active));
+});
+
+// Textarea tự giãn theo nội dung (cả trang cuộn, không cuộn riêng ô)
+function autoGrow() {
+  contentEl.style.height = 'auto';
+  contentEl.style.height = contentEl.scrollHeight + 'px';
+}
+contentEl.addEventListener('input', autoGrow);
 
 // Bấm ✕ để gỡ ảnh
 noteImagesEl.addEventListener('click', async (e) => {

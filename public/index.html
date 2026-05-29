@@ -77,32 +77,39 @@
       </span>
     </div>
 
-    <div class="doc-body">
-      <input type="hidden" id="entry-id" />
-      <input type="text" id="title" class="doc-title" placeholder="Không có tiêu đề" maxlength="200" />
-
-      <div class="doc-meta">
-        <input type="date" id="entry-date" class="doc-date-input" title="Ngày của ghi chú" />
-        <label class="add-image-icon" title="Chèn ảnh" aria-label="Chèn ảnh">
-          🖼️
-          <input type="file" id="note-image-input" accept="image/*" hidden />
-        </label>
-        <span id="edited-mark" class="doc-date"></span>
-        <div id="rating" class="rating" role="radiogroup" aria-label="Cảm xúc">
-          <button type="button" class="face" data-value="1" aria-label="Rất buồn">😢</button>
-          <button type="button" class="face" data-value="2" aria-label="Buồn">🙁</button>
-          <button type="button" class="face" data-value="3" aria-label="Bình thường">😐</button>
-          <button type="button" class="face" data-value="4" aria-label="Vui">🙂</button>
-          <button type="button" class="face" data-value="5" aria-label="Rất vui">😄</button>
-          <button type="button" id="rating-clear" class="rating-clear" title="Xóa cảm xúc">✕</button>
-        </div>
-        <span id="image-status" class="cover-status muted"></span>
+    <div class="doc-scroll">
+      <!-- Ảnh bìa full-width (kiểu Notion) — nhiều ảnh thì thành slider -->
+      <div id="cover-slider" class="cover-slider">
+        <div id="note-images" class="note-cover"></div>
+        <button type="button" id="slider-prev" class="slider-arrow prev" aria-label="Ảnh trước">‹</button>
+        <button type="button" id="slider-next" class="slider-arrow next" aria-label="Ảnh sau">›</button>
+        <div id="slider-dots" class="slider-dots"></div>
       </div>
 
-      <!-- Thư viện ảnh (trên nội dung) -->
-      <div id="note-images" class="note-images"></div>
+      <div class="doc-body">
+        <input type="hidden" id="entry-id" />
+        <input type="text" id="title" class="doc-title" placeholder="Không có tiêu đề" maxlength="200" />
 
-      <textarea id="content" class="doc-content" placeholder="Bắt đầu viết..."></textarea>
+        <div class="doc-meta">
+          <input type="date" id="entry-date" class="doc-date-input" title="Ngày của ghi chú" />
+          <label class="add-image-icon" title="Thêm ảnh bìa" aria-label="Thêm ảnh bìa">
+            🖼️
+            <input type="file" id="note-image-input" accept="image/*" hidden />
+          </label>
+          <span id="edited-mark" class="doc-date"></span>
+          <div id="rating" class="rating" role="radiogroup" aria-label="Cảm xúc">
+            <button type="button" class="face" data-value="1" aria-label="Rất buồn">😢</button>
+            <button type="button" class="face" data-value="2" aria-label="Buồn">🙁</button>
+            <button type="button" class="face" data-value="3" aria-label="Bình thường">😐</button>
+            <button type="button" class="face" data-value="4" aria-label="Vui">🙂</button>
+            <button type="button" class="face" data-value="5" aria-label="Rất vui">😄</button>
+            <button type="button" id="rating-clear" class="rating-clear" title="Xóa cảm xúc">✕</button>
+          </div>
+          <span id="image-status" class="cover-status muted"></span>
+        </div>
+
+        <textarea id="content" class="doc-content" placeholder="Bắt đầu viết..."></textarea>
+      </div>
     </div>
   </main>
 
