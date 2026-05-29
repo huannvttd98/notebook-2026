@@ -506,17 +506,7 @@ input, textarea, button { font: inherit; color: inherit; }
   box-shadow: inset 0 0 0 1px var(--accent);
   background: rgba(58, 138, 54, .08);
 }
-.cal-cell.today .cal-day {
-  color: #fff;
-  font-weight: 700;
-  background: var(--accent);
-  border-radius: 999px;
-  width: 1.5em;
-  height: 1.5em;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
+
 
 .cal-hint {
   margin: 1.4rem auto 0;

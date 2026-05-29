@@ -79,7 +79,8 @@ sudo ufw enable
 cd /var/www/notebook
 git pull                  # hoặc upload lại — KHÔNG ghi đè db/ và public/uploads/
 npm install --production
-pm2 restart notebook
+nano .env                 # tăng ASSET_VERSION (vd 1 -> 2) để trình duyệt tải CSS/JS mới
+pm2 restart notebook --update-env
 ```
 
 > `db/` và `public/uploads/` chứa dữ liệu người dùng, đã được `.gitignore` bỏ qua — đừng xóa khi cập nhật.

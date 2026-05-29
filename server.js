@@ -3,6 +3,7 @@
 require('dotenv').config();
 
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -26,12 +27,28 @@ app.use('/api/entries', entriesRouter);
 app.use('/api/weather', weatherRouter);
 app.use('/api/cover', coverRouter);
 
-// Frontend tĩnh
-app.use(express.static(path.join(__dirname, 'public')));
+// Frontend tĩnh (tắt index để route '/' bên dưới chèn được version)
+const publicDir = path.join(__dirname, 'public');
+app.use(express.static(publicDir, { index: false }));
 
-// Trang chính
+// Version cache: ưu tiên biến môi trường ASSET_VERSION,
+// nếu không có thì dùng thời gian sửa CSS/JS (tự đổi khi file thay đổi)
+function assetVersion() {
+  if (process.env.ASSET_VERSION) return process.env.ASSET_VERSION;
+  try {
+    const css = fs.statSync(path.join(publicDir, 'style.css')).mtimeMs;
+    const js = fs.statSync(path.join(publicDir, 'app.js')).mtimeMs;
+    return String(Math.floor(Math.max(css, js)));
+  } catch {
+    return '1';
+  }
+}
+
+// Trang chính — chèn version vào link CSS/JS
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  let html = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
+  html = html.replaceAll('__V__', assetVersion());
+  res.type('html').send(html);
 });
 
 app.listen(PORT, () => {
