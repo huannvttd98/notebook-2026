@@ -24,7 +24,7 @@ npm install
 # Tạo file .env từ mẫu rồi chỉnh nếu cần (PORT, WEATHER_CITY)
 cp .env.example .env      # Windows: copy .env.example .env
 
-npm start                 # Mở http://localhost:3000
+npm start                 # Mở http://localhost:3100
 ```
 
 ---
@@ -42,7 +42,7 @@ npm install --production
 
 # 3. Cấu hình môi trường
 cp .env.example .env
-nano .env                 # đặt WEATHER_CITY, NODE_ENV=production (PORT mặc định 3000)
+nano .env                 # đặt WEATHER_CITY, NODE_ENV=production (PORT mặc định 3100)
 
 # 4. Đảm bảo thư mục dữ liệu tồn tại & ghi được (DB + ảnh upload)
 mkdir -p db public/uploads

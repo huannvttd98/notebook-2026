@@ -12,7 +12,7 @@ const weatherRouter = require('./src/routes/weather');
 const coverRouter = require('./src/routes/cover');
 
 const app = express();
-const PORT = parseInt(process.env.PORT, 10) || 3000;
+const PORT = parseInt(process.env.PORT, 10) || 3100;
 
 // Sau Nginx reverse proxy
 app.set('trust proxy', 1);
