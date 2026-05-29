@@ -24,18 +24,32 @@ const titleEl = document.getElementById('title');
 const contentEl = document.getElementById('content');
 const moodEl = document.getElementById('mood');
 const dateEl = document.getElementById('entry-date');
+const editedMark = document.getElementById('edited-mark');
 const crumbEl = document.getElementById('doc-crumb');
 const statusEl = document.getElementById('save-status');
 const deleteBtn = document.getElementById('delete-note');
 const ratingEl = document.getElementById('rating');
 const ratingClearBtn = document.getElementById('rating-clear');
 const faceEls = ratingEl ? Array.from(ratingEl.querySelectorAll('.face')) : [];
+const noteImagesEl = document.getElementById('note-images');
+const noteImageInput = document.getElementById('note-image-input');
+const imageStatus = document.getElementById('image-status');
 
 // Icon cảm xúc theo mức 1-5
 const FACES = ['😢', '🙁', '😐', '🙂', '😄'];
 function faceFor(rating) {
   return rating >= 1 && rating <= 5 ? FACES[rating - 1] : '';
 }
+
+// Ngày hôm nay dạng YYYY-MM-DD (cho ô chọn ngày)
+function todayStr() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+// Ảnh hiện tại của ghi chú đang mở
+let currentImages = [];
 
 // ===== Tiện ích =====
 function escapeHtml(str) {
@@ -114,6 +128,7 @@ noteListEl.addEventListener('click', (e) => {
 async function selectNote(id) {
   await flushNow(); // lưu nốt ghi chú đang mở trước khi chuyển
   showDoc();
+  closeSidebar();
   const res = await fetch(`/api/entries/${id}`);
   if (!res.ok) return;
   const entry = await res.json();
@@ -128,13 +143,23 @@ function loadIntoEditor(entry) {
   contentEl.value = entry.content || '';
   moodEl.value = entry.mood || '';
   setRating(entry.rating || 0, false);
-  dateEl.textContent = entry.created_at
-    ? formatDate(entry.created_at) + (entry.updated_at ? ' (đã sửa)' : '')
-    : '';
+  dateEl.value = entry.created_at ? entry.created_at.split(' ')[0] : todayStr();
+  editedMark.textContent = entry.updated_at ? '(đã sửa)' : '';
   crumbEl.textContent = displayTitle(entry);
   deleteBtn.hidden = false;
+  renderImages(parseEntryImages(entry));
   setStatus('');
   dirty = false;
+}
+
+// Đọc mảng images từ entry (cột images là chuỗi JSON)
+function parseEntryImages(entry) {
+  try {
+    const arr = typeof entry.images === 'string' ? JSON.parse(entry.images) : entry.images;
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
 }
 
 function highlightActive() {
@@ -147,15 +172,18 @@ function highlightActive() {
 function newNote() {
   flushNow();
   showDoc();
+  closeSidebar();
   currentId = null;
   idEl.value = '';
   titleEl.value = '';
   contentEl.value = '';
   moodEl.value = '';
   setRating(0, false);
-  dateEl.textContent = '';
+  dateEl.value = todayStr();
+  editedMark.textContent = '';
   crumbEl.textContent = 'Ghi chú mới';
   deleteBtn.hidden = true;
+  renderImages([]);
   setStatus('');
   dirty = false;
   highlightActive();
@@ -193,6 +221,7 @@ async function flush() {
     content: contentEl.value,
     mood: moodEl.value,
     rating: currentRating,
+    date: dateEl.value || undefined,
   };
 
   try {
@@ -236,8 +265,77 @@ async function flushNow() {
 
 // Gõ tiêu đề / nội dung / tâm trạng -> lên lịch lưu
 [titleEl, contentEl, moodEl].forEach((el) => el.addEventListener('input', scheduleSave));
+// Đổi ngày -> lưu (ảnh hưởng vị trí trên lịch)
+dateEl.addEventListener('change', scheduleSave);
 // Rời trang -> cố gắng lưu nốt
 window.addEventListener('beforeunload', () => { clearTimeout(saveTimer); });
+
+// ===== Ảnh trong ghi chú =====
+function renderImages(images) {
+  currentImages = images || [];
+  if (!currentImages.length) {
+    noteImagesEl.innerHTML = '';
+    return;
+  }
+  noteImagesEl.innerHTML = currentImages
+    .map(
+      (url) => `
+      <div class="note-img">
+        <img src="${escapeHtml(url)}" alt="ảnh ghi chú" />
+        <button type="button" class="note-img-del" data-url="${escapeHtml(url)}" title="Gỡ ảnh">✕</button>
+      </div>`
+    )
+    .join('');
+}
+
+// Bấm ✕ để gỡ ảnh
+noteImagesEl.addEventListener('click', async (e) => {
+  const url = e.target.closest('.note-img-del')?.dataset.url;
+  if (!url || !currentId) return;
+  if (!confirm('Gỡ ảnh này?')) return;
+  try {
+    const res = await fetch(`/api/entries/${currentId}/images`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    const data = await res.json();
+    renderImages(data.images || []);
+  } catch {
+    imageStatus.textContent = '⚠ Lỗi khi gỡ ảnh';
+  }
+});
+
+// Chèn ảnh: cần ghi chú đã được lưu (có id) trước
+if (noteImageInput) {
+  noteImageInput.addEventListener('change', async () => {
+    const file = noteImageInput.files[0];
+    if (!file) return;
+
+    // Đảm bảo ghi chú đã lưu để có id gắn ảnh
+    await flushNow();
+    if (!currentId) {
+      imageStatus.textContent = 'Hãy viết nội dung (để tự lưu) trước khi chèn ảnh';
+      noteImageInput.value = '';
+      return;
+    }
+
+    imageStatus.textContent = 'Đang tải ảnh…';
+    const fd = new FormData();
+    fd.append('image', file);
+    try {
+      const res = await fetch(`/api/entries/${currentId}/images`, { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Lỗi');
+      renderImages(data.images || []);
+      imageStatus.textContent = '✓ Đã thêm ảnh';
+    } catch (err) {
+      imageStatus.textContent = '⚠ ' + err.message;
+    } finally {
+      noteImageInput.value = '';
+    }
+  });
+}
 
 // ===== Xóa ghi chú đang mở =====
 deleteBtn.addEventListener('click', async () => {
@@ -269,11 +367,19 @@ function showDoc() {
 }
 async function showCalendar() {
   await flushNow();
+  closeSidebar();
   if (docEl) docEl.hidden = true;
   if (calView) calView.hidden = false;
   await renderCalendar();
 }
 if (openCalBtn) openCalBtn.addEventListener('click', showCalendar);
+
+// ===== Menu điện thoại (drawer sidebar) =====
+const menuToggle = document.getElementById('menu-toggle');
+const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+if (menuToggle) menuToggle.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeSidebar);
 
 // ===== Lịch tháng =====
 const now = new Date();

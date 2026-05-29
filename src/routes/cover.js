@@ -3,14 +3,11 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const multer = require('multer');
 const db = require('../db');
+const { uploadDir, createUpload } = require('../upload');
 
 const router = express.Router();
-
-// Thư mục lưu ảnh upload
-const uploadDir = path.join(__dirname, '..', '..', 'public', 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+const upload = createUpload('cover');
 
 // Helpers đọc/ghi settings
 const getSetting = db.prepare(`SELECT value FROM settings WHERE key = ?`);
@@ -18,23 +15,6 @@ const setSetting = db.prepare(
   `INSERT INTO settings (key, value) VALUES (?, ?)
    ON CONFLICT(key) DO UPDATE SET value = excluded.value`
 );
-
-// Cấu hình multer: lưu vào public/uploads với tên duy nhất, giới hạn 3MB, chỉ nhận ảnh
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const ext = (path.extname(file.originalname) || '.jpg').toLowerCase();
-    cb(null, `cover_${Date.now()}${ext}`);
-  },
-});
-const upload = multer({
-  storage,
-  limits: { fileSize: 3 * 1024 * 1024 }, // 3MB — an toàn cho server nhỏ
-  fileFilter: (req, file, cb) => {
-    if (/^image\//.test(file.mimetype)) cb(null, true);
-    else cb(new Error('Chỉ chấp nhận file ảnh'));
-  },
-});
 
 // GET /api/cover — trả URL ảnh hiện tại (null nếu chưa có)
 router.get('/', (req, res) => {

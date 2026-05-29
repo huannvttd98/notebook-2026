@@ -1,9 +1,13 @@
 'use strict';
 
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const db = require('../db');
+const { uploadDir, createUpload } = require('../upload');
 
 const router = express.Router();
+const imgUpload = createUpload('note');
 
 const PAGE_SIZE = 10;
 
@@ -11,10 +15,17 @@ const PAGE_SIZE = 10;
 const stmtInsert = db.prepare(
   `INSERT INTO entries (title, content, mood, rating) VALUES (?, ?, ?, ?)`
 );
+const stmtInsertDated = db.prepare(
+  `INSERT INTO entries (title, content, mood, rating, created_at) VALUES (?, ?, ?, ?, ?)`
+);
 const stmtGetOne = db.prepare(`SELECT * FROM entries WHERE id = ?`);
 const stmtUpdate = db.prepare(
   `UPDATE entries SET title = ?, content = ?, mood = ?, rating = ?, updated_at = datetime('now','localtime') WHERE id = ?`
 );
+const stmtUpdateDated = db.prepare(
+  `UPDATE entries SET title = ?, content = ?, mood = ?, rating = ?, created_at = ?, updated_at = datetime('now','localtime') WHERE id = ?`
+);
+const stmtUpdateImages = db.prepare(`UPDATE entries SET images = ? WHERE id = ?`);
 const stmtDelete = db.prepare(`DELETE FROM entries WHERE id = ?`);
 
 // Validate + chuẩn hóa input từ body
@@ -25,14 +36,25 @@ function parseBody(body) {
   let rating = Number.parseInt(body.rating, 10);
   if (Number.isNaN(rating) || rating < 0) rating = 0;
   if (rating > 5) rating = 5;
-  return { title, content, mood, rating };
+  // Ngày dạng YYYY-MM-DD (tùy chọn) -> dùng làm ngày của ghi chú trên lịch
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(body.date) ? body.date : null;
+  return { title, content, mood, rating, date };
 }
 
-// GET /api/entries?search=&page= — danh sách, mới nhất trước, phân trang
+// Đọc mảng images (JSON) an toàn
+function parseImages(entry) {
+  try {
+    const arr = JSON.parse(entry.images || '[]');
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
+// GET /api/entries?search=&page=&limit= — danh sách
 router.get('/', (req, res) => {
   const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
   const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
-  // limit tùy chọn: dùng cho sidebar kiểu Notion (liệt kê nhiều ghi chú)
   const limit = Math.min(200, Math.max(1, Number.parseInt(req.query.limit, 10) || PAGE_SIZE));
   const offset = (page - 1) * limit;
 
@@ -76,12 +98,16 @@ router.get('/:id', (req, res) => {
 
 // POST /api/entries — tạo mới
 router.post('/', (req, res) => {
-  const { title, content, mood, rating } = parseBody(req.body || {});
+  const { title, content, mood, rating, date } = parseBody(req.body || {});
   if (!content) return res.status(400).json({ error: 'Nội dung không được để trống' });
 
-  const info = stmtInsert.run(title || null, content, mood || null, rating);
-  const entry = stmtGetOne.get(info.lastInsertRowid);
-  res.status(201).json(entry);
+  let info;
+  if (date) {
+    info = stmtInsertDated.run(title || null, content, mood || null, rating, `${date} 12:00:00`);
+  } else {
+    info = stmtInsert.run(title || null, content, mood || null, rating);
+  }
+  res.status(201).json(stmtGetOne.get(info.lastInsertRowid));
 });
 
 // PUT /api/entries/:id — cập nhật
@@ -89,17 +115,60 @@ router.put('/:id', (req, res) => {
   const existing = stmtGetOne.get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Không tìm thấy' });
 
-  const { title, content, mood, rating } = parseBody(req.body || {});
+  const { title, content, mood, rating, date } = parseBody(req.body || {});
   if (!content) return res.status(400).json({ error: 'Nội dung không được để trống' });
 
-  stmtUpdate.run(title || null, content, mood || null, rating, req.params.id);
+  if (date) {
+    stmtUpdateDated.run(title || null, content, mood || null, rating, `${date} 12:00:00`, req.params.id);
+  } else {
+    stmtUpdate.run(title || null, content, mood || null, rating, req.params.id);
+  }
   res.json(stmtGetOne.get(req.params.id));
 });
 
-// DELETE /api/entries/:id — xóa
+// POST /api/entries/:id/images — đính kèm 1 ảnh vào ghi chú
+router.post('/:id/images', (req, res) => {
+  const entry = stmtGetOne.get(req.params.id);
+  if (!entry) return res.status(404).json({ error: 'Không tìm thấy ghi chú' });
+
+  imgUpload.single('image')(req, res, (err) => {
+    if (err) {
+      const msg = err.code === 'LIMIT_FILE_SIZE' ? 'Ảnh quá lớn (tối đa 3MB)' : err.message;
+      return res.status(400).json({ error: msg });
+    }
+    if (!req.file) return res.status(400).json({ error: 'Thiếu file ảnh' });
+
+    const images = parseImages(entry);
+    images.push(`/uploads/${req.file.filename}`);
+    stmtUpdateImages.run(JSON.stringify(images), req.params.id);
+    res.json({ images });
+  });
+});
+
+// DELETE /api/entries/:id/images — gỡ 1 ảnh khỏi ghi chú (body: { url })
+router.delete('/:id/images', (req, res) => {
+  const entry = stmtGetOne.get(req.params.id);
+  if (!entry) return res.status(404).json({ error: 'Không tìm thấy ghi chú' });
+
+  const url = (req.body || {}).url;
+  let images = parseImages(entry);
+  if (images.includes(url)) {
+    images = images.filter((u) => u !== url);
+    stmtUpdateImages.run(JSON.stringify(images), req.params.id);
+    fs.promises.unlink(path.join(uploadDir, path.basename(url))).catch(() => {});
+  }
+  res.json({ images });
+});
+
+// DELETE /api/entries/:id — xóa ghi chú (kèm xóa file ảnh của nó)
 router.delete('/:id', (req, res) => {
-  const info = stmtDelete.run(req.params.id);
-  if (info.changes === 0) return res.status(404).json({ error: 'Không tìm thấy' });
+  const entry = stmtGetOne.get(req.params.id);
+  if (!entry) return res.status(404).json({ error: 'Không tìm thấy' });
+
+  for (const url of parseImages(entry)) {
+    fs.promises.unlink(path.join(uploadDir, path.basename(url))).catch(() => {});
+  }
+  stmtDelete.run(req.params.id);
   res.json({ ok: true });
 });
 

@@ -35,10 +35,14 @@ db.exec(`
   );
 `);
 
-// Migration: thêm cột rating (đánh giá 0-5) nếu DB cũ chưa có
+// Migration: thêm cột nếu DB cũ chưa có
 const cols = db.prepare(`PRAGMA table_info(entries)`).all().map((c) => c.name);
 if (!cols.includes('rating')) {
   db.exec(`ALTER TABLE entries ADD COLUMN rating INTEGER NOT NULL DEFAULT 0`);
+}
+if (!cols.includes('images')) {
+  // Mảng JSON các URL ảnh đính kèm trong nội dung ghi chú
+  db.exec(`ALTER TABLE entries ADD COLUMN images TEXT NOT NULL DEFAULT '[]'`);
 }
 
 module.exports = db;

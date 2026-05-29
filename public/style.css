@@ -24,6 +24,32 @@
 /* Đảm bảo thuộc tính hidden luôn ẩn, kể cả khi phần tử có display: flex */
 [hidden] { display: none !important; }
 
+/* Nút mở menu + nền mờ — mặc định ẩn (chỉ hiện trên điện thoại) */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 46;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-sidebar);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .5);
+  z-index: 48;
+}
+
 html, body { height: 100%; }
 
 body.app {
@@ -217,17 +243,80 @@ input, textarea, button { font: inherit; color: inherit; }
 .doc-mood:focus { outline: none; }
 
 .doc-content {
-  flex: 1;
-  min-height: 50vh;
+  min-height: 40vh;
   background: none;
   border: none;
-  resize: none;
+  resize: vertical;
   font-size: 1.05rem;
   line-height: 1.7;
   padding: 0;
 }
 .doc-content::placeholder { color: #4a4a4a; }
 .doc-content:focus { outline: none; }
+
+/* Ô chọn ngày của ghi chú */
+.doc-date-input {
+  background: #2a2a2a;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: .82rem;
+  padding: .25rem .5rem;
+}
+.doc-date-input:focus { outline: none; border-color: var(--accent); }
+.doc-date-input::-webkit-calendar-picker-indicator { filter: invert(.8); cursor: pointer; }
+
+/* Ảnh trong ghi chú */
+.note-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .8rem;
+  margin: .9rem 0;
+}
+.note-images:empty { margin: 0; }
+.note-img {
+  position: relative;
+  width: 200px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.note-img img { width: 100%; display: block; }
+.note-img-del {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .65);
+  color: #fff;
+  cursor: pointer;
+  font-size: .85rem;
+  line-height: 1;
+}
+.note-img-del:hover { background: var(--danger); }
+
+.note-images-bar {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  margin-top: 1.2rem;
+}
+.add-image {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  background: #2a2a2a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .45rem .9rem;
+  font-size: .88rem;
+  cursor: pointer;
+  color: var(--ink);
+}
+.add-image:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ===== Đánh giá cảm xúc ===== */
 .rating { display: flex; align-items: center; gap: .15rem; }
@@ -348,7 +437,7 @@ input, textarea, button { font: inherit; color: inherit; }
 .cal-weekdays,
 .cal-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr)); /* minmax(0,..) cho phép co lại, tránh tràn ngang */
   gap: 8px;
 }
 .cal-weekdays {
@@ -365,6 +454,7 @@ input, textarea, button { font: inherit; color: inherit; }
 
 .cal-cell {
   position: relative;
+  min-width: 0;
   aspect-ratio: 1.25 / 1;
   background: var(--bg-sidebar);
   border: 1px solid var(--border);
@@ -392,12 +482,43 @@ input, textarea, button { font: inherit; color: inherit; }
 .muted { color: var(--muted); }
 
 /* ===================== RESPONSIVE ===================== */
-@media (max-width: 640px) {
-  body.app { flex-direction: column; height: auto; overflow: auto; }
-  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 45vh; }
+@media (max-width: 768px) {
+  /* Sidebar thành ngăn kéo (drawer): ẩn sang trái, trượt vào khi mở */
+  .menu-toggle { display: flex; }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 80%;
+    max-width: 300px;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    z-index: 50;
+  }
+  body.sidebar-open .sidebar {
+    transform: translateX(0);
+    box-shadow: 0 0 40px rgba(0, 0, 0, .6);
+  }
+  body.sidebar-open .sidebar-backdrop { display: block; }
+
+  /* Chừa chỗ cho nút ☰ ở góc trên trái */
+  .doc-topbar { padding-left: 3.6rem; }
+  .calendar-view { padding: 3.4rem 1.2rem 4rem; }
+
+  /* Lịch + tài liệu xếp gọn trên màn nhỏ */
+  .cal-split { flex-direction: column; }
+  .cal-right { width: 100%; order: -1; }   /* ẢNH lên trên LỊCH */
+  .cover-panel { aspect-ratio: 16 / 10; }   /* ảnh thấp hơn cho gọn */
+
+  /* Lịch: thu nhỏ khoảng cách + chữ để 7 cột vừa màn hình */
+  .cal-weekdays, .cal-grid { gap: 5px; }
+  .cal-weekdays span { font-size: .68rem; }
+  .cal-cell { aspect-ratio: 1 / 1; border-radius: 8px; padding: .3rem; }
+  .cal-day { font-size: .75rem; }
+  .cal-face { font-size: 1.25rem; }
+  .cal-title { font-size: 1.2rem; min-width: 0; }
+
   .doc-body { padding: 1.5rem 1.2rem 4rem; }
   .doc-title { font-size: 1.8rem; }
-  .cal-split { flex-direction: column; }
-  .cal-right { position: static; width: 100%; }
-  .calendar-view { padding: 1.2rem; }
 }

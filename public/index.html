@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body class="app">
+  <!-- Nút mở menu (chỉ hiện trên điện thoại) + nền mờ -->
+  <button type="button" id="menu-toggle" class="menu-toggle" aria-label="Mở menu">☰</button>
+  <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
   <!-- ===== Sidebar trái (kiểu Notion) ===== -->
   <aside class="sidebar">
     <div class="sidebar-head">
@@ -75,7 +79,8 @@
       <input type="text" id="title" class="doc-title" placeholder="Không có tiêu đề" maxlength="200" />
 
       <div class="doc-meta">
-        <span id="entry-date" class="doc-date"></span>
+        <input type="date" id="entry-date" class="doc-date-input" title="Ngày của ghi chú" />
+        <span id="edited-mark" class="doc-date"></span>
         <div id="rating" class="rating" role="radiogroup" aria-label="Cảm xúc">
           <button type="button" class="face" data-value="1" aria-label="Rất buồn">😢</button>
           <button type="button" class="face" data-value="2" aria-label="Buồn">🙁</button>
@@ -86,6 +91,16 @@
         </div>
         <input type="text" id="mood" class="doc-mood" placeholder="+ tâm trạng" maxlength="50" />
       </div>
+
+      <!-- Thanh thêm ảnh + thư viện ảnh (ở đầu, trên nội dung) -->
+      <div class="note-images-bar">
+        <label class="add-image">
+          🖼️ Chèn ảnh
+          <input type="file" id="note-image-input" accept="image/*" hidden />
+        </label>
+        <span id="image-status" class="cover-status muted"></span>
+      </div>
+      <div id="note-images" class="note-images"></div>
 
       <textarea id="content" class="doc-content" placeholder="Bắt đầu viết..."></textarea>
     </div>
