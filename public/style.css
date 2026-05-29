@@ -43,6 +43,23 @@
   font-size: 1.2rem;
   cursor: pointer;
 }
+.back-btn {
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 46;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-sidebar);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
 .sidebar-backdrop {
   display: none;
   position: fixed;
@@ -335,6 +352,23 @@ input, textarea, button { font: inherit; color: inherit; }
 }
 .add-image:hover { border-color: var(--accent); color: var(--accent); }
 
+/* Nút chèn ảnh dạng icon (nằm trong hàng meta, cạnh ô ngày) */
+.add-image-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 30px;
+  background: #eef3df;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.add-image-icon:hover { border-color: var(--accent); }
+
 /* ===== Đánh giá cảm xúc ===== */
 .rating { display: flex; align-items: center; gap: .15rem; }
 .rating .face {
@@ -521,13 +555,16 @@ input, textarea, button { font: inherit; color: inherit; }
   padding: .5rem .9rem;
   border-radius: 999px;
 }
-.cal-hint::before { content: "👆"; }
+.cal-hint::before { content: "🔥"; }
 .muted { color: var(--muted); }
 
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 768px) {
   /* Sidebar thành ngăn kéo (drawer): ẩn sang trái, trượt vào khi mở */
   .menu-toggle { display: flex; }
+  /* Màn chi tiết (ghi chú): ẩn ☰, hiện nút ← quay lại lịch */
+  body.on-doc .menu-toggle { display: none; }
+  body.on-doc .back-btn { display: flex; }
   .sidebar {
     position: fixed;
     top: 0;
@@ -546,7 +583,11 @@ input, textarea, button { font: inherit; color: inherit; }
   body.sidebar-open .sidebar-backdrop { display: block; }
 
   /* Chừa chỗ cho nút ☰ ở góc trên trái */
-  .doc-topbar { padding-left: 3.6rem; }
+  .doc-topbar {
+    padding-left: 3.6rem;
+    min-height: 54px;        /* đủ cao để nút ☰ không đè xuống tiêu đề */
+    box-sizing: border-box;
+  }
   .calendar-view { padding: 3.4rem 1.2rem 4rem; }
 
   /* Lịch + tài liệu xếp gọn trên màn nhỏ */
@@ -562,6 +603,6 @@ input, textarea, button { font: inherit; color: inherit; }
   .cal-face { font-size: 1.25rem; }
   .cal-title { font-size: 1.2rem; min-width: 0; }
 
-  .doc-body { padding: 1.5rem 1.2rem 4rem; }
-  .doc-title { font-size: 1.8rem; }
+  .doc-body { padding: 1rem 1.2rem 4rem; }
+  .doc-title { font-size: 1.7rem; }
 }

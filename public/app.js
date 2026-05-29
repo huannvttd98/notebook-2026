@@ -369,15 +369,21 @@ searchEl.addEventListener('input', () => {
 function showDoc() {
   if (calView) calView.hidden = true;
   if (docEl) docEl.hidden = false;
+  document.body.classList.add('on-doc');
 }
 async function showCalendar() {
   await flushNow();
   closeSidebar();
+  document.body.classList.remove('on-doc');
   if (docEl) docEl.hidden = true;
   if (calView) calView.hidden = false;
   await renderCalendar();
 }
 if (openCalBtn) openCalBtn.addEventListener('click', showCalendar);
+
+// Nút ← quay lại màn lịch (chỉ hiện ở màn chi tiết trên điện thoại)
+const backBtn = document.getElementById('back-btn');
+if (backBtn) backBtn.addEventListener('click', showCalendar);
 
 // ===== Menu điện thoại (drawer sidebar) =====
 const menuToggle = document.getElementById('menu-toggle');
@@ -424,7 +430,7 @@ async function renderCalendar() {
            ${entry ? `data-id="${entry.id}"` : ''}
            ${entry ? `title="${escapeHtml(displayTitle(entry))}"` : ''}>
         <span class="cal-day">${d}</span>
-        <span class="cal-face">${entry && entry.rating ? faceFor(entry.rating) : ''}</span>
+        <span class="cal-face">${entry ? '🔥' : ''}</span>
       </div>`;
   }
   calGrid.innerHTML = html;
