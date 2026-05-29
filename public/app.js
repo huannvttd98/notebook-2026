@@ -22,7 +22,6 @@ const noteListEl = document.getElementById('note-list');
 const idEl = document.getElementById('entry-id');
 const titleEl = document.getElementById('title');
 const contentEl = document.getElementById('content');
-const moodEl = document.getElementById('mood');
 const dateEl = document.getElementById('entry-date');
 const editedMark = document.getElementById('edited-mark');
 const crumbEl = document.getElementById('doc-crumb');
@@ -146,7 +145,6 @@ function loadIntoEditor(entry) {
   idEl.value = entry.id;
   titleEl.value = entry.title || '';
   contentEl.value = entry.content || '';
-  moodEl.value = entry.mood || '';
   setRating(entry.rating || 0, false);
   dateEl.value = entry.created_at ? entry.created_at.split(' ')[0] : todayStr();
   editedMark.textContent = entry.updated_at ? '(đã sửa)' : '';
@@ -182,7 +180,6 @@ function newNote() {
   idEl.value = '';
   titleEl.value = '';
   contentEl.value = '';
-  moodEl.value = '';
   setRating(0, false);
   dateEl.value = todayStr();
   editedMark.textContent = '';
@@ -224,7 +221,6 @@ async function flush() {
   const payload = {
     title: titleEl.value,
     content: contentEl.value,
-    mood: moodEl.value,
     rating: currentRating,
     date: dateEl.value || undefined,
   };
@@ -269,7 +265,7 @@ async function flushNow() {
 }
 
 // Gõ tiêu đề / nội dung / tâm trạng -> lên lịch lưu
-[titleEl, contentEl, moodEl].forEach((el) => el.addEventListener('input', scheduleSave));
+[titleEl, contentEl].forEach((el) => el.addEventListener('input', scheduleSave));
 // Đổi ngày -> lưu (ảnh hưởng vị trí trên lịch)
 dateEl.addEventListener('change', scheduleSave);
 // Rời trang -> cố gắng lưu nốt

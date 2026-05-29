@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nhật ký của tôi</title>
+  <title>💗 Nhật ký bé iu 💗</title>
   <link rel="stylesheet" href="/style.css?v=__V__" />
 </head>
 <body class="app">
   <!-- Nút mở menu (màn lịch) / nút quay lại (màn chi tiết) — chỉ hiện trên điện thoại -->
   <button type="button" id="menu-toggle" class="menu-toggle" aria-label="Mở menu">☰</button>
-  <button type="button" id="back-btn" class="back-btn" aria-label="Quay lại lịch">←</button>
+  <button type="button" id="back-btn" class="back-btn" aria-label="Quay lại lịch">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
   <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 
   <!-- ===== Sidebar trái (kiểu Notion) ===== -->
@@ -94,7 +96,6 @@
           <button type="button" class="face" data-value="5" aria-label="Rất vui">😄</button>
           <button type="button" id="rating-clear" class="rating-clear" title="Xóa cảm xúc">✕</button>
         </div>
-        <input type="text" id="mood" class="doc-mood" placeholder="+ tâm trạng" maxlength="50" />
         <span id="image-status" class="cover-status muted"></span>
       </div>
 

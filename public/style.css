@@ -54,12 +54,16 @@
   align-items: center;
   justify-content: center;
   background: var(--bg-sidebar);
-  color: var(--ink);
+  color: var(--accent);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 1.3rem;
+  border-radius: 50%;
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+  transition: background .15s, border-color .15s, transform .12s;
 }
+.back-btn svg { display: block; }
+.back-btn:hover { background: var(--bg-hover); border-color: var(--accent); }
+.back-btn:active { transform: scale(.92); }
 .sidebar-backdrop {
   display: none;
   position: fixed;
