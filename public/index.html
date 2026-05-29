@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nhật ký của tôi</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body class="app">
+  <!-- ===== Sidebar trái (kiểu Notion) ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <span class="workspace">📔 Nhật ký</span>
+    </div>
+
+    <button type="button" id="new-note" class="new-note">＋ Trang mới</button>
+
+    <div class="sidebar-search">
+      <input type="search" id="search" placeholder="🔍 Tìm kiếm..." />
+    </div>
+
+    <div class="sidebar-section-label">Ghi chú</div>
+    <nav id="note-list" class="note-list"></nav>
+
+    <div id="weather" class="weather" title="Thời tiết hiện tại">
+      <span class="weather-loading">Đang tải thời tiết…</span>
+    </div>
+  </aside>
+
+  <!-- ===== Vùng tài liệu bên phải ===== -->
+  <main class="doc">
+    <div class="doc-topbar">
+      <span id="doc-crumb" class="doc-crumb">Ghi chú</span>
+      <span class="doc-tools">
+        <span id="save-status" class="save-status"></span>
+        <button type="button" id="delete-note" class="doc-tool danger" hidden>🗑 Xóa</button>
+      </span>
+    </div>
+
+    <div class="doc-body">
+      <input type="hidden" id="entry-id" />
+      <input type="text" id="title" class="doc-title" placeholder="Không có tiêu đề" maxlength="200" />
+
+      <div class="doc-meta">
+        <span id="entry-date" class="doc-date"></span>
+        <div id="rating" class="rating" role="radiogroup" aria-label="Đánh giá">
+          <button type="button" class="star" data-value="1" aria-label="1 sao">★</button>
+          <button type="button" class="star" data-value="2" aria-label="2 sao">★</button>
+          <button type="button" class="star" data-value="3" aria-label="3 sao">★</button>
+          <button type="button" class="star" data-value="4" aria-label="4 sao">★</button>
+          <button type="button" class="star" data-value="5" aria-label="5 sao">★</button>
+          <button type="button" id="rating-clear" class="rating-clear" title="Xóa đánh giá">✕</button>
+        </div>
+        <input type="text" id="mood" class="doc-mood" placeholder="+ tâm trạng" maxlength="50" />
+      </div>
+
+      <textarea id="content" class="doc-content" placeholder="Bắt đầu viết..."></textarea>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

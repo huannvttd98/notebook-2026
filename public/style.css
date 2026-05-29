@@ -1,0 +1,260 @@
+:root {
+  /* Bảng màu McLaren / Petronas */
+  --mcl-petronas-green: #00a19b;
+  --mcl-silver-arrow:   #e0e0e0;
+  --mcl-carbon-black:   #1c1c1c;
+  --mcl-deep-black:     #0b0b0b;
+  --mcl-ineos-red:      #e10600;
+
+  /* Vai trò giao diện (theme tối kiểu Notion) */
+  --bg-doc: #1f1f1f;
+  --bg-sidebar: #171717;
+  --bg-hover: #262626;
+  --bg-active: #2c2c2c;
+  --ink: #e6e6e6;
+  --muted: #9a9a9a;
+  --accent: var(--mcl-petronas-green);
+  --border: #2e2e2e;
+  --danger: var(--mcl-ineos-red);
+  --star: #f5c518;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body.app {
+  margin: 0;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+  background: var(--bg-doc);
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+input, textarea, button { font: inherit; color: inherit; }
+
+/* ===================== SIDEBAR ===================== */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: .6rem .5rem;
+  overflow-y: auto;
+}
+
+.sidebar-head {
+  display: flex;
+  align-items: center;
+  padding: .3rem .5rem .6rem;
+}
+.workspace { font-weight: 700; font-size: 1rem; }
+
+.new-note {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: .45rem .6rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 600;
+}
+.new-note:hover { background: var(--bg-hover); color: var(--ink); }
+
+.sidebar-search { padding: .4rem .3rem .6rem; }
+.sidebar-search input {
+  width: 100%;
+  background: #222;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: .4rem .6rem;
+  font-size: .85rem;
+}
+.sidebar-search input::placeholder { color: #6a6a6a; }
+.sidebar-search input:focus { outline: none; border-color: var(--accent); }
+
+.sidebar-section-label {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--muted);
+  padding: .3rem .6rem;
+}
+
+.note-list { display: flex; flex-direction: column; gap: 1px; flex: 1; }
+.note-empty { color: var(--muted); font-size: .85rem; padding: .4rem .6rem; font-style: italic; }
+
+.note-item {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: .4rem .6rem;
+  cursor: pointer;
+  color: var(--ink);
+}
+.note-item:hover { background: var(--bg-hover); }
+.note-item.active { background: var(--bg-active); }
+.note-item.active .note-name { color: #fff; }
+.note-icon { font-size: .95rem; flex-shrink: 0; }
+.note-name {
+  flex: 1;
+  font-size: .9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.note-stars { color: var(--star); font-size: .7rem; flex-shrink: 0; }
+
+/* Widget thời tiết dưới đáy sidebar */
+.weather {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: wrap;
+  margin-top: .8rem;
+  padding: .55rem .7rem;
+  background: #222;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: .85rem;
+}
+.weather-icon { font-size: 1.3rem; line-height: 1; }
+.weather-temp { font-weight: 700; color: var(--accent); }
+.weather-meta { color: var(--muted); font-size: .8rem; }
+.weather-loading { color: var(--muted); font-style: italic; }
+
+/* ===================== DOCUMENT ===================== */
+.doc {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .6rem 1.2rem;
+  background: var(--bg-doc);
+  border-bottom: 1px solid var(--border);
+}
+.doc-crumb { color: var(--muted); font-size: .9rem; }
+.doc-tools { display: flex; align-items: center; gap: .8rem; }
+.save-status { font-size: .8rem; color: var(--muted); }
+.doc-tool {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 6px;
+  padding: .3rem .55rem;
+  font-size: .85rem;
+}
+.doc-tool:hover { background: var(--bg-hover); color: var(--ink); }
+.doc-tool.danger:hover { background: rgba(225, 6, 0, .15); color: var(--danger); }
+
+.doc-body {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 3rem 3.5rem 6rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-title {
+  background: none;
+  border: none;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #fff;
+  padding: 0;
+  margin-bottom: .8rem;
+}
+.doc-title::placeholder { color: #4a4a4a; }
+.doc-title:focus { outline: none; }
+
+.doc-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.doc-date { color: var(--muted); font-size: .85rem; }
+.doc-mood {
+  background: none;
+  border: none;
+  color: var(--ink);
+  font-size: .85rem;
+  width: 140px;
+}
+.doc-mood::placeholder { color: #5a5a5a; }
+.doc-mood:focus { outline: none; }
+
+.doc-content {
+  flex: 1;
+  min-height: 50vh;
+  background: none;
+  border: none;
+  resize: none;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  padding: 0;
+}
+.doc-content::placeholder { color: #4a4a4a; }
+.doc-content:focus { outline: none; }
+
+/* ===== Đánh giá sao ===== */
+.rating { display: flex; align-items: center; gap: .1rem; }
+.rating .star {
+  background: none;
+  border: none;
+  padding: 0 .03rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: #3a3a3a;
+  cursor: pointer;
+  transition: color .12s;
+}
+.rating .star:hover, .rating .star.active { color: var(--star); }
+.rating-clear {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: .8rem;
+  margin-left: .25rem;
+  padding: .15rem .35rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.rating-clear:hover { background: var(--bg-hover); color: var(--ink); }
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 640px) {
+  body.app { flex-direction: column; height: auto; overflow: auto; }
+  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 45vh; }
+  .doc-body { padding: 1.5rem 1.2rem 4rem; }
+  .doc-title { font-size: 1.8rem; }
+}
