@@ -349,8 +349,36 @@ function autoGrow() {
 }
 contentEl.addEventListener('input', autoGrow);
 
-// Bấm ✕ để gỡ ảnh
+// ===== Xem ảnh phóng to (lightbox) =====
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightbox-img');
+function openLightbox(url) {
+  if (!url || !lightbox) return;
+  lightboxImg.src = url;
+  lightbox.hidden = false;
+}
+function closeLightbox() {
+  if (!lightbox) return;
+  lightbox.hidden = true;
+  lightboxImg.removeAttribute('src');
+}
+if (lightbox) {
+  // Bấm nền hoặc nút ✕ để đóng; bấm trực tiếp lên ảnh thì không đóng
+  lightbox.addEventListener('click', (e) => {
+    if (e.target !== lightboxImg) closeLightbox();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !lightbox.hidden) closeLightbox();
+  });
+}
+
+// Bấm vào ảnh để xem phóng to; bấm ✕ để gỡ ảnh
 noteImagesEl.addEventListener('click', async (e) => {
+  const img = e.target.closest('.cover-photo img');
+  if (img) {
+    openLightbox(img.src);
+    return;
+  }
   const url = e.target.closest('.note-img-del')?.dataset.url;
   if (!url || !currentId) return;
   if (!confirm('Gỡ ảnh này?')) return;
@@ -521,6 +549,9 @@ function showCover(url) {
     coverPlaceholder.hidden = false;
   }
 }
+
+// Bấm ảnh bìa để xem phóng to
+if (coverImg) coverImg.addEventListener('click', () => openLightbox(coverImg.src));
 
 async function loadCover() {
   try {
