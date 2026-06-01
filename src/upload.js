@@ -8,6 +8,12 @@ const multer = require('multer');
 const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
+// Giới hạn kích thước ảnh. Để đủ lớn cho ảnh chụp từ điện thoại (iPhone/Android
+// thường 4–12MB). Lưu ý: nginx (client_max_body_size) phải đặt CAO HƠN giá trị này
+// để app tự trả lỗi JSON thân thiện thay vì nginx trả trang HTML 413.
+const MAX_FILE_MB = 12;
+const MAX_FILE_SIZE = MAX_FILE_MB * 1024 * 1024;
+
 // Tạo middleware multer với tiền tố tên file, giới hạn 3MB, chỉ nhận ảnh
 function createUpload(prefix) {
   const storage = multer.diskStorage({
@@ -20,7 +26,7 @@ function createUpload(prefix) {
   });
   return multer({
     storage,
-    limits: { fileSize: 3 * 1024 * 1024 }, // 3MB
+    limits: { fileSize: MAX_FILE_SIZE },
     fileFilter: (req, file, cb) => {
       if (/^image\//.test(file.mimetype)) cb(null, true);
       else cb(new Error('Chỉ chấp nhận file ảnh'));
@@ -28,4 +34,4 @@ function createUpload(prefix) {
   });
 }
 
-module.exports = { uploadDir, createUpload };
+module.exports = { uploadDir, createUpload, MAX_FILE_MB };

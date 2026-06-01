@@ -4,7 +4,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const db = require('../db');
-const { uploadDir, createUpload } = require('../upload');
+const { uploadDir, createUpload, MAX_FILE_MB } = require('../upload');
 
 const router = express.Router();
 const imgUpload = createUpload('note');
@@ -133,7 +133,7 @@ router.post('/:id/images', (req, res) => {
 
   imgUpload.single('image')(req, res, (err) => {
     if (err) {
-      const msg = err.code === 'LIMIT_FILE_SIZE' ? 'Ảnh quá lớn (tối đa 3MB)' : err.message;
+      const msg = err.code === 'LIMIT_FILE_SIZE' ? `Ảnh quá lớn (tối đa ${MAX_FILE_MB}MB)` : err.message;
       return res.status(400).json({ error: msg });
     }
     if (!req.file) return res.status(400).json({ error: 'Thiếu file ảnh' });

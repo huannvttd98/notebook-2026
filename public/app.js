@@ -1,5 +1,18 @@
 'use strict';
 
+// Đọc JSON an toàn. Trên iOS Safari, res.json() với thân rỗng / HTML (vd nginx
+// trả 413 khi ảnh quá lớn) ném "The string did not match the expected pattern".
+// Hàm này tự bắt và trả lỗi thân thiện theo HTTP status thay vì dòng khó hiểu đó.
+async function readJson(res) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    if (res.status === 413) return { error: 'Ảnh quá lớn, hãy chọn ảnh nhỏ hơn' };
+    return { error: `Lỗi máy chủ (${res.status || 'mạng'})` };
+  }
+}
+
 // ===== Trạng thái =====
 let currentId = null;       // id ghi chú đang mở (null = bản nháp mới chưa lưu)
 let currentRating = 0;
@@ -347,7 +360,7 @@ noteImagesEl.addEventListener('click', async (e) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url }),
     });
-    const data = await res.json();
+    const data = await readJson(res);
     renderImages(data.images || []);
   } catch {
     imageStatus.textContent = '⚠ Lỗi khi gỡ ảnh';
@@ -373,7 +386,7 @@ if (noteImageInput) {
     fd.append('image', file);
     try {
       const res = await fetch(`/api/entries/${currentId}/images`, { method: 'POST', body: fd });
-      const data = await res.json();
+      const data = await readJson(res);
       if (!res.ok) throw new Error(data.error || 'Lỗi');
       renderImages(data.images || []);
       imageStatus.textContent = '✓ Đã thêm ảnh';
@@ -528,7 +541,7 @@ if (coverInput) {
     fd.append('image', file);
     try {
       const res = await fetch('/api/cover', { method: 'POST', body: fd });
-      const data = await res.json();
+      const data = await readJson(res);
       if (!res.ok) throw new Error(data.error || 'Lỗi');
       showCover(data.url);
       coverStatus.textContent = '✓ Đã cập nhật ảnh';
