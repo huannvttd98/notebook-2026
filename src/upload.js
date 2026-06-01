@@ -11,10 +11,10 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 // Giới hạn kích thước ảnh. Để đủ lớn cho ảnh chụp từ điện thoại (iPhone/Android
 // thường 4–12MB). Lưu ý: nginx (client_max_body_size) phải đặt CAO HƠN giá trị này
 // để app tự trả lỗi JSON thân thiện thay vì nginx trả trang HTML 413.
-const MAX_FILE_MB = 12;
+const MAX_FILE_MB = 20;
 const MAX_FILE_SIZE = MAX_FILE_MB * 1024 * 1024;
 
-// Tạo middleware multer với tiền tố tên file, giới hạn 3MB, chỉ nhận ảnh
+// Tạo middleware multer với tiền tố tên file, giới hạn MAX_FILE_MB, chỉ nhận ảnh
 function createUpload(prefix) {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, uploadDir),

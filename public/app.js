@@ -1,5 +1,24 @@
 'use strict';
 
+// Giới hạn kích thước ảnh (MB) — server nhúng vào data-max-mb của <body>
+const MAX_FILE_MB = Number(document.body.dataset.maxMb) || 12;
+
+// Định dạng dung lượng file cho dễ đọc: 850KB / 3.4MB
+function formatSize(bytes) {
+  const mb = bytes / (1024 * 1024);
+  if (mb >= 1) return `${mb.toFixed(1)}MB`;
+  return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+}
+
+// Kiểm tra ảnh quá lớn ngay tại client (khỏi tốn băng thông upload rồi mới báo lỗi).
+// Trả về thông báo lỗi nếu vượt giới hạn, hoặc '' nếu hợp lệ.
+function oversizeError(file) {
+  if (file.size > MAX_FILE_MB * 1024 * 1024) {
+    return `Ảnh ${formatSize(file.size)} vượt giới hạn ${MAX_FILE_MB}MB`;
+  }
+  return '';
+}
+
 // Đọc JSON an toàn. Trên iOS Safari, res.json() với thân rỗng / HTML (vd nginx
 // trả 413 khi ảnh quá lớn) ném "The string did not match the expected pattern".
 // Hàm này tự bắt và trả lỗi thân thiện theo HTTP status thay vì dòng khó hiểu đó.
@@ -8,7 +27,7 @@ async function readJson(res) {
   try {
     return JSON.parse(text);
   } catch {
-    if (res.status === 413) return { error: 'Ảnh quá lớn, hãy chọn ảnh nhỏ hơn' };
+    if (res.status === 413) return { error: `Ảnh quá lớn (tối đa ${MAX_FILE_MB}MB)` };
     return { error: `Lỗi máy chủ (${res.status || 'mạng'})` };
   }
 }
@@ -401,6 +420,14 @@ if (noteImageInput) {
     const file = noteImageInput.files[0];
     if (!file) return;
 
+    // Chặn sớm nếu ảnh quá lớn — hiện kích thước thực và giới hạn cho phép
+    const tooBig = oversizeError(file);
+    if (tooBig) {
+      imageStatus.textContent = '⚠ ' + tooBig;
+      noteImageInput.value = '';
+      return;
+    }
+
     // Đảm bảo ghi chú đã lưu để có id gắn ảnh
     await flushNow();
     if (!currentId) {
@@ -567,6 +594,15 @@ if (coverInput) {
   coverInput.addEventListener('change', async () => {
     const file = coverInput.files[0];
     if (!file) return;
+
+    // Chặn sớm nếu ảnh quá lớn — hiện kích thước thực và giới hạn cho phép
+    const tooBig = oversizeError(file);
+    if (tooBig) {
+      coverStatus.textContent = '⚠ ' + tooBig;
+      coverInput.value = '';
+      return;
+    }
+
     coverStatus.textContent = 'Đang tải lên…';
     const fd = new FormData();
     fd.append('image', file);

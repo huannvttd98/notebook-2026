@@ -11,6 +11,7 @@ const compression = require('compression');
 const entriesRouter = require('./src/routes/entries');
 const weatherRouter = require('./src/routes/weather');
 const coverRouter = require('./src/routes/cover');
+const { MAX_FILE_MB } = require('./src/upload');
 
 const app = express();
 const PORT = parseInt(process.env.PORT, 10) || 3100;
@@ -50,6 +51,7 @@ function assetVersion() {
 app.get('/', (req, res) => {
   let html = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
   html = html.replaceAll('__V__', assetVersion());
+  html = html.replaceAll('__MAX_MB__', String(MAX_FILE_MB));
   res.type('html').send(html);
 });
 
