@@ -557,17 +557,24 @@ if (musicModal) {
   });
 }
 
-// Hiện/ẩn ô dán link nhạc; có sẵn link thì luôn mở
+// Hiện/ẩn ô dán link nhạc (nút 🎵 sáng khi đang mở)
 function showMusicRow(open) {
   musicRow.hidden = !open;
   musicToggle.classList.toggle('active', open);
 }
 
+// Đánh dấu nút 🎵 khi ghi chú có nhạc (kể cả lúc ô link đang ẩn)
+function markHasMusic(url) {
+  musicToggle.classList.toggle('has-music', !!(url && url.trim()));
+}
+
 // Nạp nhạc của ghi chú vào editor (gọi trong loadIntoEditor/newNote)
+// Ô link luôn ẩn mặc định cho gọn; player vẫn hiện nếu có nhạc.
 function loadMusic(url) {
   musicInput.value = url || '';
   renderMusic(url);
-  showMusicRow(!!(url && url.trim()));
+  showMusicRow(false);
+  markHasMusic(url);
 }
 
 if (musicToggle) {
@@ -579,13 +586,18 @@ if (musicToggle) {
 }
 if (musicInput) {
   // Gõ/dán -> lên lịch lưu; vẽ lại player khi rời ô hoặc dừng gõ
-  musicInput.addEventListener('input', () => { renderMusic(musicInput.value); scheduleSave(); });
+  musicInput.addEventListener('input', () => {
+    renderMusic(musicInput.value);
+    markHasMusic(musicInput.value);
+    scheduleSave();
+  });
   musicInput.addEventListener('change', () => renderMusic(musicInput.value));
 }
 if (musicClear) {
   musicClear.addEventListener('click', () => {
     musicInput.value = '';
     renderMusic('');
+    markHasMusic('');
     scheduleSave();
     musicInput.focus();
   });

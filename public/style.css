@@ -356,12 +356,16 @@ input, textarea, button { font: inherit; color: inherit; }
 .doc-meta {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: .55rem;
   flex-wrap: wrap;
   margin-bottom: 1.2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border);
 }
+/* "(đã sửa)" + cảm xúc đẩy sang phải, tách khỏi nhóm ngày + icon */
+#edited-mark { margin-left: auto; font-size: .78rem; }
+/* Trạng thái ảnh (vd "Đang tải…") xuống dòng riêng, không phá thanh công cụ */
+#image-status { flex-basis: 100%; text-align: left; }
 .doc-date { color: var(--muted); font-size: .85rem; }
 .doc-mood {
   background: none;
@@ -538,6 +542,9 @@ input, textarea, button { font: inherit; color: inherit; }
   flex-shrink: 0;
 }
 .add-music-icon:hover { border-color: var(--accent); }
+/* Có nhạc: viền + nền xanh nhạt để biết ghi chú đã gắn nhạc */
+.add-music-icon.has-music { border-color: var(--accent); background: #dcedc8; }
+/* Đang mở ô dán link: nền xanh đậm */
 .add-music-icon.active { background: var(--accent); border-color: var(--accent); }
 
 /* ===== Nhạc gắn vào ghi chú ===== */
