@@ -72,7 +72,7 @@ sudo ufw allow 'Nginx Full'
 sudo ufw enable
 ```
 
-> **Giới hạn upload:** app nhận ảnh tối đa **3MB**; Nginx đã đặt `client_max_body_size 5M` trong [deploy/nginx.conf](deploy/nginx.conf).
+> **Giới hạn upload:** app nhận ảnh tối đa **50MB**; Nginx đã đặt `client_max_body_size 60M` trong [deploy/nginx.conf](deploy/nginx.conf).
 
 ### Cập nhật code sau này
 
