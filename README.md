@@ -12,6 +12,7 @@ Web app ghi nhật ký kiểu Notion. Nhẹ, chạy tốt trên server nhỏ (**
 - Sidebar liệt kê ghi chú + tìm kiếm; trang tài liệu tự động lưu (auto-save)
 - Đánh giá cảm xúc bằng icon 😢🙁😐🙂😄
 - **Lịch tháng**: mỗi ngày hiện cảm xúc của ghi chú; bên cạnh là **ảnh bìa** tải lên từ máy
+- **Nhạc theo ghi chú**: dán link YouTube/Spotify (nút 🎵) để nhúng trình phát ngay trong ghi chú
 - Widget **thời tiết** theo thành phố cấu hình (Open-Meteo, miễn phí)
 
 ---

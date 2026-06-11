@@ -430,6 +430,58 @@ input, textarea, button { font: inherit; color: inherit; }
 }
 .add-image-icon:hover { border-color: var(--accent); }
 
+/* Nút 🎵 dùng chung style với nút thêm ảnh */
+.add-music-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 30px;
+  background: #eef3df;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.add-music-icon:hover { border-color: var(--accent); }
+.add-music-icon.active { background: var(--accent); border-color: var(--accent); }
+
+/* ===== Nhạc gắn vào ghi chú ===== */
+.music-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: 1rem;
+}
+.music-input {
+  flex: 1;
+  padding: .5rem .7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: .9rem;
+  background: #fff;
+}
+.music-input:focus { outline: none; border-color: var(--accent); }
+.music-clear {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  color: var(--muted, #888);
+  line-height: 1;
+}
+.music-clear:hover { border-color: var(--accent); color: var(--accent); }
+.music-player {
+  margin-bottom: 1.2rem;
+  max-width: 480px;
+}
+.music-player iframe { display: block; }
+
 /* ===== Đánh giá cảm xúc ===== */
 .rating { display: flex; align-items: center; gap: .15rem; }
 .rating .face {

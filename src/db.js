@@ -44,5 +44,9 @@ if (!cols.includes('images')) {
   // Mảng JSON các URL ảnh đính kèm trong nội dung ghi chú
   db.exec(`ALTER TABLE entries ADD COLUMN images TEXT NOT NULL DEFAULT '[]'`);
 }
+if (!cols.includes('music')) {
+  // Link nhạc (YouTube/Spotify) gắn vào ghi chú — nghe khi mở ghi chú
+  db.exec(`ALTER TABLE entries ADD COLUMN music TEXT NOT NULL DEFAULT ''`);
+}
 
 module.exports = db;

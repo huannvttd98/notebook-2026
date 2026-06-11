@@ -69,6 +69,11 @@ const coverSlider = document.getElementById('cover-slider');
 const sliderPrev = document.getElementById('slider-prev');
 const sliderNext = document.getElementById('slider-next');
 const sliderDots = document.getElementById('slider-dots');
+const musicToggle = document.getElementById('music-toggle');
+const musicRow = document.getElementById('music-row');
+const musicInput = document.getElementById('music-input');
+const musicClear = document.getElementById('music-clear');
+const musicPlayer = document.getElementById('music-player');
 
 // Icon cảm xúc theo mức 1-5
 const FACES = ['😢', '🙁', '😐', '🙂', '😄'];
@@ -187,6 +192,7 @@ function loadIntoEditor(entry) {
   crumbEl.textContent = displayTitle(entry);
   deleteBtn.hidden = false;
   renderImages(parseEntryImages(entry));
+  loadMusic(entry.music);
   autoGrow();
   setStatus('');
   dirty = false;
@@ -223,6 +229,7 @@ function newNote() {
   crumbEl.textContent = 'Ghi chú mới';
   deleteBtn.hidden = true;
   renderImages([]);
+  loadMusic('');
   autoGrow();
   setStatus('');
   dirty = false;
@@ -261,6 +268,7 @@ async function flush() {
     content: contentEl.value,
     rating: currentRating,
     date: dateEl.value || undefined,
+    music: musicInput ? musicInput.value.trim() : '',
   };
 
   try {
@@ -450,6 +458,73 @@ if (noteImageInput) {
     } finally {
       noteImageInput.value = '';
     }
+  });
+}
+
+// ===== Nhạc gắn vào ghi chú (YouTube / Spotify) =====
+// Chuyển link người dùng dán -> URL nhúng cho iframe. Trả '' nếu không nhận dạng được.
+function musicEmbed(url) {
+  const u = (url || '').trim();
+  if (!u) return '';
+  // YouTube: watch?v= / youtu.be/ / embed/ / music.youtube.com (id 11 ký tự)
+  let m = u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
+  if (m) return `https://www.youtube.com/embed/${m[1]}`;
+  // Spotify: track / album / playlist / episode / show
+  m = u.match(/open\.spotify\.com\/(?:intl-\w+\/)?(track|album|playlist|episode|show)\/(\w+)/);
+  if (m) return `https://open.spotify.com/embed/${m[1]}/${m[2]}`;
+  return '';
+}
+
+// Vẽ player nhúng từ link hiện trong ô input
+function renderMusic(url) {
+  const embed = musicEmbed(url);
+  if (!embed) {
+    musicPlayer.innerHTML = '';
+    musicPlayer.hidden = true;
+    return;
+  }
+  const isSpotify = embed.includes('spotify');
+  const frameStyle = isSpotify
+    ? 'height:152px;width:100%'
+    : 'aspect-ratio:16/9;width:100%;height:auto';
+  musicPlayer.innerHTML =
+    `<iframe src="${escapeHtml(embed)}" style="${frameStyle};border:0;border-radius:12px" ` +
+    `loading="lazy" allowfullscreen ` +
+    `allow="autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture"></iframe>`;
+  musicPlayer.hidden = false;
+}
+
+// Hiện/ẩn ô dán link nhạc; có sẵn link thì luôn mở
+function showMusicRow(open) {
+  musicRow.hidden = !open;
+  musicToggle.classList.toggle('active', open);
+}
+
+// Nạp nhạc của ghi chú vào editor (gọi trong loadIntoEditor/newNote)
+function loadMusic(url) {
+  musicInput.value = url || '';
+  renderMusic(url);
+  showMusicRow(!!(url && url.trim()));
+}
+
+if (musicToggle) {
+  musicToggle.addEventListener('click', () => {
+    const open = musicRow.hidden;
+    showMusicRow(open);
+    if (open) musicInput.focus();
+  });
+}
+if (musicInput) {
+  // Gõ/dán -> lên lịch lưu; vẽ lại player khi rời ô hoặc dừng gõ
+  musicInput.addEventListener('input', () => { renderMusic(musicInput.value); scheduleSave(); });
+  musicInput.addEventListener('change', () => renderMusic(musicInput.value));
+}
+if (musicClear) {
+  musicClear.addEventListener('click', () => {
+    musicInput.value = '';
+    renderMusic('');
+    scheduleSave();
+    musicInput.focus();
   });
 }
 

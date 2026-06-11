@@ -13,17 +13,17 @@ const PAGE_SIZE = 10;
 
 // Prepared statements (tái sử dụng, chống SQL injection)
 const stmtInsert = db.prepare(
-  `INSERT INTO entries (title, content, mood, rating) VALUES (?, ?, ?, ?)`
+  `INSERT INTO entries (title, content, mood, rating, music) VALUES (?, ?, ?, ?, ?)`
 );
 const stmtInsertDated = db.prepare(
-  `INSERT INTO entries (title, content, mood, rating, created_at) VALUES (?, ?, ?, ?, ?)`
+  `INSERT INTO entries (title, content, mood, rating, music, created_at) VALUES (?, ?, ?, ?, ?, ?)`
 );
 const stmtGetOne = db.prepare(`SELECT * FROM entries WHERE id = ?`);
 const stmtUpdate = db.prepare(
-  `UPDATE entries SET title = ?, content = ?, mood = ?, rating = ?, updated_at = datetime('now','localtime') WHERE id = ?`
+  `UPDATE entries SET title = ?, content = ?, mood = ?, rating = ?, music = ?, updated_at = datetime('now','localtime') WHERE id = ?`
 );
 const stmtUpdateDated = db.prepare(
-  `UPDATE entries SET title = ?, content = ?, mood = ?, rating = ?, created_at = ?, updated_at = datetime('now','localtime') WHERE id = ?`
+  `UPDATE entries SET title = ?, content = ?, mood = ?, rating = ?, music = ?, created_at = ?, updated_at = datetime('now','localtime') WHERE id = ?`
 );
 const stmtUpdateImages = db.prepare(`UPDATE entries SET images = ? WHERE id = ?`);
 const stmtDelete = db.prepare(`DELETE FROM entries WHERE id = ?`);
@@ -38,7 +38,10 @@ function parseBody(body) {
   if (rating > 5) rating = 5;
   // Ngày dạng YYYY-MM-DD (tùy chọn) -> dùng làm ngày của ghi chú trên lịch
   const date = /^\d{4}-\d{2}-\d{2}$/.test(body.date) ? body.date : null;
-  return { title, content, mood, rating, date };
+  // Link nhạc (YouTube/Spotify) — chỉ nhận http(s), giới hạn độ dài
+  let music = typeof body.music === 'string' ? body.music.trim().slice(0, 500) : '';
+  if (music && !/^https?:\/\//i.test(music)) music = '';
+  return { title, content, mood, rating, date, music };
 }
 
 // Đọc mảng images (JSON) an toàn
@@ -98,14 +101,14 @@ router.get('/:id', (req, res) => {
 
 // POST /api/entries — tạo mới
 router.post('/', (req, res) => {
-  const { title, content, mood, rating, date } = parseBody(req.body || {});
+  const { title, content, mood, rating, date, music } = parseBody(req.body || {});
   if (!content) return res.status(400).json({ error: 'Nội dung không được để trống' });
 
   let info;
   if (date) {
-    info = stmtInsertDated.run(title || null, content, mood || null, rating, `${date} 12:00:00`);
+    info = stmtInsertDated.run(title || null, content, mood || null, rating, music, `${date} 12:00:00`);
   } else {
-    info = stmtInsert.run(title || null, content, mood || null, rating);
+    info = stmtInsert.run(title || null, content, mood || null, rating, music);
   }
   res.status(201).json(stmtGetOne.get(info.lastInsertRowid));
 });
@@ -115,13 +118,13 @@ router.put('/:id', (req, res) => {
   const existing = stmtGetOne.get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Không tìm thấy' });
 
-  const { title, content, mood, rating, date } = parseBody(req.body || {});
+  const { title, content, mood, rating, date, music } = parseBody(req.body || {});
   if (!content) return res.status(400).json({ error: 'Nội dung không được để trống' });
 
   if (date) {
-    stmtUpdateDated.run(title || null, content, mood || null, rating, `${date} 12:00:00`, req.params.id);
+    stmtUpdateDated.run(title || null, content, mood || null, rating, music, `${date} 12:00:00`, req.params.id);
   } else {
-    stmtUpdate.run(title || null, content, mood || null, rating, req.params.id);
+    stmtUpdate.run(title || null, content, mood || null, rating, music, req.params.id);
   }
   res.json(stmtGetOne.get(req.params.id));
 });

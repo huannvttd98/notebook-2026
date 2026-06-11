@@ -19,7 +19,22 @@ const PORT = parseInt(process.env.PORT, 10) || 3100;
 // Sau Nginx reverse proxy
 app.set('trust proxy', 1);
 
-app.use(helmet());
+// Nới CSP để cho phép nhúng player nhạc (mặc định helmet chặn iframe ngoài origin)
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'frame-src': [
+          "'self'",
+          'https://www.youtube.com',
+          'https://www.youtube-nocookie.com',
+          'https://open.spotify.com',
+        ],
+      },
+    },
+  })
+);
 app.use(compression());
 app.use(express.json({ limit: '1mb' }));
 
