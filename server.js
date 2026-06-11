@@ -33,6 +33,9 @@ app.use(
         ],
       },
     },
+    // Mặc định helmet đặt 'no-referrer' khiến YouTube báo lỗi 153 (không xác
+    // thực được origin nhúng). Gửi origin khi sang domain khác để player chạy.
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   })
 );
 app.use(compression());

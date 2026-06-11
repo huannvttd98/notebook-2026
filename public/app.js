@@ -158,6 +158,12 @@ function renderNoteList(entries) {
       <button type="button" class="note-item${e.id === currentId ? ' active' : ''}" data-id="${e.id}">
         <span class="note-icon">📄</span>
         <span class="note-name">${escapeHtml(displayTitle(e))}</span>
+        ${
+          musicEmbed(e.music)
+            ? `<span class="note-play" role="button" tabindex="0" title="Phát nhạc"
+                 data-music="${escapeHtml(e.music)}" data-title="${escapeHtml(displayTitle(e))}">▶</span>`
+            : ''
+        }
         ${e.rating ? `<span class="note-face">${faceFor(e.rating)}</span>` : ''}
       </button>`
     )
@@ -165,8 +171,23 @@ function renderNoteList(entries) {
 }
 
 noteListEl.addEventListener('click', (e) => {
+  // Bấm nút ▶ -> phát nhạc tại chỗ, không mở ghi chú
+  const play = e.target.closest('.note-play');
+  if (play) {
+    e.stopPropagation();
+    openPlayer(play.dataset.music, play.dataset.title);
+    return;
+  }
   const id = e.target.closest('.note-item')?.dataset.id;
   if (id) selectNote(Number(id));
+});
+// Phát bằng phím Enter/Space khi focus nút ▶
+noteListEl.addEventListener('keydown', (e) => {
+  const play = e.target.closest('.note-play');
+  if (play && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    openPlayer(play.dataset.music, play.dataset.title);
+  }
 });
 
 // ===== Mở 1 ghi chú =====
@@ -489,9 +510,51 @@ function renderMusic(url) {
     : 'aspect-ratio:16/9;width:100%;height:auto';
   musicPlayer.innerHTML =
     `<iframe src="${escapeHtml(embed)}" style="${frameStyle};border:0;border-radius:12px" ` +
-    `loading="lazy" allowfullscreen ` +
+    `loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" ` +
     `allow="autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture"></iframe>`;
   musicPlayer.hidden = false;
+}
+
+// ===== Trang phát nhạc (modal toàn màn hình) =====
+const musicModal = document.getElementById('music-modal');
+const musicModalTitle = document.getElementById('music-modal-title');
+const musicModalBody = document.getElementById('music-modal-body');
+const musicModalClose = document.getElementById('music-modal-close');
+
+function openPlayer(url, title) {
+  const embed = musicEmbed(url);
+  if (!embed || !musicModal) return;
+  const isSpotify = embed.includes('spotify');
+  // YouTube: tự phát; Spotify embed có nút play riêng (không tự phát)
+  const src = isSpotify ? embed : embed + (embed.includes('?') ? '&' : '?') + 'autoplay=1';
+  const frameStyle = isSpotify ? 'height:352px;width:100%' : 'aspect-ratio:16/9;width:100%;height:auto';
+  musicModalBody.innerHTML =
+    `<iframe src="${escapeHtml(src)}" style="${frameStyle};border:0" ` +
+    `loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" ` +
+    `allow="autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture"></iframe>`;
+  musicModalTitle.textContent = title || 'Đang phát';
+  musicModal.hidden = false;
+  document.body.classList.add('player-open');
+  closeSidebar(); // đóng menu để xem trình phát rõ hơn (điện thoại)
+}
+
+function closePlayer() {
+  if (!musicModal) return;
+  musicModal.hidden = true;
+  musicModalBody.innerHTML = ''; // gỡ iframe -> dừng nhạc
+  document.body.classList.remove('player-open');
+}
+
+if (musicModalClose) musicModalClose.addEventListener('click', closePlayer);
+if (musicModal) {
+  // Bấm nền ngoài thẻ để đóng
+  musicModal.addEventListener('click', (e) => {
+    if (e.target === musicModal) closePlayer();
+  });
+  // Esc để đóng
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !musicModal.hidden) closePlayer();
+  });
 }
 
 // Hiện/ẩn ô dán link nhạc; có sẵn link thì luôn mở

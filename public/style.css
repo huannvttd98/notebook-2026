@@ -169,6 +169,98 @@ input, textarea, button { font: inherit; color: inherit; }
 }
 .note-face { font-size: .95rem; flex-shrink: 0; }
 
+/* Nút ▶ phát nhạc trên mỗi ghi chú có nhạc */
+.note-play {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: .62rem;
+  color: #fff;
+  background: var(--accent);
+  cursor: pointer;
+  opacity: .85;
+}
+.note-play:hover { opacity: 1; }
+
+/* ===== Trang phát nhạc (modal toàn màn hình) ===== */
+.music-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  background: rgba(18, 22, 16, .55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: modal-fade .18s ease;
+}
+@keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.music-modal-card {
+  position: relative;
+  width: 440px;
+  max-width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(160deg, #2e7d32 0%, #1f5d3a 55%, #14352a 100%);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .45);
+  animation: modal-pop .22s cubic-bezier(.2, .9, .3, 1.2);
+}
+@keyframes modal-pop { from { transform: scale(.92) translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.music-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .18);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .15s;
+}
+.music-modal-close:hover { background: rgba(255, 255, 255, .34); }
+
+.music-modal-head {
+  padding: 1.6rem 1.6rem 1.1rem;
+  color: #fff;
+}
+.music-modal-eyebrow {
+  font-size: .72rem;
+  letter-spacing: .14em;
+  font-weight: 700;
+  opacity: .8;
+}
+.music-modal-title {
+  margin: .4rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.25;
+  word-break: break-word;
+}
+.music-modal-body {
+  line-height: 0;
+  background: rgba(0, 0, 0, .25);
+}
+.music-modal-body iframe { display: block; width: 100%; }
+
+@media (max-width: 480px) {
+  .music-modal-card { width: 100%; border-radius: 16px; }
+  .music-modal-head { padding: 1.3rem 1.3rem .9rem; }
+  .music-modal-title { font-size: 1.15rem; }
+}
+
 /* Widget thời tiết dưới đáy sidebar */
 .weather {
   display: flex;
@@ -540,6 +632,7 @@ input, textarea, button { font: inherit; color: inherit; }
 }
 
 .cover-panel {
+  position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;       /* khớp ảnh phong cảnh, ít bị cắt */
   background: var(--bg-sidebar);
@@ -599,21 +692,28 @@ input, textarea, button { font: inherit; color: inherit; }
 }
 .cover-placeholder span { font-size: .9rem; }
 
-.cover-upload {
+/* Nút tròn tải ảnh, nổi ở góc dưới phải ảnh bìa */
+.cover-upload-fab {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: .4rem;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
   background: var(--accent);
   color: #fff;
-  font-weight: 700;
-  padding: .55rem 1rem;
-  border-radius: 8px;
   cursor: pointer;
-  text-align: center;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+  transition: background .15s, transform .1s;
 }
-.cover-upload:hover { background: var(--accent-dark); color: #fff; }
-.cover-status { font-size: .82rem; text-align: center; min-height: 1em; }
+.cover-upload-fab:hover { background: var(--accent-dark); transform: scale(1.07); }
+.cover-upload-fab:active { transform: scale(.95); }
+.cover-status { font-size: .82rem; text-align: center; min-height: 1em; margin-top: .5rem; }
 
 .cal-header {
   display: flex;

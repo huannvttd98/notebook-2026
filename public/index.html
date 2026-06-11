@@ -21,6 +21,7 @@
     </div>
 
     <button type="button" id="open-calendar" class="new-note">📅 Lịch tháng</button>
+    <a href="/music.html" class="new-note" id="open-music" style="text-decoration:none">🎧 Trang nhạc</a>
     <button type="button" id="new-note" class="new-note">＋ Trang mới</button>
 
     <div class="sidebar-search">
@@ -57,11 +58,12 @@
         <div class="cover-panel">
           <img id="cover-img" class="cover-img" alt="Ảnh bìa" hidden />
           <div id="cover-placeholder" class="cover-placeholder">🖼️<span>Chưa có ảnh</span></div>
+          <!-- Nút tròn tải ảnh ở góc dưới phải -->
+          <label class="cover-upload-fab" title="Tải ảnh lên" aria-label="Tải ảnh lên">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <input type="file" id="cover-input" accept="image/*" hidden />
+          </label>
         </div>
-        <label class="cover-upload">
-          📤 Tải ảnh lên
-          <input type="file" id="cover-input" accept="image/*" hidden />
-        </label>
         <span id="cover-status" class="cover-status muted"></span>
       </div>
     </div>
@@ -125,6 +127,18 @@
   <div id="lightbox" class="lightbox" hidden>
     <button type="button" id="lightbox-close" class="lightbox-close" aria-label="Đóng">✕</button>
     <img id="lightbox-img" class="lightbox-img" alt="Xem ảnh" />
+  </div>
+
+  <!-- Trang phát nhạc: bấm ▶ ở danh sách ghi chú để mở trình phát toàn màn hình -->
+  <div id="music-modal" class="music-modal" hidden>
+    <div class="music-modal-card" role="dialog" aria-modal="true" aria-label="Trình phát nhạc">
+      <button type="button" id="music-modal-close" class="music-modal-close" aria-label="Đóng">✕</button>
+      <div class="music-modal-head">
+        <span class="music-modal-eyebrow">♪ ĐANG PHÁT</span>
+        <h3 id="music-modal-title" class="music-modal-title"></h3>
+      </div>
+      <div id="music-modal-body" class="music-modal-body"></div>
+    </div>
   </div>
 
   <script src="/app.js?v=__V__"></script>

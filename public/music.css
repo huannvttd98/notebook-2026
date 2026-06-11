@@ -1,0 +1,205 @@
+/* ===== Trang nhạc (độc lập) ===== */
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #e9efe9;
+  background:
+    radial-gradient(1100px 560px at 75% -12%, rgba(46, 125, 50, .55) 0%, transparent 60%),
+    linear-gradient(160deg, #10231a 0%, #0a130e 100%);
+  min-height: 100vh;
+}
+
+/* Thanh trên */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.4rem;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  backdrop-filter: blur(6px);
+  background: rgba(10, 19, 14, .5);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  color: #cfe8d4;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: .92rem;
+  padding: .4rem .7rem;
+  border-radius: 8px;
+  transition: background .15s;
+}
+.back-link:hover { background: rgba(255, 255, 255, .1); }
+.brand { font-weight: 700; opacity: .9; }
+
+/* Bố cục */
+.wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 1.4rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.4rem;
+}
+@media (min-width: 760px) {
+  .wrap { grid-template-columns: 380px 1fr; align-items: start; }
+  .player-card { position: sticky; top: 84px; }
+}
+
+/* Trình phát */
+.player-card {
+  border-radius: 20px;
+  padding: 1.4rem;
+  background: linear-gradient(160deg, rgba(46, 125, 50, .9) 0%, rgba(31, 93, 58, .85) 55%, rgba(20, 53, 42, .9) 100%);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .4);
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+.now-label { font-size: .7rem; letter-spacing: .16em; font-weight: 700; opacity: .8; }
+.player-title {
+  margin: .4rem 0 .5rem;
+  font-size: 1.3rem;
+  line-height: 1.25;
+  word-break: break-word;
+}
+.provider-badge {
+  display: inline-block;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  padding: .15rem .5rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .3);
+  margin-bottom: .9rem;
+}
+.player-body {
+  line-height: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, .3);
+  min-height: 80px;
+}
+.player-body iframe { display: block; width: 100%; border: 0; }
+.player-empty {
+  padding: 2.2rem 1rem;
+  text-align: center;
+  font-size: .9rem;
+  opacity: .75;
+  line-height: 0;
+}
+.player-empty span { line-height: 1.5; display: inline-block; }
+
+.player-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Ghi chú của bài đang phát */
+.player-meta {
+  margin-top: 1.1rem;
+  font-size: .8rem;
+  opacity: .85;
+  font-weight: 600;
+}
+.player-note {
+  margin-top: .5rem;
+  padding-top: .9rem;
+  border-top: 1px solid rgba(255, 255, 255, .15);
+  font-size: .9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow-y: auto;
+  opacity: .95;
+}
+.ctrl-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, .15);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+}
+.ctrl-btn:hover { background: rgba(255, 255, 255, .28); }
+.ctrl-btn:active { transform: scale(.92); }
+.ctrl-btn:disabled { opacity: .4; cursor: default; }
+
+/* Danh sách */
+.list-card {
+  border-radius: 20px;
+  padding: 1.2rem 1.2rem 1.4rem;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+.list-head {
+  margin: .2rem 0 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.list-count { opacity: .6; font-weight: 500; }
+.song-list { display: flex; flex-direction: column; gap: .35rem; }
+
+.song-item {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  width: 100%;
+  text-align: left;
+  padding: .65rem .8rem;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background .15s;
+}
+.song-item:hover { background: rgba(255, 255, 255, .07); }
+.song-item.active { background: rgba(46, 125, 50, .35); }
+.song-index {
+  width: 1.4rem;
+  text-align: center;
+  font-size: .82rem;
+  opacity: .6;
+  flex-shrink: 0;
+}
+.song-item.active .song-index { color: #7fe0a0; opacity: 1; }
+.song-main { flex: 1; min-width: 0; }
+.song-name {
+  font-size: .92rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.song-sub {
+  display: block;
+  margin-top: .12rem;
+  font-size: .72rem;
+  opacity: .6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.song-provider { font-weight: 600; }
+.song-note-preview { opacity: .85; }
+.song-play { flex-shrink: 0; font-size: .9rem; opacity: .5; }
+.song-item:hover .song-play, .song-item.active .song-play { opacity: 1; }
+
+.empty-state {
+  text-align: center;
+  opacity: .7;
+  font-size: .9rem;
+  line-height: 1.6;
+  padding: 1.5rem 0;
+}

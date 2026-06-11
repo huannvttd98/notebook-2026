@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎧 Nhạc — Nhật ký</title>
+  <link rel="stylesheet" href="/music.css?v=1" />
+</head>
+<body>
+  <header class="topbar">
+    <a href="/" class="back-link" title="Về nhật ký">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Nhật ký
+    </a>
+    <span class="brand">🎧 Trang nhạc</span>
+  </header>
+
+  <main class="wrap">
+    <!-- Trình phát -->
+    <section class="player-card">
+      <span class="now-label">♪ ĐANG PHÁT</span>
+      <h1 id="player-title" class="player-title">—</h1>
+      <span id="player-provider" class="provider-badge" hidden></span>
+      <div id="player-body" class="player-body"></div>
+      <div class="player-controls">
+        <button type="button" id="prev-btn" class="ctrl-btn" aria-label="Bài trước">⏮</button>
+        <button type="button" id="next-btn" class="ctrl-btn" aria-label="Bài sau">⏭</button>
+      </div>
+      <div id="player-meta" class="player-meta" hidden></div>
+      <div id="player-note" class="player-note"></div>
+    </section>
+
+    <!-- Danh sách -->
+    <section class="list-card">
+      <h2 class="list-head">Danh sách <span id="list-count" class="list-count"></span></h2>
+      <div id="song-list" class="song-list"></div>
+      <p id="empty-state" class="empty-state" hidden>
+        Chưa có ghi chú nào gắn nhạc.<br />
+        Mở một ghi chú, bấm 🎵 và dán link YouTube/Spotify nhé.
+      </p>
+    </section>
+  </main>
+
+  <script src="/music.js?v=1"></script>
+</body>
+</html>
