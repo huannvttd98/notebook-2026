@@ -392,7 +392,7 @@ async function flush() {
       clearShareInline();
     }
     crumbEl.textContent = displayTitle(entry);
-    setStatus('✓ Đã lưu');
+    setStatus('✓');
     await loadNotes();
     highlightActive();
   } catch {
