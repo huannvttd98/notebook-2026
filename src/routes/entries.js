@@ -4,6 +4,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const db = require('../db');
+const { isApproved } = require('../auth');
 const { uploadDir, createUpload, MAX_FILE_MB } = require('../upload');
 
 const router = express.Router();
@@ -40,8 +41,9 @@ const stmtDelete = db.prepare(`DELETE FROM entries WHERE id = ? AND user_id = ?`
 
 // ===== Chia sẻ note =====
 const stmtFindUser = db.prepare(
-  `SELECT id, username, email FROM users WHERE username = ? OR email = ?`
+  `SELECT id, username, email, status FROM users WHERE username = ? OR email = ?`
 );
+const stmtUserForShare = db.prepare(`SELECT username, status FROM users WHERE id = ?`);
 const stmtListShares = db.prepare(
   `SELECT u.id, u.username, u.email
    FROM note_shares s JOIN users u ON u.id = s.user_id
@@ -209,6 +211,11 @@ router.post('/:id/shares', (req, res) => {
   const owned = stmtGetOwned.get(req.params.id, req.userId);
   if (!owned) return res.status(403).json({ error: 'Chỉ chủ ghi chú mới được chia sẻ' });
 
+  // Người chia sẻ phải được admin duyệt
+  if (!isApproved(stmtUserForShare.get(req.userId))) {
+    return res.status(403).json({ error: 'Tài khoản chưa được admin duyệt để chia sẻ' });
+  }
+
   const ident = typeof (req.body || {}).user === 'string' ? req.body.user.trim().toLowerCase() : '';
   if (!ident) return res.status(400).json({ error: 'Thiếu tài khoản hoặc email' });
 
@@ -216,6 +223,9 @@ router.post('/:id/shares', (req, res) => {
   if (!target) return res.status(404).json({ error: 'Không tìm thấy người dùng' });
   if (target.id === req.userId) {
     return res.status(400).json({ error: 'Không thể tự chia sẻ cho chính mình' });
+  }
+  if (!isApproved(target)) {
+    return res.status(400).json({ error: 'Người này chưa được admin duyệt' });
   }
 
   stmtAddShare.run(req.params.id, target.id);

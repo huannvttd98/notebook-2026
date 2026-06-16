@@ -83,6 +83,7 @@ app.get('/register.html', sendPage('register.html'));
 app.get('/forgot.html', sendPage('forgot.html'));
 app.get('/reset.html', sendPage('reset.html'));
 app.get('/users.html', sendPage('users.html'));
+app.get('/admin-notes.html', sendPage('admin-notes.html'));
 
 // Frontend tĩnh (CSS/JS/ảnh) — không cần session, đặt trước session cho nhẹ
 app.use(express.static(publicDir, { index: false }));

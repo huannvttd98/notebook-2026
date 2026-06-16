@@ -40,6 +40,7 @@ db.exec(`
     username      TEXT NOT NULL UNIQUE,
     email         TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
+    status        TEXT NOT NULL DEFAULT 'pending',
     created_at    TEXT NOT NULL DEFAULT (datetime('now','localtime'))
   );
 
@@ -97,6 +98,11 @@ if (!ucols.includes('password_hash')) {
 if (!ucols.includes('last_login_at')) {
   // Thời điểm đăng nhập gần nhất (NULL = chưa đăng nhập lần nào)
   db.exec(`ALTER TABLE users ADD COLUMN last_login_at TEXT`);
+}
+if (!ucols.includes('status')) {
+  // Trạng thái duyệt: 'pending' (chờ admin duyệt) | 'approved' (đã duyệt).
+  // User cũ (trước khi có cột này) coi như đã duyệt để không mất quyền sẵn có.
+  db.exec(`ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'approved'`);
 }
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)`);
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)`);

@@ -23,6 +23,7 @@
     <button type="button" id="open-calendar" class="new-note">📅 Lịch tháng</button>
     <a href="/music.html" class="new-note" id="open-music" style="text-decoration:none">🎧 Trang nhạc</a>
     <a href="/users.html" class="new-note" id="open-users" style="text-decoration:none" hidden>👥 Quản lý user</a>
+    <a href="/admin-notes.html" class="new-note" id="open-admin-notes" style="text-decoration:none" hidden>🗒️ Quản lý ghi chú</a>
     <button type="button" id="new-note" class="new-note">＋ Trang mới</button>
 
     <div class="sidebar-search">
@@ -32,9 +33,11 @@
     <div class="sidebar-section-label">Ghi chú</div>
     <nav id="note-list" class="note-list"></nav>
 
-    <div class="sidebar-section-label">Chia sẻ với</div>
-    <div id="user-share-status" class="user-share-status"></div>
-    <nav id="sidebar-user-list" class="sidebar-user-list" aria-label="Chia sẻ ghi chú với người dùng"></nav>
+    <div id="share-sidebar-section" hidden>
+      <div class="sidebar-section-label">Chia sẻ với</div>
+      <div id="user-share-status" class="user-share-status"></div>
+      <nav id="sidebar-user-list" class="sidebar-user-list" aria-label="Chia sẻ ghi chú với người dùng"></nav>
+    </div>
 
     <div id="weather" class="weather" title="Thời tiết hiện tại">
       <span class="weather-loading">Đang tải thời tiết…</span>

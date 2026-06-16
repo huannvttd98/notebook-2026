@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý ghi chú — Nhật ký</title>
+  <link rel="stylesheet" href="/auth.css?v=__V__" />
+</head>
+<body class="admin">
+  <div class="admin-wrap">
+    <div class="admin-head">
+      <h1>🗒️ Quản lý ghi chú</h1>
+      <span class="admin-nav">
+        <a href="/users.html" class="admin-back">👥 Quản lý user</a>
+        <a href="/" class="admin-back">← Về trang nhật ký</a>
+      </span>
+    </div>
+
+    <div class="admin-search">
+      <input type="search" id="search" placeholder="🔍 Tìm theo tiêu đề, nội dung, hoặc tên chủ..." />
+    </div>
+    <div id="count" class="admin-count"></div>
+
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Chủ</th>
+            <th>Tiêu đề</th>
+            <th>Nội dung</th>
+            <th>Ngày tạo</th>
+            <th class="admin-num">Chia sẻ</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="note-rows">
+          <tr><td colspan="7" class="admin-empty">Đang tải…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Xem nội dung đầy đủ 1 ghi chú -->
+  <div id="note-modal" class="share-modal" hidden>
+    <div class="share-modal-card note-modal-card" role="dialog" aria-modal="true" aria-label="Nội dung ghi chú">
+      <button type="button" id="note-modal-close" class="share-modal-close" aria-label="Đóng">✕</button>
+      <h3 id="note-modal-title" class="share-modal-title"></h3>
+      <p id="note-modal-meta" class="share-modal-hint"></p>
+      <pre id="note-modal-content" class="note-modal-content"></pre>
+    </div>
+  </div>
+
+  <script src="/admin-notes.js?v=__V__"></script>
+</body>
+</html>

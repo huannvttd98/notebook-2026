@@ -102,6 +102,8 @@ function todayStr() {
 let currentImages = [];
 // Ghi chú đang mở có phải của mình không (ảnh hưởng nút Xóa/Chia sẻ)
 let currentIsOwner = true;
+// Tài khoản đã được admin duyệt để dùng tính năng chia sẻ chưa
+let meApproved = false;
 
 // ===== Tiện ích =====
 function escapeHtml(str) {
@@ -226,7 +228,7 @@ function loadIntoEditor(entry) {
   // Chủ note mới thấy nút Xóa & Chia sẻ; note được chia sẻ thì hiện badge "của <chủ>"
   currentIsOwner = entry.is_owner !== 0;
   deleteBtn.hidden = !currentIsOwner;
-  if (shareBtn) shareBtn.hidden = !currentIsOwner;
+  if (shareBtn) shareBtn.hidden = !currentIsOwner || !meApproved;
   if (sharedBadge) {
     if (currentIsOwner) {
       sharedBadge.hidden = true;
@@ -338,7 +340,7 @@ async function flush() {
       idEl.value = entry.id;
       currentIsOwner = true;
       deleteBtn.hidden = false;
-      if (shareBtn) shareBtn.hidden = false;
+      if (shareBtn) shareBtn.hidden = !meApproved;
     }
     crumbEl.textContent = displayTitle(entry);
     setStatus('✓ Đã lưu');
@@ -1029,9 +1031,18 @@ function setupAuthUI(me) {
   const nameEl = document.getElementById('user-name');
   if (nameEl && me) nameEl.textContent = me.username;
 
-  // Chỉ admin mới thấy link "Quản lý user"
-  const usersLink = document.getElementById('open-users');
-  if (usersLink && me && me.isAdmin) usersLink.hidden = false;
+  // Chỉ user đã được admin duyệt mới thấy tính năng chia sẻ
+  meApproved = !!(me && me.approved);
+  const shareSection = document.getElementById('share-sidebar-section');
+  if (shareSection) shareSection.hidden = !meApproved;
+
+  // Chỉ admin mới thấy link "Quản lý user" và "Quản lý ghi chú"
+  if (me && me.isAdmin) {
+    const usersLink = document.getElementById('open-users');
+    if (usersLink) usersLink.hidden = false;
+    const notesLink = document.getElementById('open-admin-notes');
+    if (notesLink) notesLink.hidden = false;
+  }
 
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {

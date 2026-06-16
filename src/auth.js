@@ -21,7 +21,7 @@ const stmtUserByUsername = db.prepare(`SELECT * FROM users WHERE username = ?`);
 const stmtUserByEmail = db.prepare(`SELECT * FROM users WHERE email = ?`);
 const stmtUserById = db.prepare(`SELECT * FROM users WHERE id = ?`);
 const stmtInsertUser = db.prepare(
-  `INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)`
+  `INSERT INTO users (username, email, password_hash, status) VALUES (?, ?, ?, ?)`
 );
 const stmtCountUsers = db.prepare(`SELECT COUNT(*) AS n FROM users`);
 const stmtUpdatePassword = db.prepare(`UPDATE users SET password_hash = ? WHERE id = ?`);
@@ -87,6 +87,11 @@ function isAdminUsername(username) {
   return !!admin && typeof username === 'string' && username.toLowerCase() === admin;
 }
 
+// User đã được duyệt để dùng tính năng chia sẻ? Admin luôn coi là đã duyệt.
+function isApproved(user) {
+  return !!user && (user.status === 'approved' || isAdminUsername(user.username));
+}
+
 // Middleware: chỉ cho admin đi tiếp (dùng sau requireAuth)
 function requireAdmin(req, res, next) {
   if (req.session && isAdminUsername(req.session.username)) {
@@ -141,10 +146,12 @@ router.post('/register', registerLimiter, async (req, res) => {
 
   const isFirstUser = stmtCountUsers.get().n === 0;
   const hash = bcrypt.hashSync(password, BCRYPT_COST);
+  // User đầu tiên (chủ hệ thống) tự duyệt; còn lại chờ admin duyệt mới chia sẻ được.
+  const status = isFirstUser ? 'approved' : 'pending';
 
   let info;
   try {
-    info = stmtInsertUser.run(username, email, hash);
+    info = stmtInsertUser.run(username, email, hash, status);
   } catch (err) {
     // Phòng race-condition trùng UNIQUE giữa kiểm tra và insert
     return res.status(409).json({ error: 'Tài khoản hoặc email đã tồn tại' });
@@ -229,6 +236,7 @@ router.get('/me', (req, res) => {
         username: user.username,
         email: user.email,
         isAdmin: isAdminUsername(user.username),
+        approved: isApproved(user),
       });
     }
   }
@@ -293,4 +301,4 @@ router.post('/reset', async (req, res) => {
   res.json({ ok: true });
 });
 
-module.exports = { router, requireAuth, requireAdmin, isAdminUsername };
+module.exports = { router, requireAuth, requireAdmin, isAdminUsername, isApproved };
