@@ -90,13 +90,28 @@
   <!-- ===== Vùng tài liệu bên phải ===== -->
   <main class="doc" hidden>
     <div class="doc-topbar">
-      <span id="doc-crumb" class="doc-crumb">Ghi chú</span>
-      <span id="shared-badge" class="shared-badge" hidden></span>
-      <span class="doc-tools">
+      <div class="doc-topbar-main">
+        <span id="doc-crumb" class="doc-crumb">Ghi chú</span>
+        <span id="shared-badge" class="shared-badge" hidden></span>
+      </div>
+      <div class="doc-tools">
         <span id="save-status" class="save-status"></span>
-        <button type="button" id="share-note" class="doc-tool" hidden>👥 Chia sẻ</button>
-        <button type="button" id="delete-note" class="doc-tool danger" hidden>🗑 Xóa</button>
-      </span>
+        <button type="button" id="share-note" class="doc-tool" hidden>
+          <span class="doc-tool-ico" aria-hidden="true">👥</span>
+          <span class="doc-tool-text">Chia sẻ</span>
+          <span id="share-count" class="doc-tool-count" hidden></span>
+        </button>
+        <button type="button" id="delete-note" class="doc-tool doc-tool-icon danger" hidden aria-label="Xóa ghi chú" title="Xóa ghi chú">
+          <span class="doc-tool-ico" aria-hidden="true">🗑</span>
+        </button>
+      </div>
+    </div>
+    <div id="share-inline" class="share-inline" hidden>
+      <div class="share-inline-head">
+        <span class="share-inline-title">Đang chia sẻ với</span>
+        <button type="button" id="share-inline-manage" class="share-inline-manage">Thêm người</button>
+      </div>
+      <div id="share-inline-list" class="share-inline-list"></div>
     </div>
 
     <div class="doc-scroll">

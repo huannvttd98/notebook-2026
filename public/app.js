@@ -83,6 +83,10 @@ const shareInput = document.getElementById('share-input');
 const shareAddBtn = document.getElementById('share-add-btn');
 const shareMsg = document.getElementById('share-msg');
 const shareList = document.getElementById('share-list');
+const shareCount = document.getElementById('share-count');
+const shareInline = document.getElementById('share-inline');
+const shareInlineList = document.getElementById('share-inline-list');
+const shareInlineManage = document.getElementById('share-inline-manage');
 const sidebarUserList = document.getElementById('sidebar-user-list');
 const userShareStatus = document.getElementById('user-share-status');
 
@@ -105,6 +109,7 @@ let currentImages = [];
 let currentIsOwner = true;
 // Tài khoản đã được admin duyệt để dùng tính năng chia sẻ chưa
 let meApproved = false;
+let currentShares = [];
 
 // ===== Tiện ích =====
 function escapeHtml(str) {
@@ -138,6 +143,45 @@ function setStatus(text) {
   if (text.includes('✓')) statusEl.classList.add('is-saved');
   else if (text.includes('⚠') || text.includes('Lỗi') || text.includes('Cần')) statusEl.classList.add('is-error');
   else statusEl.classList.add('is-saving');
+}
+
+function clearShareInline() {
+  currentShares = [];
+  if (shareInline) shareInline.hidden = true;
+  if (shareInlineList) shareInlineList.innerHTML = '';
+  if (shareCount) {
+    shareCount.hidden = true;
+    shareCount.textContent = '';
+  }
+}
+
+function renderShareInline(users) {
+  currentShares = Array.isArray(users) ? users : [];
+  const canShow = !!(currentId && currentIsOwner && meApproved && currentShares.length);
+  if (shareCount) {
+    shareCount.textContent = currentShares.length ? String(currentShares.length) : '';
+    shareCount.hidden = !currentShares.length;
+  }
+  if (!shareInline || !shareInlineList) return;
+  shareInline.hidden = !canShow;
+  if (!canShow) {
+    shareInlineList.innerHTML = '';
+    return;
+  }
+
+  shareInlineList.innerHTML = currentShares
+    .map((u) => {
+      const name = u.display_name || u.username;
+      const avatar = u.avatar_url
+        ? `<img class="share-avatar" src="${escapeHtml(u.avatar_url)}" alt="" />`
+        : '<span class="share-avatar share-avatar-empty">👤</span>';
+      return `<div class="share-chip" data-uid="${u.id}">
+        ${avatar}
+        <span class="share-chip-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span>
+        <button type="button" class="share-chip-remove" data-uid="${u.id}" title="Hủy chia sẻ">✕</button>
+      </div>`;
+    })
+    .join('');
 }
 
 // ===== Đánh giá cảm xúc (chọn 1 icon) =====
@@ -238,6 +282,8 @@ function loadIntoEditor(entry) {
       sharedBadge.hidden = false;
     }
   }
+  if (currentIsOwner && currentId && meApproved) loadShares(false);
+  else clearShareInline();
   renderImages(parseEntryImages(entry));
   loadMusic(entry.music);
   autoGrow();
@@ -278,6 +324,7 @@ function newNote() {
   deleteBtn.hidden = true;
   if (shareBtn) shareBtn.hidden = true; // chỉ chia sẻ được sau khi đã lưu
   if (sharedBadge) sharedBadge.hidden = true;
+  clearShareInline();
   renderImages([]);
   loadMusic('');
   autoGrow();
@@ -342,6 +389,7 @@ async function flush() {
       currentIsOwner = true;
       deleteBtn.hidden = false;
       if (shareBtn) shareBtn.hidden = !meApproved;
+      clearShareInline();
     }
     crumbEl.textContent = displayTitle(entry);
     setStatus('✓ Đã lưu');
@@ -577,32 +625,18 @@ async function fetchMusicMeta(url) {
   if (musicMetaCache.has(trimmed)) return musicMetaCache.get(trimmed);
 
   const fallback = musicFallbackMeta(trimmed);
-  const provider = musicProvider(trimmed);
   let meta = fallback;
 
   try {
-    if (provider === 'youtube') {
-      const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(trimmed)}&format=json`);
-      if (res.ok) {
-        const data = await res.json();
-        meta = {
-          title: data.title || fallback.title,
-          providerLabel: 'YouTube',
-          thumbnail: data.thumbnail_url || fallback.thumbnail,
-          icon: fallback.icon,
-        };
-      }
-    } else if (provider === 'spotify') {
-      const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(trimmed)}`);
-      if (res.ok) {
-        const data = await res.json();
-        meta = {
-          title: data.title || fallback.title,
-          providerLabel: 'Spotify',
-          thumbnail: data.thumbnail_url || '',
-          icon: fallback.icon,
-        };
-      }
+    const res = await fetch(`/api/entries/music-meta?url=${encodeURIComponent(trimmed)}`);
+    if (res.ok) {
+      const data = await res.json();
+      meta = {
+        title: data.title || fallback.title,
+        providerLabel: data.providerLabel || fallback.providerLabel,
+        thumbnail: data.thumbnail || fallback.thumbnail,
+        icon: data.icon || fallback.icon,
+      };
     }
   } catch {
     meta = fallback;
@@ -614,27 +648,57 @@ async function fetchMusicMeta(url) {
 
 function renderMusicCard(url, meta) {
   const title = meta?.title || 'Nhac dinh kem';
-  const providerLabel = meta?.providerLabel || 'Nguon nhac';
   const hasThumb = !!meta?.thumbnail;
+  const isPlaying = currentPlayingUrl && currentPlayingUrl === (url || '').trim();
+  const playingMarkup = '<span class="music-playing" aria-hidden="true"><span></span><span></span><span></span></span>';
   const artMarkup = hasThumb
-    ? `<img class="music-art-image" src="${escapeHtml(meta.thumbnail)}" alt="${escapeHtml(title)}" loading="lazy" />`
+    ? `<span class="music-art-icon ${escapeHtml(meta?.icon || 'album-generic')}" aria-hidden="true"></span>` +
+      `<img class="music-art-image" src="${escapeHtml(meta.thumbnail)}" alt="${escapeHtml(title)}" loading="lazy" />`
     : `<span class="music-art-icon ${escapeHtml(meta?.icon || 'album-generic')}" aria-hidden="true"></span>`;
   musicPlayer.innerHTML =
-    `<button type="button" class="music-card" data-url="${escapeHtml(url)}" data-title="${escapeHtml(title)}" aria-label="Phat ${escapeHtml(title)}">` +
+    `<button type="button" class="music-card${isPlaying ? ' is-playing' : ''}" data-url="${escapeHtml(url)}" data-title="${escapeHtml(title)}" aria-label="Phat ${escapeHtml(title)}">` +
       `<span class="music-card-remove" role="button" tabindex="0" aria-label="Go nhac" title="Go nhac">✕</span>` +
       `<span class="music-art">${artMarkup}</span>` +
       `<span class="music-copy">` +
         `<span class="music-song-title">${escapeHtml(title)}</span>` +
         `<span class="music-card-meta">` +
-          `<span class="music-song-provider">${escapeHtml(providerLabel)}</span>` +
-          `<span class="music-card-edit" role="button" tabindex="0" aria-label="Sua link nhac" title="Sua link">Sua</span>` +
+          `${playingMarkup}` +
+          `<span class="music-card-edit" role="button" tabindex="0" aria-label="Sua link nhac" title="Sua link">` +
+            `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20.25V16.75L14.96 5.79L18.46 9.29L7.5 20.25H4ZM20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.62 3.54C18.23 3.15 17.6 3.15 17.21 3.54L15.57 5.18L19.07 8.68L20.71 7.04Z"/></svg>` +
+          `</span>` +
         `</span>` +
       `</span>` +
-      `<span class="music-play-btn" aria-hidden="true">▶</span>` +
+      `<span class="music-play-btn" aria-hidden="true"></span>` +
     `</button>`;
   musicPlayer.hidden = false;
   musicSection.hidden = false;
+  bindMusicArtFallback(musicPlayer.querySelector('.music-art'));
   updateMusicSectionState();
+}
+
+function bindMusicArtFallback(artEl) {
+  if (!artEl) return;
+  const img = artEl.querySelector('.music-art-image');
+  const icon = artEl.querySelector('.music-art-icon');
+  if (!img || !icon) return;
+
+  icon.hidden = true;
+  img.addEventListener('load', () => {
+    icon.hidden = true;
+    img.hidden = false;
+  }, { once: true });
+  img.addEventListener('error', () => {
+    img.remove();
+    icon.hidden = false;
+  }, { once: true });
+}
+
+function syncMusicPlayingState() {
+  if (!musicPlayer) return;
+  const card = musicPlayer.querySelector('.music-card[data-url]');
+  if (!card) return;
+  const isPlaying = !!currentPlayingUrl && card.dataset.url === currentPlayingUrl;
+  card.classList.toggle('is-playing', isPlaying);
 }
 
 // Vẽ thẻ nhạc gọn: chỉ tên bài, ảnh/icon album và nút phát.
@@ -678,7 +742,10 @@ function renderPlayerArt(meta) {
   if (!musicModalArt) return;
   const title = meta?.title || 'Nhac dinh kem';
   if (meta?.thumbnail) {
-    musicModalArt.innerHTML = `<img class="music-art-image" src="${escapeHtml(meta.thumbnail)}" alt="${escapeHtml(title)}" loading="lazy" />`;
+    musicModalArt.innerHTML =
+      `<span class="music-art-icon ${escapeHtml(meta?.icon || 'album-generic')}" aria-hidden="true"></span>` +
+      `<img class="music-art-image" src="${escapeHtml(meta.thumbnail)}" alt="${escapeHtml(title)}" loading="lazy" />`;
+    bindMusicArtFallback(musicModalArt);
     return;
   }
   musicModalArt.innerHTML = `<span class="music-art-icon ${escapeHtml(meta?.icon || 'album-generic')}" aria-hidden="true"></span>`;
@@ -699,6 +766,7 @@ function openPlayer(url, title) {
   musicModalTitle.textContent = meta.title || title || 'Dang phat';
   if (musicModalProvider) musicModalProvider.textContent = meta.providerLabel || (isSpotify ? 'Spotify' : 'YouTube');
   renderPlayerArt(meta);
+  syncMusicPlayingState();
   musicModal.hidden = false;
   document.body.classList.add('player-open');
   closeSidebar(); // đóng menu để xem trình phát rõ hơn (điện thoại)
@@ -719,6 +787,7 @@ function closePlayer() {
   musicModal.hidden = true;
   musicModalBody.innerHTML = ''; // gỡ iframe -> dừng nhạc
   document.body.classList.remove('player-open');
+  syncMusicPlayingState();
 }
 
 if (musicModalClose) musicModalClose.addEventListener('click', closePlayer);
@@ -868,6 +937,7 @@ function setShareMsg(text, type) {
 
 function renderShareList(users) {
   if (!shareList) return;
+  renderShareInline(users);
   if (!users.length) {
     shareList.innerHTML = '<li class="share-empty">Chưa chia sẻ với ai.</li>';
     return;
@@ -890,14 +960,23 @@ function renderShareList(users) {
     .join('');
 }
 
-async function loadShares() {
+async function loadShares(showError = true) {
+  const noteId = currentId;
+  if (!noteId || !currentIsOwner) {
+    clearShareInline();
+    return [];
+  }
   try {
-    const res = await fetch(`/api/entries/${currentId}/shares`);
+    const res = await fetch(`/api/entries/${noteId}/shares`);
     const data = await readJson(res);
     if (!res.ok) throw new Error(data.error || 'Lỗi');
+    if (noteId !== currentId) return [];
     renderShareList(data.users || []);
+    return data.users || [];
   } catch (err) {
-    setShareMsg(err.message, 'error');
+    if (showError) setShareMsg(err.message, 'error');
+    if (noteId === currentId) clearShareInline();
+    return [];
   }
 }
 
@@ -905,9 +984,9 @@ function openShareModal() {
   if (!currentId || !currentIsOwner) return;
   setShareMsg('');
   if (shareInput) shareInput.value = '';
-  renderShareList([]);
+  if (shareList) shareList.innerHTML = '<li class="share-empty">Đang tải danh sách…</li>';
   shareModal.hidden = false;
-  loadShares();
+  loadShares(true);
   if (shareInput) shareInput.focus();
 }
 
@@ -949,6 +1028,7 @@ async function removeShare(userId) {
     const data = await readJson(res);
     if (!res.ok) throw new Error(data.error || 'Lỗi');
     renderShareList(data.users || []);
+    setShareMsg('✓ Đã hủy chia sẻ', 'ok');
   } catch (err) {
     setShareMsg('⚠ ' + err.message, 'error');
   }
@@ -976,6 +1056,13 @@ if (shareList) {
     if (btn) removeShare(Number(btn.dataset.uid));
   });
 }
+if (shareInlineList) {
+  shareInlineList.addEventListener('click', (e) => {
+    const btn = e.target.closest('.share-chip-remove');
+    if (btn) removeShare(Number(btn.dataset.uid));
+  });
+}
+if (shareInlineManage) shareInlineManage.addEventListener('click', openShareModal);
 
 // ===== Danh sách user ở sidebar: bấm để chia sẻ nhanh ghi chú đang mở =====
 let sidebarUsersLoaded = false;
@@ -1035,6 +1122,7 @@ async function shareWithUser(username) {
     const data = await readJson(res);
     if (!res.ok) throw new Error(data.error || 'Không chia sẻ được');
     setUserShareStatus(`✓ Đã chia sẻ "${displayTitle({ title: titleEl.value, content: contentEl.value })}" với ${username}`, 'ok');
+    loadShares(false);
   } catch (err) {
     setUserShareStatus('⚠ ' + err.message, 'error');
   }

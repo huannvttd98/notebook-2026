@@ -11,6 +11,8 @@ const router = express.Router();
 const imgUpload = createUpload('note');
 
 const PAGE_SIZE = 10;
+const MUSIC_META_CACHE_MS = 6 * 60 * 60 * 1000;
+const musicMetaCache = new Map();
 
 // Prepared statements (tái sử dụng, chống SQL injection).
 // Mọi câu lệnh đều gắn user_id để mỗi user chỉ thao tác trên ghi chú của mình.
@@ -86,6 +88,83 @@ function withOwner(entry, uid) {
   return { ...entry, is_owner: entry.user_id === uid ? 1 : 0 };
 }
 
+function parseMusicProvider(url) {
+  const value = String(url || '').trim();
+  if (!value) return null;
+
+  let match = value.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
+  if (match) {
+    return {
+      provider: 'youtube',
+      providerLabel: 'YouTube',
+      id: match[1],
+      thumbnail: `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`,
+      fallbackTitle: 'Bai hat tu YouTube',
+      icon: 'album-youtube',
+      oembedUrl: `https://www.youtube.com/oembed?url=${encodeURIComponent(value)}&format=json`,
+    };
+  }
+
+  match = value.match(/open\.spotify\.com\/(?:intl-\w+\/)?(track|album|playlist|episode|show)\/(\w+)/);
+  if (match) {
+    return {
+      provider: 'spotify',
+      providerLabel: 'Spotify',
+      id: match[2],
+      thumbnail: '',
+      fallbackTitle: 'Bai hat tu Spotify',
+      icon: 'album-spotify',
+      oembedUrl: `https://open.spotify.com/oembed?url=${encodeURIComponent(value)}`,
+    };
+  }
+
+  return null;
+}
+
+async function fetchMusicMeta(url) {
+  const parsed = parseMusicProvider(url);
+  if (!parsed) return null;
+
+  const key = String(url || '').trim();
+  const cached = musicMetaCache.get(key);
+  if (cached && Date.now() - cached.at < MUSIC_META_CACHE_MS) return cached.data;
+
+  let meta = {
+    title: parsed.fallbackTitle,
+    provider: parsed.provider,
+    providerLabel: parsed.providerLabel,
+    thumbnail: parsed.thumbnail,
+    icon: parsed.icon,
+  };
+
+  try {
+    const res = await fetch(parsed.oembedUrl, {
+      headers: { Accept: 'application/json' },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      meta = {
+        title: String(data.title || parsed.fallbackTitle).trim() || parsed.fallbackTitle,
+        provider: parsed.provider,
+        providerLabel: parsed.providerLabel,
+        thumbnail: String(data.thumbnail_url || parsed.thumbnail || '').trim(),
+        icon: parsed.icon,
+      };
+    }
+  } catch {
+    meta = {
+      title: parsed.fallbackTitle,
+      provider: parsed.provider,
+      providerLabel: parsed.providerLabel,
+      thumbnail: parsed.thumbnail,
+      icon: parsed.icon,
+    };
+  }
+
+  musicMetaCache.set(key, { at: Date.now(), data: meta });
+  return meta;
+}
+
 // GET /api/entries?search=&page=&limit= — danh sách: ghi chú của mình + được chia sẻ
 router.get('/', (req, res) => {
   const uid = req.userId;
@@ -124,6 +203,18 @@ router.get('/', (req, res) => {
     total,
     totalPages: Math.max(1, Math.ceil(total / limit)),
   });
+});
+
+// GET /api/entries/:id — chi tiết 1 entry (chủ hoặc được chia sẻ)
+router.get('/music-meta', async (req, res) => {
+  const url = typeof req.query.url === 'string' ? req.query.url.trim().slice(0, 500) : '';
+  if (!url || !/^https?:\/\//i.test(url)) {
+    return res.status(400).json({ error: 'Link nhac khong hop le' });
+  }
+
+  const meta = await fetchMusicMeta(url);
+  if (!meta) return res.status(400).json({ error: 'Chi ho tro YouTube hoac Spotify' });
+  res.json(meta);
 });
 
 // GET /api/entries/:id — chi tiết 1 entry (chủ hoặc được chia sẻ)
