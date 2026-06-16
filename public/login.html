@@ -7,9 +7,24 @@
   <link rel="stylesheet" href="/auth.css?v=__V__" />
 </head>
 <body class="auth">
-  <main class="auth-card">
-    <h1 class="auth-brand">📔 Nhật ký</h1>
-    <p class="auth-title">Đăng nhập</p>
+  <div class="auth-layout">
+    <section class="auth-intro">
+      <h1 class="auth-intro-brand">📔 Nhật ký cá nhân</h1>
+      <p class="auth-intro-tag">
+        Ứng dụng viết nhật ký kiểu Notion — nhẹ, riêng tư, gắn ảnh và nhạc cho từng trang.
+      </p>
+      <ul class="auth-features">
+        <li><span class="feat-ico">📝</span> Trang viết <b>tự động lưu</b>, tìm kiếm nhanh</li>
+        <li><span class="feat-ico">📅</span> Lịch tháng theo <b>cảm xúc</b> + ảnh bìa</li>
+        <li><span class="feat-ico">🎵</span> Gắn <b>nhạc</b> YouTube/Spotify vào ghi chú</li>
+        <li><span class="feat-ico">👥</span> <b>Chia sẻ</b> ghi chú để cùng chỉnh sửa</li>
+      </ul>
+      <p class="auth-intro-foot">Đăng nhập hoặc tạo tài khoản để bắt đầu.</p>
+    </section>
+
+    <main class="auth-card">
+      <h1 class="auth-brand">📔 Nhật ký</h1>
+      <p class="auth-title">Đăng nhập</p>
 
     <div id="msg" class="auth-msg"></div>
 
@@ -31,7 +46,8 @@
       <span class="auth-sep">·</span>
       <a href="/forgot.html">Quên mật khẩu?</a>
     </div>
-  </main>
+    </main>
+  </div>
   <script src="/auth.js?v=__V__"></script>
 </body>
 </html>

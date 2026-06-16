@@ -38,6 +38,75 @@ body.auth {
   box-shadow: 0 12px 40px rgba(36, 80, 36, 0.12);
 }
 
+/* Bố cục có thêm phần giới thiệu (trang đăng nhập): 2 cột trên desktop, xếp dọc trên mobile */
+.auth-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 44px;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 840px;
+}
+.auth-layout .auth-card { margin: 0; flex: 0 0 auto; }
+
+.auth-intro {
+  flex: 1 1 300px;
+  max-width: 400px;
+  color: var(--ink);
+}
+.auth-intro-brand {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0 0 10px;
+}
+.auth-intro-tag {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--accent-dark);
+  margin: 0 0 22px;
+}
+.auth-features {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.auth-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  font-size: 0.93rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.auth-features b { color: var(--accent-dark); font-weight: 700; }
+.feat-ico {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 9px;
+}
+.auth-intro-foot {
+  font-size: 0.86rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .auth-layout { gap: 24px; }
+  .auth-intro { flex-basis: auto; max-width: 380px; text-align: center; }
+  .auth-features { text-align: left; max-width: 320px; margin-left: auto; margin-right: auto; }
+  .auth-intro-brand { font-size: 1.5rem; }
+}
+
 .auth-brand {
   text-align: center;
   font-size: 1.5rem;
