@@ -143,26 +143,33 @@
     </div>
 
     <div class="doc-scroll">
-      <!-- Ảnh bìa full-width (kiểu Notion) — nhiều ảnh thì thành slider -->
+      <!-- Media: ảnh + video đầu ghi chú -->
       <div id="cover-slider" class="cover-slider">
         <div id="note-images" class="note-cover"></div>
         <button type="button" id="slider-prev" class="slider-arrow prev" aria-label="Ảnh trước">‹</button>
         <button type="button" id="slider-next" class="slider-arrow next" aria-label="Ảnh sau">›</button>
         <div id="slider-dots" class="slider-dots"></div>
+        <!-- Nút thêm ảnh/video — FAB góc dưới phải của vùng media -->
+        <label id="media-fab" class="media-fab" title="Thêm ảnh / video" aria-label="Thêm ảnh hoặc video">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          <input type="file" id="note-image-input" accept="image/*,video/*" multiple hidden />
+        </label>
+        <!-- Nút tùy chọn — FAB góc dưới trái của vùng media -->
+        <button type="button" id="doc-meta-toggle" class="doc-meta-toggle" aria-expanded="false"
+          aria-controls="doc-meta" title="Tùy chọn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.2 1.2 0 0 1 0 1.7l-1.3 1.3a1.2 1.2 0 0 1-1.7 0l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a1.2 1.2 0 0 1-1.2 1.2h-1.8A1.2 1.2 0 0 1 10.8 20v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1.2 1.2 0 0 1-1.7 0L6 17.9a1.2 1.2 0 0 1 0-1.7l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H5.2A1.2 1.2 0 0 1 4 13.2v-1.8a1.2 1.2 0 0 1 1.2-1.2h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1L6 8.4a1.2 1.2 0 0 1 0-1.7l1.3-1.3a1.2 1.2 0 0 1 1.7 0l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9v-.2A1.2 1.2 0 0 1 12 3.4h1.8A1.2 1.2 0 0 1 15 4.6v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1.2 1.2 0 0 1 1.7 0L19.8 6a1.2 1.2 0 0 1 0 1.7l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a1.2 1.2 0 0 1 1.2 1.2v1.8a1.2 1.2 0 0 1-1.2 1.2h-.2a1 1 0 0 0-.9.6z"/></svg>
+        </button>
       </div>
 
       <div class="doc-body">
         <input type="hidden" id="entry-id" />
         <input type="text" id="title" class="doc-title" placeholder="Không có tiêu đề" maxlength="200" />
 
-        <button type="button" id="doc-meta-toggle" class="doc-meta-toggle" aria-expanded="false"
-          aria-controls="doc-meta" title="Hiện tùy chọn"><span class="ui-ico meta-toggle-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.2 1.2 0 0 1 0 1.7l-1.3 1.3a1.2 1.2 0 0 1-1.7 0l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a1.2 1.2 0 0 1-1.2 1.2h-1.8A1.2 1.2 0 0 1 10.8 20v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1.2 1.2 0 0 1-1.7 0L6 17.9a1.2 1.2 0 0 1 0-1.7l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H5.2A1.2 1.2 0 0 1 4 13.2v-1.8a1.2 1.2 0 0 1 1.2-1.2h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1L6 8.4a1.2 1.2 0 0 1 0-1.7l1.3-1.3a1.2 1.2 0 0 1 1.7 0l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9v-.2A1.2 1.2 0 0 1 12 3.4h1.8A1.2 1.2 0 0 1 15 4.6v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1.2 1.2 0 0 1 1.7 0L19.8 6a1.2 1.2 0 0 1 0 1.7l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a1.2 1.2 0 0 1 1.2 1.2v1.8a1.2 1.2 0 0 1-1.2 1.2h-.2a1 1 0 0 0-.9.6z"/></svg></span><span>Tùy chọn</span></button>
-
         <div class="doc-meta" id="doc-meta" hidden>
           <input type="date" id="entry-date" class="doc-date-input" title="Ngày của ghi chú" />
-          <label class="add-image-icon" title="Thêm ảnh bìa" aria-label="Thêm ảnh bìa">
+          <label class="add-image-icon" title="Thêm ảnh / video" aria-label="Thêm ảnh hoặc video">
             <span class="ui-ico meta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 15l-4.8-4.8a1.7 1.7 0 0 0-2.4 0L8 16"/></svg></span>
-            <input type="file" id="note-image-input" accept="image/*" hidden />
+            <input type="file" id="note-image-input-meta" accept="image/*,video/*" multiple hidden />
           </label>
           <button type="button" id="music-toggle" class="add-music-icon" title="Thêm nhạc" aria-label="Thêm nhạc"><span class="ui-ico meta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6.5l10-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></span></button>
           <span id="edited-mark" class="doc-date"></span>

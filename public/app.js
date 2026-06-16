@@ -417,9 +417,11 @@ dateEl.addEventListener('change', scheduleSave);
 // Rời trang -> cố gắng lưu nốt
 window.addEventListener('beforeunload', () => { clearTimeout(saveTimer); });
 
-// ===== Ảnh trong ghi chú =====
+// ===== Ảnh / video trong ghi chú =====
+function isVideo(url) { return /\.(mp4|webm|ogg|mov|m4v)$/i.test(url); }
 function renderImages(images) {
   currentImages = images || [];
+  coverSlider.classList.toggle('has-media', currentImages.length > 0);
   if (!currentImages.length) {
     noteImagesEl.innerHTML = '';
     setupSlider();
@@ -427,11 +429,19 @@ function renderImages(images) {
   }
   noteImagesEl.innerHTML = currentImages
     .map(
-      (url) => `
+      (url) => {
+        const eUrl = escapeHtml(url);
+        const media = isVideo(url)
+          ? `<video src="${eUrl}" controls playsinline preload="metadata"></video>`
+          : `<img src="${eUrl}" alt="ảnh bìa" />`;
+        return `
       <div class="cover-photo">
-        <img src="${escapeHtml(url)}" alt="ảnh bìa" />
-        <button type="button" class="note-img-del" data-url="${escapeHtml(url)}" title="Gỡ ảnh">✕</button>
-      </div>`
+        ${media}
+        <button type="button" class="note-img-del" data-url="${eUrl}" title="Gỡ">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="12" height="12"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>`;
+      }
     )
     .join('');
   setupSlider();
@@ -522,43 +532,67 @@ noteImagesEl.addEventListener('click', async (e) => {
   }
 });
 
-// Chèn ảnh: cần ghi chú đã được lưu (có id) trước
-if (noteImageInput) {
-  noteImageInput.addEventListener('change', async () => {
-    const file = noteImageInput.files[0];
-    if (!file) return;
+// Chèn ảnh/video — hàm dùng chung cho cả FAB và input trong doc-meta
+async function uploadMediaFiles(files, inputEl) {
+  if (!files.length) return;
 
-    // Chặn sớm nếu ảnh quá lớn — hiện kích thước thực và giới hạn cho phép
-    const tooBig = oversizeError(file);
-    if (tooBig) {
-      imageStatus.textContent = '⚠ ' + tooBig;
-      noteImageInput.value = '';
+  // Kiểm tra kích thước từng file
+  for (const file of files) {
+    const limit = MAX_FILE_MB * 1024 * 1024;
+    if (file.size > limit) {
+      const label = file.type.startsWith('video/') ? 'Video' : 'Ảnh';
+      imageStatus.textContent = `⚠ ${label} ${formatSize(file.size)} vượt giới hạn ${MAX_FILE_MB}MB`;
+      inputEl.value = '';
       return;
     }
+  }
 
-    // Đảm bảo ghi chú đã lưu để có id gắn ảnh
-    await flushNow();
-    if (!currentId) {
-      imageStatus.textContent = 'Hãy viết nội dung (để tự lưu) trước khi chèn ảnh';
-      noteImageInput.value = '';
-      return;
-    }
+  // Đảm bảo ghi chú đã lưu trước khi gắn media
+  await flushNow();
+  if (!currentId) {
+    imageStatus.textContent = 'Hãy viết nội dung (để tự lưu) trước khi thêm media';
+    inputEl.value = '';
+    return;
+  }
 
-    imageStatus.textContent = 'Đang tải ảnh…';
+  let lastImages = null;
+  let errorCount = 0;
+  for (let i = 0; i < files.length; i++) {
+    const label = files[i].type.startsWith('video/') ? 'video' : 'ảnh';
+    imageStatus.textContent = `Đang tải ${label} ${i + 1}/${files.length}…`;
     const fd = new FormData();
-    fd.append('image', file);
+    fd.append('image', files[i]);
     try {
       const res = await fetch(`/api/entries/${currentId}/images`, { method: 'POST', body: fd });
       const data = await readJson(res);
       if (!res.ok) throw new Error(data.error || 'Lỗi');
-      renderImages(data.images || []);
-      imageStatus.textContent = '✓ Đã thêm ảnh';
+      lastImages = data.images;
     } catch (err) {
-      imageStatus.textContent = '⚠ ' + err.message;
-    } finally {
-      noteImageInput.value = '';
+      errorCount++;
+      imageStatus.textContent = `⚠ File ${i + 1}: ${err.message}`;
     }
-  });
+  }
+  if (lastImages) renderImages(lastImages);
+  if (errorCount === 0) {
+    imageStatus.textContent = files.length > 1 ? `✓ Đã thêm ${files.length} file` : '✓ Đã thêm';
+  } else if (errorCount < files.length) {
+    imageStatus.textContent = `✓ ${files.length - errorCount}/${files.length} file thành công (${errorCount} lỗi)`;
+  }
+  inputEl.value = '';
+}
+
+// FAB trong cover-slider
+if (noteImageInput) {
+  noteImageInput.addEventListener('change', () =>
+    uploadMediaFiles(Array.from(noteImageInput.files), noteImageInput)
+  );
+}
+// Input trong doc-meta
+const noteImageInputMeta = document.getElementById('note-image-input-meta');
+if (noteImageInputMeta) {
+  noteImageInputMeta.addEventListener('change', () =>
+    uploadMediaFiles(Array.from(noteImageInputMeta.files), noteImageInputMeta)
+  );
 }
 
 // ===== Nhạc gắn vào ghi chú (YouTube / Spotify) =====

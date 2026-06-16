@@ -728,23 +728,49 @@ input, textarea, button { font: inherit; color: inherit; }
 .doc-title::placeholder { color: #9aa88a; }
 .doc-title:focus { outline: none; }
 
-/* Nút thu gọn hàng tùy chọn (ngày, ảnh, nhạc, cảm xúc) */
+/* Nút tùy chọn + nút thêm media — FAB nổi trong vùng cover-slider */
 .doc-meta-toggle {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  z-index: 3;
   display: inline-flex;
   align-items: center;
-  gap: .38rem;
-  margin-bottom: 1.2rem;
-  padding: .35rem .75rem;
-  font-size: .85rem;
-  color: var(--muted);
-  background: var(--bg-sidebar);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.42);
+  border: none;
+  color: #fff;
   cursor: pointer;
-  transition: background .15s, color .15s;
+  transition: background .15s, transform .12s;
+  backdrop-filter: blur(4px);
 }
-.doc-meta-toggle:hover { background: var(--bg-hover); color: var(--ink); }
-.doc-meta-toggle.active { background: var(--bg-active); color: var(--accent-dark); border-color: var(--green-sage); }
+.doc-meta-toggle svg { display: block; width: 18px; height: 18px; }
+.doc-meta-toggle:hover { background: rgba(0,0,0,.65); }
+.doc-meta-toggle.active { background: var(--accent); }
+
+/* Nút + thêm ảnh/video */
+.media-fab {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.42);
+  color: #fff;
+  cursor: pointer;
+  transition: background .15s, transform .12s;
+  backdrop-filter: blur(4px);
+}
+.media-fab svg { display: block; width: 18px; height: 18px; }
+.media-fab:hover { background: var(--accent); transform: scale(1.07); }
 
 .doc-meta {
   display: flex;
@@ -798,7 +824,28 @@ input, textarea, button { font: inherit; color: inherit; }
 
 /* Ảnh trong ghi chú */
 /* Ảnh bìa full-width ở đầu ghi chú (kiểu Notion) — nhiều ảnh thành slider */
-.cover-slider { position: relative; }
+.cover-slider {
+  position: relative;
+  min-height: 80px;
+}
+/* Empty state: vùng dashed gợi ý khi chưa có ảnh/video */
+.cover-slider::before {
+  content: 'Thêm ảnh hoặc video';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .82rem;
+  color: var(--muted);
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  margin: 6px 8px 0;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity .15s;
+}
+.cover-slider.has-media::before { opacity: 0; }
 .note-cover {
   display: flex;
   overflow-x: auto;
@@ -819,6 +866,14 @@ input, textarea, button { font: inherit; color: inherit; }
   object-fit: cover;
   display: block;
   cursor: zoom-in;
+}
+.cover-photo video {
+  width: 100%;
+  max-height: 320px;
+  display: block;
+  object-fit: contain;
+  background: #000;
+  cursor: default;
 }
 
 /* Nút ‹ › và chấm — chỉ hiện khi có nhiều ảnh */
@@ -875,10 +930,12 @@ input, textarea, button { font: inherit; color: inherit; }
   border: none;
   border-radius: 50%;
   background: rgba(0, 0, 0, .65);
-  color: var(--ink);
+  color: #fff;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: .85rem;
-  line-height: 1;
 }
 .note-img-del:hover { background: var(--danger); }
 

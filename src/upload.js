@@ -28,8 +28,8 @@ function createUpload(prefix) {
     storage,
     limits: { fileSize: MAX_FILE_SIZE },
     fileFilter: (req, file, cb) => {
-      if (/^image\//.test(file.mimetype)) cb(null, true);
-      else cb(new Error('Chỉ chấp nhận file ảnh'));
+      if (/^image\//.test(file.mimetype) || /^video\//.test(file.mimetype)) cb(null, true);
+      else cb(new Error('Chỉ chấp nhận file ảnh hoặc video'));
     },
   });
 }
