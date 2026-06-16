@@ -11,7 +11,8 @@ const session = require('express-session');
 const SqliteStore = require('better-sqlite3-session-store')(session);
 
 const db = require('./src/db');
-const { router: authRouter, requireAuth } = require('./src/auth');
+const { router: authRouter, requireAuth, requireAdmin } = require('./src/auth');
+const adminRouter = require('./src/routes/admin');
 const entriesRouter = require('./src/routes/entries');
 const weatherRouter = require('./src/routes/weather');
 const coverRouter = require('./src/routes/cover');
@@ -80,6 +81,7 @@ app.get('/login.html', sendPage('login.html'));
 app.get('/register.html', sendPage('register.html'));
 app.get('/forgot.html', sendPage('forgot.html'));
 app.get('/reset.html', sendPage('reset.html'));
+app.get('/users.html', sendPage('users.html'));
 
 // Frontend tĩnh (CSS/JS/ảnh) — không cần session, đặt trước session cho nhẹ
 app.use(express.static(publicDir, { index: false }));
@@ -113,6 +115,9 @@ app.use('/api/auth', authRouter);
 app.use('/api/entries', requireAuth, entriesRouter);
 app.use('/api/cover', requireAuth, coverRouter);
 app.use('/api/weather', weatherRouter);
+
+// API quản trị — bắt buộc đăng nhập VÀ là admin
+app.use('/api/admin', requireAuth, requireAdmin, adminRouter);
 
 app.listen(PORT, () => {
   console.log(`Notebook đang chạy tại http://localhost:${PORT}`);

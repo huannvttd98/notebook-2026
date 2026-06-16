@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý người dùng — Nhật ký</title>
+  <link rel="stylesheet" href="/auth.css?v=__V__" />
+</head>
+<body class="admin">
+  <div class="admin-wrap">
+    <div class="admin-head">
+      <h1>👥 Quản lý người dùng</h1>
+      <a href="/" class="admin-back">← Về trang nhật ký</a>
+    </div>
+
+    <div id="count" class="admin-count"></div>
+
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tài khoản</th>
+            <th>Email</th>
+            <th>Ngày tạo</th>
+            <th class="admin-num">Số ghi chú</th>
+          </tr>
+        </thead>
+        <tbody id="user-rows">
+          <tr><td colspan="5" class="admin-empty">Đang tải…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script src="/users.js?v=__V__"></script>
+</body>
+</html>

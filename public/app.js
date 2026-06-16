@@ -809,6 +809,10 @@ function setupAuthUI(me) {
   const nameEl = document.getElementById('user-name');
   if (nameEl && me) nameEl.textContent = me.username;
 
+  // Chỉ admin mới thấy link "Quản lý user"
+  const usersLink = document.getElementById('open-users');
+  if (usersLink && me && me.isAdmin) usersLink.hidden = false;
+
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {

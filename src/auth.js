@@ -77,6 +77,21 @@ function requireAuth(req, res, next) {
   return res.status(401).json({ error: 'Chưa đăng nhập' });
 }
 
+// Admin được xác định bằng ADMIN_USERNAME trong .env (so khớp không phân biệt hoa thường).
+// Chưa đặt ADMIN_USERNAME => không có ai là admin.
+function isAdminUsername(username) {
+  const admin = (process.env.ADMIN_USERNAME || '').trim().toLowerCase();
+  return !!admin && typeof username === 'string' && username.toLowerCase() === admin;
+}
+
+// Middleware: chỉ cho admin đi tiếp (dùng sau requireAuth)
+function requireAdmin(req, res, next) {
+  if (req.session && isAdminUsername(req.session.username)) {
+    return next();
+  }
+  return res.status(403).json({ error: 'Không có quyền truy cập' });
+}
+
 // Lưu thông tin user vào session sau khi xác thực thành công (chống fixation)
 function startSession(req, user) {
   return new Promise((resolve, reject) => {
@@ -187,7 +202,12 @@ router.get('/me', (req, res) => {
   if (req.session && req.session.userId) {
     const user = stmtUserById.get(req.session.userId);
     if (user) {
-      return res.json({ authenticated: true, username: user.username, email: user.email });
+      return res.json({
+        authenticated: true,
+        username: user.username,
+        email: user.email,
+        isAdmin: isAdminUsername(user.username),
+      });
     }
   }
   res.json({ authenticated: false });
@@ -251,4 +271,4 @@ router.post('/reset', async (req, res) => {
   res.json({ ok: true });
 });
 
-module.exports = { router, requireAuth };
+module.exports = { router, requireAuth, requireAdmin, isAdminUsername };

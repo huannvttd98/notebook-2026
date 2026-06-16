@@ -127,3 +127,90 @@ body.auth {
   color: var(--muted);
   margin-top: 4px;
 }
+
+/* ===== Trang quản lý user (admin) ===== */
+body.admin {
+  display: block;
+  background: var(--bg-sidebar);
+  padding: 28px 18px;
+}
+
+.admin-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.admin-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.admin-head h1 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.admin-back {
+  font-size: 0.88rem;
+  color: var(--accent-dark);
+  text-decoration: none;
+  font-weight: 500;
+}
+.admin-back:hover { text-decoration: underline; }
+
+.admin-count {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.admin-table-wrap {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+table.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+table.admin-table th,
+table.admin-table td {
+  text-align: left;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+table.admin-table th {
+  background: var(--bg-sidebar);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+table.admin-table tr:last-child td { border-bottom: none; }
+table.admin-table tbody tr:hover { background: var(--bg-hover); }
+
+.admin-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  margin-left: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 10px;
+  vertical-align: middle;
+}
+
+.admin-num { text-align: right; font-variant-numeric: tabular-nums; }
+.admin-empty { padding: 28px; text-align: center; color: var(--muted); }
