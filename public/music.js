@@ -12,8 +12,8 @@ function escapeHtml(str) {
 
 // Tiêu đề hiển thị: tiêu đề, hoặc dòng đầu nội dung, hoặc mặc định
 function displayTitle(e) {
-  if (e.title && e.title.trim()) return e.title.trim();
-  if (e.content && e.content.trim()) return e.content.trim().split('\n')[0].slice(0, 60);
+  if (e.title?.trim()) return e.title.trim();
+  if (e.content?.trim()) return e.content.trim().split('\n')[0].slice(0, 60);
   return 'Không có tiêu đề';
 }
 
@@ -57,6 +57,7 @@ const listCount = document.getElementById('list-count');
 const emptyState = document.getElementById('empty-state');
 const prevBtn = document.getElementById('prev-btn');
 const nextBtn = document.getElementById('next-btn');
+const controlsEl = document.querySelector('.player-controls');
 
 // ===== Tải danh sách bài nhạc từ các ghi chú =====
 async function loadSongs() {
@@ -64,7 +65,7 @@ async function loadSongs() {
   try {
     const res = await fetch('/api/entries?limit=200');
     if (res.status === 401) {
-      window.location.href = '/login.html';
+      globalThis.location.href = '/login.html';
       return;
     }
     const data = await res.json();
@@ -122,10 +123,12 @@ function showEmpty() {
   playerTitle.textContent = '—';
   playerProvider.hidden = true;
   playerBody.innerHTML = '<div class="player-empty"><span>Chưa có bài nào để phát</span></div>';
+  playerBody.className = 'player-body is-empty';
   playerMeta.hidden = true;
   playerNote.hidden = true;
   prevBtn.disabled = true;
   nextBtn.disabled = true;
+  if (controlsEl) controlsEl.hidden = true;
 }
 
 // ===== Phát 1 bài =====
@@ -134,15 +137,17 @@ function play(i, auto = true) {
   current = i;
   const s = songs[i];
 
-  const src = s.isSpotify
-    ? s.embed
-    : s.embed + (s.embed.includes('?') ? '&' : '?') + (auto ? 'autoplay=1' : 'autoplay=0');
-  const frameStyle = s.isSpotify ? 'height:352px;width:100%' : 'aspect-ratio:16/9;width:100%;height:auto';
-
+  let src = s.embed;
+  if (!s.isSpotify) {
+    const joiner = s.embed.includes('?') ? '&' : '?';
+    const autoplay = auto ? 'autoplay=1' : 'autoplay=0';
+    src = s.embed + joiner + autoplay;
+  }
+  playerBody.className = 'player-body' + (s.isSpotify ? ' is-spotify' : ' is-video');
   playerBody.innerHTML =
-    `<iframe src="${escapeHtml(src)}" style="${frameStyle}" ` +
+    `<div class="player-embed-shell"><iframe src="${escapeHtml(src)}" ` +
     `loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" ` +
-    `allow="autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture"></iframe>`;
+    `allow="autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture"></iframe></div>`;
 
   playerTitle.textContent = s.title;
   playerProvider.textContent = s.isSpotify ? '🟢 Spotify' : '🔴 YouTube';
@@ -157,6 +162,7 @@ function play(i, auto = true) {
 
   prevBtn.disabled = i <= 0;
   nextBtn.disabled = i >= songs.length - 1;
+  if (controlsEl) controlsEl.hidden = songs.length <= 1;
 
   highlight();
 }

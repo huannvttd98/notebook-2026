@@ -9,6 +9,7 @@ body {
     radial-gradient(1100px 560px at 75% -12%, rgba(46, 125, 50, .55) 0%, transparent 60%),
     linear-gradient(160deg, #10231a 0%, #0a130e 100%);
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden; /* chặn tràn ngang trên điện thoại */
 }
 /* Ảnh / iframe nhúng không bao giờ vượt khung cha */
@@ -18,8 +19,9 @@ img, iframe { max-width: 100%; }
 .topbar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 1.4rem;
+  padding: calc(.85rem + env(safe-area-inset-top, 0px)) calc(1.15rem + env(safe-area-inset-right, 0px)) .85rem calc(1.15rem + env(safe-area-inset-left, 0px));
   position: sticky;
   top: 0;
   z-index: 5;
@@ -40,13 +42,13 @@ img, iframe { max-width: 100%; }
   transition: background .15s;
 }
 .back-link:hover { background: rgba(255, 255, 255, .1); }
-.brand { font-weight: 700; opacity: .9; }
+.brand { font-weight: 700; opacity: .9; white-space: nowrap; }
 
 /* Bố cục */
 .wrap {
   max-width: 980px;
   margin: 0 auto;
-  padding: 1.4rem;
+  padding: 1.4rem max(1rem, env(safe-area-inset-right, 0px)) calc(1.4rem + env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.4rem;
@@ -88,13 +90,28 @@ img, iframe { max-width: 100%; }
   background: rgba(0, 0, 0, .3);
   min-height: 80px;
 }
-.player-body iframe { display: block; width: 100%; border: 0; }
+.player-embed-shell {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+.player-body.is-spotify .player-embed-shell {
+  aspect-ratio: auto;
+  min-height: 352px;
+}
+.player-body iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
 .player-empty {
   padding: 2.2rem 1rem;
   text-align: center;
   font-size: .9rem;
   opacity: .75;
-  line-height: 0;
+  line-height: 1.4;
 }
 .player-empty span { line-height: 1.5; display: inline-block; }
 
@@ -129,13 +146,13 @@ img, iframe { max-width: 100%; }
   height: 46px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, .15);
+  background: rgba(0, 0, 0, .28);
   color: #fff;
   font-size: 1.1rem;
   cursor: pointer;
   transition: background .15s, transform .1s;
 }
-.ctrl-btn:hover { background: rgba(255, 255, 255, .28); }
+.ctrl-btn:hover { background: rgba(0, 0, 0, .4); }
 .ctrl-btn:active { transform: scale(.92); }
 .ctrl-btn:disabled { opacity: .4; cursor: default; }
 
@@ -210,16 +227,100 @@ img, iframe { max-width: 100%; }
 
 /* ===== Điện thoại ===== */
 @media (max-width: 600px) {
-  .topbar { padding: .7rem .9rem; gap: .6rem; }
-  .brand { font-size: .95rem; }
+  .topbar {
+    padding: calc(.6rem + env(safe-area-inset-top, 0px)) calc(.75rem + env(safe-area-inset-right, 0px)) .6rem calc(.75rem + env(safe-area-inset-left, 0px));
+    gap: .45rem;
+    align-items: center;
+  }
+  .back-link {
+    min-width: 0;
+    font-size: .86rem;
+    padding: .34rem .5rem;
+    flex: 0 1 auto;
+  }
+  .brand {
+    font-size: .9rem;
+    text-align: right;
+    color: #dff1e3;
+    flex: 0 1 auto;
+  }
 
-  .wrap { padding: .9rem; gap: 1rem; }
+  .wrap {
+    padding: .85rem max(.75rem, env(safe-area-inset-right, 0px)) calc(1rem + env(safe-area-inset-bottom, 0px)) max(.75rem, env(safe-area-inset-left, 0px));
+    gap: .9rem;
+  }
 
   .player-card { padding: 1.1rem; border-radius: 16px; }
   .player-title { font-size: 1.12rem; }
-  .player-note { max-height: 160px; }
+  .provider-badge { margin-bottom: .7rem; }
+  .player-body { border-radius: 12px; }
+  .player-body.is-spotify .player-embed-shell { min-height: 232px; }
+  .player-controls {
+    margin-top: .8rem;
+    gap: .7rem;
+  }
+  .ctrl-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 1rem;
+  }
+  .player-meta { margin-top: .9rem; }
+  .player-note {
+    max-height: 150px;
+    font-size: .88rem;
+  }
 
   .list-card { padding: 1rem .8rem 1.1rem; border-radius: 16px; }
   .song-item { padding: .6rem .55rem; gap: .6rem; }
   .song-index { width: 1.1rem; }
+  .song-name { font-size: .88rem; }
+  .song-sub { font-size: .7rem; }
+}
+
+@media (max-width: 430px) {
+  .topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .back-link {
+    font-size: .82rem;
+    gap: .25rem;
+  }
+
+  .brand {
+    font-size: .84rem;
+  }
+
+  .player-card,
+  .list-card {
+    border-radius: 14px;
+  }
+
+  .player-card {
+    padding: .95rem;
+  }
+
+  .player-title {
+    font-size: 1.02rem;
+    margin-bottom: .45rem;
+  }
+
+  .player-body.is-spotify .player-embed-shell {
+    min-height: 188px;
+  }
+
+  .player-note {
+    max-height: 132px;
+    font-size: .84rem;
+  }
+
+  .song-item {
+    padding: .55rem .45rem;
+  }
+
+  .song-sub {
+    font-size: .68rem;
+  }
 }

@@ -811,6 +811,64 @@ table.admin-table tbody tr:hover { background: var(--bg-hover); }
   margin: 12px 0 14px;
 }
 
+.note-detail-media {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0 0 16px;
+}
+
+.note-media-block {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fcfdf9;
+}
+
+.note-media-title {
+  margin: 0 0 10px;
+  font-size: 0.96rem;
+}
+
+.note-detail-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.note-detail-image-link {
+  display: block;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.note-detail-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.note-detail-music iframe {
+  display: block;
+  width: 100%;
+}
+
+.note-detail-music-link {
+  display: inline-flex;
+  margin-top: 10px;
+  color: var(--accent-dark);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.note-detail-music-link:hover {
+  text-decoration: underline;
+}
+
 .note-detail-tag {
   display: inline-flex;
   align-items: center;
@@ -984,6 +1042,14 @@ table.admin-table tbody tr:hover { background: var(--bg-hover); }
 
   .note-detail-card {
     padding: 14px;
+  }
+
+  .note-media-block {
+    padding: 12px;
+  }
+
+  .note-detail-images {
+    grid-template-columns: 1fr 1fr;
   }
 
   .note-detail-title {

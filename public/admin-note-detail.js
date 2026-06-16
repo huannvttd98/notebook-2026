@@ -8,6 +8,11 @@ const updatedEl = document.getElementById('note-updated');
 const shareCountEl = document.getElementById('note-share-count');
 const titleEl = document.getElementById('note-title');
 const tagsEl = document.getElementById('note-tags');
+const mediaEl = document.getElementById('note-media');
+const imagesWrapEl = document.getElementById('note-images-wrap');
+const imagesEl = document.getElementById('note-images');
+const musicWrapEl = document.getElementById('note-music-wrap');
+const musicPlayerEl = document.getElementById('note-music-player');
 const contentEl = document.getElementById('note-content');
 
 const FACES = ['😢', '🙁', '😐', '🙂', '😄'];
@@ -20,6 +25,12 @@ function noteTitle(note) {
 
 function formatDate(value) {
   return value || '—';
+}
+
+function escapeHtml(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, (char) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])
+  );
 }
 
 function buildBackLink(params) {
@@ -43,6 +54,65 @@ function renderTags(note) {
     tags.push('<span class="note-detail-tag">🖼 Có ảnh đính kèm</span>');
   }
   tagsEl.innerHTML = tags.join('');
+}
+
+function parseImages(images) {
+  try {
+    const parsed = typeof images === 'string' ? JSON.parse(images) : images;
+    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === 'string' && item) : [];
+  } catch {
+    return [];
+  }
+}
+
+function musicEmbed(url) {
+  const value = (url || '').trim();
+  if (!value) return '';
+  let match = value.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
+  if (match) return `https://www.youtube.com/embed/${match[1]}`;
+  match = value.match(/open\.spotify\.com\/(?:intl-\w+\/)?(track|album|playlist|episode|show)\/(\w+)/);
+  if (match) return `https://open.spotify.com/embed/${match[1]}/${match[2]}`;
+  return '';
+}
+
+function renderMedia(note) {
+  const images = parseImages(note.images);
+  const musicUrl = (note.music || '').trim();
+  const embed = musicEmbed(musicUrl);
+
+  mediaEl.hidden = !images.length && !musicUrl;
+
+  if (images.length) {
+    imagesWrapEl.hidden = false;
+    imagesEl.innerHTML = images
+      .map((url) => `<a class="note-detail-image-link" href="${escapeHtml(url)}" target="_blank" rel="noreferrer">
+        <img class="note-detail-image" src="${escapeHtml(url)}" alt="Ảnh đính kèm" />
+      </a>`)
+      .join('');
+  } else {
+    imagesWrapEl.hidden = true;
+    imagesEl.innerHTML = '';
+  }
+
+  if (musicUrl) {
+    musicWrapEl.hidden = false;
+    if (embed) {
+      const isSpotify = embed.includes('spotify');
+      const frameStyle = isSpotify
+        ? 'height:152px;width:100%'
+        : 'aspect-ratio:16/9;width:100%;height:auto';
+      musicPlayerEl.innerHTML =
+        `<iframe src="${escapeHtml(embed)}" style="${frameStyle};border:0;border-radius:12px" ` +
+        'loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" ' +
+        'allow="autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture"></iframe>' +
+        `<a class="note-detail-music-link" href="${escapeHtml(musicUrl)}" target="_blank" rel="noreferrer">Mở link nhạc gốc</a>`;
+    } else {
+      musicPlayerEl.innerHTML = `<a class="note-detail-music-link" href="${escapeHtml(musicUrl)}" target="_blank" rel="noreferrer">Mở nhạc đính kèm</a>`;
+    }
+  } else {
+    musicWrapEl.hidden = true;
+    musicPlayerEl.innerHTML = '';
+  }
 }
 
 async function loadNote() {
@@ -86,6 +156,7 @@ async function loadNote() {
     updatedEl.textContent = formatDate(note.updated_at);
     shareCountEl.textContent = String(note.share_count || 0);
     titleEl.textContent = noteTitle(note);
+    renderMedia(note);
     contentEl.textContent = note.content || '';
     renderTags(note);
   } catch {
