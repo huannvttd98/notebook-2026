@@ -44,4 +44,28 @@ async function sendResetEmail(to, link, username) {
   await transporter.sendMail({ from: MAIL_FROM, to, subject, text, html });
 }
 
-module.exports = { sendResetEmail };
+// Gửi email chào mừng sau khi đăng ký thành công.
+async function sendWelcomeEmail(to, username) {
+  const appUrl = (process.env.APP_URL || '').replace(/\/$/, '');
+  const link = appUrl || '#';
+  const subject = 'Chào mừng bạn đến với Notebook 📔';
+  const text =
+    `Xin chào ${username},\n\n` +
+    `Tài khoản Notebook của bạn đã được tạo thành công!\n` +
+    `Bạn có thể đăng nhập và bắt đầu viết nhật ký tại:\n${link}\n\n` +
+    `Chúc bạn có những trang nhật ký thật ý nghĩa.`;
+  const html =
+    `<p>Xin chào <b>${username}</b>,</p>` +
+    `<p>Tài khoản Notebook của bạn đã được tạo thành công! 🎉</p>` +
+    `<p><a href="${link}">Đăng nhập và bắt đầu viết nhật ký</a></p>` +
+    `<p>Chúc bạn có những trang nhật ký thật ý nghĩa.</p>`;
+
+  if (!transporter) {
+    console.log(`\n[mailer] Chưa cấu hình SMTP. Bỏ qua email chào mừng cho ${to}.\n`);
+    return;
+  }
+
+  await transporter.sendMail({ from: MAIL_FROM, to, subject, text, html });
+}
+
+module.exports = { sendResetEmail, sendWelcomeEmail };

@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const db = require('./db');
-const { sendResetEmail } = require('./mailer');
+const { sendResetEmail, sendWelcomeEmail } = require('./mailer');
 
 const router = express.Router();
 
@@ -139,6 +139,12 @@ router.post('/register', registerLimiter, async (req, res) => {
   } catch {
     return res.status(500).json({ error: 'Lỗi tạo phiên đăng nhập' });
   }
+
+  // Gửi email chào mừng (không chặn phản hồi; lỗi gửi mail chỉ ghi log)
+  sendWelcomeEmail(user.email, user.username).catch((err) => {
+    console.error('Gửi email chào mừng thất bại:', err.message);
+  });
+
   res.status(201).json({ ok: true, username: user.username, email: user.email });
 });
 
