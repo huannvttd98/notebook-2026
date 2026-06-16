@@ -16,8 +16,11 @@
       </span>
     </div>
 
-    <div class="admin-search">
+    <div class="admin-search admin-filters">
       <input type="search" id="search" placeholder="🔍 Tìm theo tiêu đề, nội dung, hoặc tên chủ..." />
+      <select id="user-filter" aria-label="Lọc theo user">
+        <option value="">Tất cả user</option>
+      </select>
     </div>
     <div id="count" class="admin-count"></div>
 
@@ -42,14 +45,14 @@
   </div>
 
   <!-- Xem nội dung đầy đủ 1 ghi chú -->
-  <div id="note-modal" class="share-modal" hidden>
-    <div class="share-modal-card note-modal-card" role="dialog" aria-modal="true" aria-label="Nội dung ghi chú">
+  <dialog id="note-modal" class="share-modal" aria-label="Nội dung ghi chú">
+    <div class="share-modal-card note-modal-card">
       <button type="button" id="note-modal-close" class="share-modal-close" aria-label="Đóng">✕</button>
-      <h3 id="note-modal-title" class="share-modal-title"></h3>
+      <h3 id="note-modal-title" class="share-modal-title">Chi tiết ghi chú</h3>
       <p id="note-modal-meta" class="share-modal-hint"></p>
       <pre id="note-modal-content" class="note-modal-content"></pre>
     </div>
-  </div>
+  </dialog>
 
   <script src="/admin-notes.js?v=__V__"></script>
 </body>

@@ -9,11 +9,26 @@
 <body class="admin users-page">
   <div class="admin-wrap">
     <div class="admin-head">
-      <h1>👥 Quản lý người dùng</h1>
-      <span class="admin-nav">
-        <a href="/admin-notes.html" class="admin-back">🗒️ Quản lý ghi chú</a>
-        <a href="/" class="admin-back">← Về trang Memory</a>
-      </span>
+      <div class="admin-title-block">
+        <h1>👥 Quản lý người dùng</h1>
+        <p class="admin-subtitle">Theo dõi tài khoản, trạng thái duyệt và hoạt động gần đây.</p>
+      </div>
+      <nav class="admin-nav" aria-label="Điều hướng quản trị">
+        <a href="/admin-notes.html" class="admin-back admin-pill-link">
+          <span class="admin-pill-icon">🗒️</span>
+          <span class="admin-pill-text">
+            <strong>Quản lý ghi chú</strong>
+            <small>Xem toàn bộ note</small>
+          </span>
+        </a>
+        <a href="/" class="admin-back admin-pill-link admin-pill-link-muted">
+          <span class="admin-pill-icon">←</span>
+          <span class="admin-pill-text">
+            <strong>Về trang Memory</strong>
+            <small>Quay lại ứng dụng</small>
+          </span>
+        </a>
+      </nav>
     </div>
 
     <div id="count" class="admin-count"></div>

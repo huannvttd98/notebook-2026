@@ -28,7 +28,7 @@ router.get('/users', (req, res) => {
 // POST /api/admin/users/:id/status — duyệt / hủy duyệt 1 user (body: { status })
 const stmtSetStatus = db.prepare(`UPDATE users SET status = ? WHERE id = ?`);
 router.post('/users/:id/status', (req, res) => {
-  const status = (req.body || {}).status;
+  const status = req.body?.status;
   if (status !== 'approved' && status !== 'pending') {
     return res.status(400).json({ error: 'Trạng thái không hợp lệ' });
   }
@@ -63,12 +63,35 @@ const stmtSearchNotes = db.prepare(`
   LIMIT @cap
 `);
 
-// GET /api/admin/notes?search= — toàn bộ note của mọi user (chỉ admin)
+// GET /api/admin/notes?search=&userId= — toàn bộ note của mọi user (chỉ admin)
 router.get('/notes', (req, res) => {
   const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
-  const notes = search
-    ? stmtSearchNotes.all({ like: `%${search}%`, cap: NOTES_CAP })
-    : stmtAllNotes.all(NOTES_CAP);
+  const userId = Number.parseInt(req.query.userId, 10);
+  const filters = [];
+  const params = { cap: NOTES_CAP };
+
+  if (Number.isInteger(userId) && userId > 0) {
+    filters.push('e.user_id = @userId');
+    params.userId = userId;
+  }
+  if (search) {
+    filters.push('(e.title LIKE @like OR e.content LIKE @like OR o.username LIKE @like)');
+    params.like = `%${search}%`;
+  }
+
+  const where = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+  const notes = db.prepare(`
+    SELECT
+      e.id, e.title, e.content, e.created_at, e.updated_at, e.rating, e.music,
+      e.user_id,
+      o.username AS owner_username,
+      (SELECT COUNT(*) FROM note_shares s WHERE s.note_id = e.id) AS share_count
+    FROM entries e
+    LEFT JOIN users o ON o.id = e.user_id
+    ${where}
+    ORDER BY e.created_at DESC, e.id DESC
+    LIMIT @cap
+  `).all(params);
   res.json({ notes, total: notes.length, capped: notes.length >= NOTES_CAP });
 });
 
