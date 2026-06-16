@@ -104,10 +104,38 @@ input, textarea, button { font: inherit; color: inherit; }
   align-items: center;
   padding: .3rem .5rem .6rem;
 }
-.workspace { font-weight: 700; font-size: 1rem; }
+.workspace {
+  font-weight: 700;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .42rem;
+}
+
+/* ===== Shared SVG icon utility ===== */
+.ui-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.ui-ico svg { display: block; }
+/* Sizes */
+.workspace-mark svg  { width: 18px; height: 18px; }
+.nav-ico svg         { width: 16px; height: 16px; }
+.meta-toggle-ico svg { width: 15px; height: 15px; }
+.meta-ico svg        { width: 17px; height: 17px; }
+.section-ico svg     { width: 15px; height: 15px; }
+.close-ico svg       { width: 14px; height: 14px; }
+.cover-placeholder-ico svg { width: 42px; height: 42px; }
+.avatar-fallback-ico svg   { width: 18px; height: 18px; }
+.title-ico svg       { width: 18px; height: 18px; }
 
 .new-note {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: .45rem;
   width: 100%;
   text-align: left;
   background: none;
@@ -221,11 +249,13 @@ input, textarea, button { font: inherit; color: inherit; }
   border-radius: 50%;
   background: rgba(255, 255, 255, .18);
   color: #fff;
-  font-size: 1rem;
-  line-height: 1;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: background .15s;
 }
+.music-modal-close .close-ico svg { width: 16px; height: 16px; }
 .music-modal-close:hover { background: rgba(255, 255, 255, .34); }
 
 .music-modal-head {
@@ -390,7 +420,6 @@ input, textarea, button { font: inherit; color: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: .95rem;
   border: 1px solid var(--border);
 }
 .user-name {
@@ -483,23 +512,33 @@ input, textarea, button { font: inherit; color: inherit; }
 }
 
 .doc-topbar {
+  flex-shrink: 0;
   position: sticky;
   top: 0;
-  z-index: 5;
-  display: flex;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: "main status tools";
   align-items: center;
-  justify-content: space-between;
-  gap: .75rem;
+  column-gap: .85rem;
+  row-gap: .45rem;
   padding: .55rem 1.1rem;
   background: var(--bg-doc);
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 6px rgba(0,0,0,.06);
 }
 .doc-topbar-main {
+  grid-area: main;
   min-width: 0;
-  flex: 1;
   display: flex;
   align-items: center;
   gap: .55rem;
+}
+.doc-topbar-status {
+  grid-area: status;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .doc-crumb {
   color: var(--ink);
@@ -511,21 +550,26 @@ input, textarea, button { font: inherit; color: inherit; }
   white-space: nowrap;
 }
 .doc-tools {
+  grid-area: tools;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: .45rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 .save-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: .78rem;
   font-weight: 600;
   color: var(--muted);
+  min-height: 28px;
   padding: .22rem .62rem;
   border-radius: 999px;
   transition: background .2s, color .2s;
 }
-.save-status:empty { padding: 0; }
+.save-status:empty { display: none; }
 .save-status.is-saving { background: #fff3d4; color: #9a7400; }
 .save-status.is-saved { background: #e1f0d3; color: var(--accent-dark); animation: status-pop .35s ease; }
 .save-status.is-error { background: #fbe1de; color: var(--danger); }
@@ -555,7 +599,17 @@ input, textarea, button { font: inherit; color: inherit; }
   padding: 0;
   border-radius: 50%;
 }
-.doc-tool-ico { line-height: 1; font-size: .92rem; }
+.doc-tool-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.doc-tool-ico svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
 .doc-tool-count {
   min-width: 18px;
   height: 18px;
@@ -678,7 +732,7 @@ input, textarea, button { font: inherit; color: inherit; }
 .doc-meta-toggle {
   display: inline-flex;
   align-items: center;
-  gap: .3rem;
+  gap: .38rem;
   margin-bottom: 1.2rem;
   padding: .35rem .75rem;
   font-size: .85rem;
@@ -915,6 +969,9 @@ input, textarea, button { font: inherit; color: inherit; }
   font-weight: 700;
   color: var(--accent-dark);
   letter-spacing: .01em;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
 }
 .music-row {
   display: flex;
@@ -940,7 +997,9 @@ input, textarea, button { font: inherit; color: inherit; }
   background: #fff;
   cursor: pointer;
   color: var(--muted, #888);
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .music-clear:hover { border-color: var(--accent); color: var(--accent); }
 .music-player {
@@ -1154,11 +1213,13 @@ input, textarea, button { font: inherit; color: inherit; }
   background: none;
   border: none;
   color: var(--muted);
-  font-size: .8rem;
   margin-left: .25rem;
-  padding: .15rem .35rem;
+  padding: .15rem .3rem;
   cursor: pointer;
   border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .rating-clear:hover { background: var(--bg-hover); color: var(--ink); }
 
@@ -1236,20 +1297,22 @@ input, textarea, button { font: inherit; color: inherit; }
   border-radius: 50%;
   background: rgba(0, 0, 0, .5);
   color: #fff;
-  font-size: 1.2rem;
-  line-height: 1;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
+.lightbox-close .close-ico svg { width: 18px; height: 18px; }
 .lightbox-close:hover { background: rgba(0, 0, 0, .75); }
 .cover-placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: .4rem;
+  gap: .5rem;
   color: var(--muted);
-  font-size: 2.5rem;
 }
-.cover-placeholder span { font-size: .9rem; }
+.cover-placeholder > span { font-size: .9rem; }
+.cover-placeholder .cover-placeholder-ico svg { color: var(--muted); opacity: .55; }
 
 /* Nút tròn tải ảnh, nổi ở góc dưới phải ảnh bìa */
 .cover-upload-fab {
@@ -1501,27 +1564,33 @@ input, textarea, button { font: inherit; color: inherit; }
 
   .doc-topbar {
     padding: .52rem .8rem .38rem 3.25rem;
-    flex-wrap: wrap;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "main tools"
+      "status status";
     align-items: center;
     gap: .4rem;
   }
 
-  .doc-topbar-main,
-  .doc-tools {
-    width: 100%;
+  .doc-topbar-main {
+    min-width: 0;
   }
 
   .doc-crumb {
     font-size: .92rem;
   }
 
+  .doc-topbar-status {
+    width: 100%;
+  }
+
   .doc-tools {
-    justify-content: space-between;
+    width: auto;
+    justify-content: flex-end;
     gap: .35rem;
   }
 
   .save-status {
-    order: 3;
     width: 100%;
     text-align: center;
     font-size: .74rem;
@@ -1598,12 +1667,20 @@ input, textarea, button { font: inherit; color: inherit; }
   border-radius: 50%;
   background: var(--bg-hover);
   color: var(--muted);
-  font-size: .95rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .share-modal-close:hover { background: var(--bg-active); color: var(--ink); }
 
-.share-modal-title { margin: 0 0 .3rem; font-size: 1.15rem; }
+.share-modal-title {
+  margin: 0 0 .3rem;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+}
 .share-modal-hint { margin: 0 0 1rem; font-size: .85rem; color: var(--muted); }
 
 .share-add { display: flex; gap: .5rem; }

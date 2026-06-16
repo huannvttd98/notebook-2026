@@ -17,18 +17,38 @@
   <!-- ===== Sidebar trái (kiểu Notion) ===== -->
   <aside class="sidebar">
     <div class="sidebar-head">
-      <span class="workspace">📔 Memory</span>
+      <span class="workspace">
+        <span class="ui-ico workspace-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 5.5a2 2 0 0 1 2-2H21v15.5a1.5 1.5 0 0 0-1.5-1.5H6.5a2 2 0 0 0-2 2z"/><path d="M6.5 3.5v16"/><path d="M9 8h8"/><path d="M9 11h8"/></svg>
+        </span>
+        <span>Memory</span>
+      </span>
     </div>
 
-    <button type="button" id="open-calendar" class="new-note">📅 Lịch tháng</button>
-    <a href="/music.html" class="new-note" id="open-music" style="text-decoration:none">🎧 Trang nhạc</a>
-    <a href="/about.html" class="new-note" id="open-about" style="text-decoration:none">ℹ️ Giới thiệu dự án</a>
-    <a href="/users.html" class="new-note" id="open-users" style="text-decoration:none" hidden>👥 Quản lý user</a>
-    <a href="/admin-notes.html" class="new-note" id="open-admin-notes" style="text-decoration:none" hidden>🗒️ Quản lý ghi chú</a>
+    <button type="button" id="open-calendar" class="new-note">
+      <span class="ui-ico nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M8 2.8v3.4M16 2.8v3.4M3 9h18"/></svg></span>
+      <span>Lịch tháng</span>
+    </button>
+    <a href="/music.html" class="new-note" id="open-music" style="text-decoration:none">
+      <span class="ui-ico nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6.5l10-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></span>
+      <span>Trang nhạc</span>
+    </a>
+    <a href="/about.html" class="new-note" id="open-about" style="text-decoration:none">
+      <span class="ui-ico nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 10.2v6.1"/><circle cx="12" cy="7.4" r=".9" fill="currentColor" stroke="none"/></svg></span>
+      <span>Giới thiệu dự án</span>
+    </a>
+    <a href="/users.html" class="new-note" id="open-users" style="text-decoration:none" hidden>
+      <span class="ui-ico nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="3.2"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a3.2 3.2 0 0 1 0 6.23"/></svg></span>
+      <span>Quản lý user</span>
+    </a>
+    <a href="/admin-notes.html" class="new-note" id="open-admin-notes" style="text-decoration:none" hidden>
+      <span class="ui-ico nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7.5h6M9 11.5h6M9 15.5h4"/></svg></span>
+      <span>Quản lý ghi chú</span>
+    </a>
     <button type="button" id="new-note" class="new-note">＋ Trang mới</button>
 
     <div class="sidebar-search">
-      <input type="search" id="search" placeholder="🔍 Tìm kiếm..." />
+      <input type="search" id="search" placeholder="Tìm kiếm..." />
     </div>
 
     <div class="sidebar-section-label">Ghi chú</div>
@@ -47,7 +67,9 @@
     <div class="sidebar-user">
       <a href="/profile.html" class="user-profile" title="Hồ sơ của bạn">
         <img id="user-avatar" class="user-avatar" alt="" hidden />
-        <span id="user-avatar-fallback" class="user-avatar user-avatar-fallback">👤</span>
+        <span id="user-avatar-fallback" class="user-avatar user-avatar-fallback">
+          <span class="ui-ico avatar-fallback-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>
+        </span>
         <span id="user-name" class="user-name"></span>
       </a>
       <button type="button" id="logout-btn" class="logout-btn" title="Đăng xuất">Đăng xuất</button>
@@ -75,7 +97,7 @@
       <div class="cal-right">
         <div class="cover-panel">
           <img id="cover-img" class="cover-img" alt="Ảnh bìa" hidden />
-          <div id="cover-placeholder" class="cover-placeholder">🖼️<span>Chưa có ảnh</span></div>
+          <div id="cover-placeholder" class="cover-placeholder"><span class="ui-ico cover-placeholder-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 15l-4.8-4.8a1.7 1.7 0 0 0-2.4 0L8 16"/></svg></span><span>Chưa có ảnh</span></div>
           <!-- Nút tròn tải ảnh ở góc dưới phải -->
           <label class="cover-upload-fab" title="Tải ảnh lên" aria-label="Tải ảnh lên">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
@@ -94,15 +116,21 @@
         <span id="doc-crumb" class="doc-crumb">Ghi chú</span>
         <span id="shared-badge" class="shared-badge" hidden></span>
       </div>
-      <div class="doc-tools">
+      <div class="doc-topbar-status">
         <span id="save-status" class="save-status"></span>
+      </div>
+      <div class="doc-tools">
         <button type="button" id="share-note" class="doc-tool" hidden>
-          <span class="doc-tool-ico" aria-hidden="true">👥</span>
+          <span class="doc-tool-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="3.2"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a3.2 3.2 0 0 1 0 6.23"/></svg>
+          </span>
           <span class="doc-tool-text">Chia sẻ</span>
           <span id="share-count" class="doc-tool-count" hidden></span>
         </button>
         <button type="button" id="delete-note" class="doc-tool doc-tool-icon danger" hidden aria-label="Xóa ghi chú" title="Xóa ghi chú">
-          <span class="doc-tool-ico" aria-hidden="true">🗑</span>
+          <span class="doc-tool-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4.8C8 3.81 8.81 3 9.8 3h4.4c.99 0 1.8.81 1.8 1.8V6"/><path d="M19 6l-1 13.2c-.08.99-.91 1.8-1.9 1.8H7.9c-.99 0-1.82-.81-1.9-1.8L5 6"/><path d="M10 10.2v6.6"/><path d="M14 10.2v6.6"/></svg>
+          </span>
         </button>
       </div>
     </div>
@@ -128,15 +156,15 @@
         <input type="text" id="title" class="doc-title" placeholder="Không có tiêu đề" maxlength="200" />
 
         <button type="button" id="doc-meta-toggle" class="doc-meta-toggle" aria-expanded="false"
-                aria-controls="doc-meta" title="Hiện tùy chọn">⚙️ Tùy chọn</button>
+          aria-controls="doc-meta" title="Hiện tùy chọn"><span class="ui-ico meta-toggle-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.2 1.2 0 0 1 0 1.7l-1.3 1.3a1.2 1.2 0 0 1-1.7 0l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a1.2 1.2 0 0 1-1.2 1.2h-1.8A1.2 1.2 0 0 1 10.8 20v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1.2 1.2 0 0 1-1.7 0L6 17.9a1.2 1.2 0 0 1 0-1.7l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H5.2A1.2 1.2 0 0 1 4 13.2v-1.8a1.2 1.2 0 0 1 1.2-1.2h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1L6 8.4a1.2 1.2 0 0 1 0-1.7l1.3-1.3a1.2 1.2 0 0 1 1.7 0l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9v-.2A1.2 1.2 0 0 1 12 3.4h1.8A1.2 1.2 0 0 1 15 4.6v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1.2 1.2 0 0 1 1.7 0L19.8 6a1.2 1.2 0 0 1 0 1.7l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a1.2 1.2 0 0 1 1.2 1.2v1.8a1.2 1.2 0 0 1-1.2 1.2h-.2a1 1 0 0 0-.9.6z"/></svg></span><span>Tùy chọn</span></button>
 
         <div class="doc-meta" id="doc-meta" hidden>
           <input type="date" id="entry-date" class="doc-date-input" title="Ngày của ghi chú" />
           <label class="add-image-icon" title="Thêm ảnh bìa" aria-label="Thêm ảnh bìa">
-            🖼️
+            <span class="ui-ico meta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 15l-4.8-4.8a1.7 1.7 0 0 0-2.4 0L8 16"/></svg></span>
             <input type="file" id="note-image-input" accept="image/*" hidden />
           </label>
-          <button type="button" id="music-toggle" class="add-music-icon" title="Thêm nhạc" aria-label="Thêm nhạc">🎵</button>
+          <button type="button" id="music-toggle" class="add-music-icon" title="Thêm nhạc" aria-label="Thêm nhạc"><span class="ui-ico meta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6.5l10-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></span></button>
           <span id="edited-mark" class="doc-date"></span>
           <div id="rating" class="rating" role="radiogroup" aria-label="Cảm xúc">
             <button type="button" class="face" data-value="1" aria-label="Rất buồn">😢</button>
@@ -144,7 +172,7 @@
             <button type="button" class="face" data-value="3" aria-label="Bình thường">😐</button>
             <button type="button" class="face" data-value="4" aria-label="Vui">🙂</button>
             <button type="button" class="face" data-value="5" aria-label="Rất vui">😄</button>
-            <button type="button" id="rating-clear" class="rating-clear" title="Xóa cảm xúc">✕</button>
+            <button type="button" id="rating-clear" class="rating-clear" title="Xóa cảm xúc"><span class="ui-ico close-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>
           </div>
           <span id="image-status" class="cover-status muted"></span>
         </div>
@@ -152,8 +180,8 @@
         <!-- Dán link YouTube/Spotify để gắn nhạc cho ghi chú -->
         <section id="music-section" class="music-section" hidden>
           <div class="music-section-head">
-            <span class="music-section-label">🎵 Nhạc đính kèm</span>
-            <button type="button" id="music-clear" class="music-clear" title="Gỡ nhạc" aria-label="Gỡ nhạc">✕</button>
+            <span class="music-section-label"><span class="ui-ico section-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6.5l10-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></span><span>Nhạc đính kèm</span></span>
+            <button type="button" id="music-clear" class="music-clear" title="Gỡ nhạc" aria-label="Gỡ nhạc"><span class="ui-ico close-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>
           </div>
           <div id="music-row" class="music-row" hidden>
             <input type="url" id="music-input" class="music-input" placeholder="Dán link YouTube hoặc Spotify..." inputmode="url" />
@@ -168,15 +196,15 @@
 
   <!-- Xem ảnh phóng to: bấm vào ảnh để mở, bấm nền/✕ hoặc Esc để đóng -->
   <div id="lightbox" class="lightbox" hidden>
-    <button type="button" id="lightbox-close" class="lightbox-close" aria-label="Đóng">✕</button>
+    <button type="button" id="lightbox-close" class="lightbox-close" aria-label="Đóng"><span class="ui-ico close-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>
     <img id="lightbox-img" class="lightbox-img" alt="Xem ảnh" />
   </div>
 
   <!-- Chia sẻ ghi chú: thêm/gỡ user được xem & sửa note hiện tại -->
   <div id="share-modal" class="share-modal" hidden>
     <div class="share-modal-card" role="dialog" aria-modal="true" aria-label="Chia sẻ ghi chú">
-      <button type="button" id="share-modal-close" class="share-modal-close" aria-label="Đóng">✕</button>
-      <h3 class="share-modal-title">👥 Chia sẻ ghi chú</h3>
+      <button type="button" id="share-modal-close" class="share-modal-close" aria-label="Đóng"><span class="ui-ico close-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>
+      <h3 class="share-modal-title"><span class="ui-ico title-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="3.2"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a3.2 3.2 0 0 1 0 6.23"/></svg></span><span>Chia sẻ ghi chú</span></h3>
       <p class="share-modal-hint">Người được chia sẻ có thể <b>xem và sửa</b> ghi chú này (không xóa được).</p>
       <div class="share-add">
         <input type="text" id="share-input" class="share-input" placeholder="Nhập tài khoản hoặc email..."
@@ -191,7 +219,7 @@
   <!-- Trang phát nhạc: bấm ▶ ở danh sách ghi chú để mở trình phát toàn màn hình -->
   <div id="music-modal" class="music-modal" hidden>
     <div class="music-modal-card" role="dialog" aria-modal="true" aria-label="Trình phát nhạc">
-      <button type="button" id="music-modal-close" class="music-modal-close" aria-label="Đóng">✕</button>
+      <button type="button" id="music-modal-close" class="music-modal-close" aria-label="Đóng"><span class="ui-ico close-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>
       <div class="music-modal-head">
         <span class="music-modal-eyebrow">♪ ĐANG PHÁT</span>
         <div class="music-modal-main">
