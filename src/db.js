@@ -94,6 +94,10 @@ if (!ucols.includes('email')) {
 if (!ucols.includes('password_hash')) {
   db.exec(`ALTER TABLE users ADD COLUMN password_hash TEXT`);
 }
+if (!ucols.includes('last_login_at')) {
+  // Thời điểm đăng nhập gần nhất (NULL = chưa đăng nhập lần nào)
+  db.exec(`ALTER TABLE users ADD COLUMN last_login_at TEXT`);
+}
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)`);
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
 

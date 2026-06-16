@@ -312,6 +312,50 @@ input, textarea, button { font: inherit; color: inherit; }
 }
 .logout-btn:hover { background: var(--bg-hover); }
 
+/* Danh sách user ở sidebar — bấm để chia sẻ ghi chú đang mở */
+.sidebar-user-list { display: flex; flex-direction: column; gap: 1px; margin-bottom: .4rem; }
+.user-item {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: .38rem .6rem;
+  cursor: pointer;
+  color: var(--ink);
+}
+.user-item:hover { background: var(--bg-hover); }
+.user-item-icon { font-size: .9rem; flex-shrink: 0; }
+.user-item-name {
+  flex: 1;
+  font-size: .88rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.user-item-share {
+  flex-shrink: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity .12s;
+}
+.user-item:hover .user-item-share { opacity: 1; }
+
+.user-share-status {
+  display: none;
+  font-size: .78rem;
+  padding: .2rem .6rem .4rem;
+  line-height: 1.3;
+}
+.user-share-status.show { display: block; }
+.user-share-status.ok { color: var(--accent-dark); }
+.user-share-status.error { color: var(--danger); }
+
 /* ===================== DOCUMENT ===================== */
 .doc {
   flex: 1;
@@ -385,6 +429,24 @@ input, textarea, button { font: inherit; color: inherit; }
 }
 .doc-title::placeholder { color: #9aa88a; }
 .doc-title:focus { outline: none; }
+
+/* Nút thu gọn hàng tùy chọn (ngày, ảnh, nhạc, cảm xúc) */
+.doc-meta-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin-bottom: 1.2rem;
+  padding: .35rem .75rem;
+  font-size: .85rem;
+  color: var(--muted);
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.doc-meta-toggle:hover { background: var(--bg-hover); color: var(--ink); }
+.doc-meta-toggle.active { background: var(--bg-active); color: var(--accent-dark); border-color: var(--green-sage); }
 
 .doc-meta {
   display: flex;

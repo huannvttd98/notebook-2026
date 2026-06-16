@@ -32,6 +32,10 @@
     <div class="sidebar-section-label">Ghi chú</div>
     <nav id="note-list" class="note-list"></nav>
 
+    <div class="sidebar-section-label">Chia sẻ với</div>
+    <div id="user-share-status" class="user-share-status"></div>
+    <nav id="sidebar-user-list" class="sidebar-user-list" aria-label="Chia sẻ ghi chú với người dùng"></nav>
+
     <div id="weather" class="weather" title="Thời tiết hiện tại">
       <span class="weather-loading">Đang tải thời tiết…</span>
     </div>
@@ -100,7 +104,10 @@
         <input type="hidden" id="entry-id" />
         <input type="text" id="title" class="doc-title" placeholder="Không có tiêu đề" maxlength="200" />
 
-        <div class="doc-meta">
+        <button type="button" id="doc-meta-toggle" class="doc-meta-toggle" aria-expanded="false"
+                aria-controls="doc-meta" title="Hiện tùy chọn">⚙️ Tùy chọn</button>
+
+        <div class="doc-meta" id="doc-meta" hidden>
           <input type="date" id="entry-date" class="doc-date-input" title="Ngày của ghi chú" />
           <label class="add-image-icon" title="Thêm ảnh bìa" aria-label="Thêm ảnh bìa">
             🖼️

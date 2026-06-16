@@ -13,6 +13,7 @@ const SqliteStore = require('better-sqlite3-session-store')(session);
 const db = require('./src/db');
 const { router: authRouter, requireAuth, requireAdmin } = require('./src/auth');
 const adminRouter = require('./src/routes/admin');
+const usersRouter = require('./src/routes/users');
 const entriesRouter = require('./src/routes/entries');
 const weatherRouter = require('./src/routes/weather');
 const coverRouter = require('./src/routes/cover');
@@ -115,6 +116,9 @@ app.use('/api/auth', authRouter);
 app.use('/api/entries', requireAuth, entriesRouter);
 app.use('/api/cover', requireAuth, coverRouter);
 app.use('/api/weather', weatherRouter);
+
+// Danh sách user (cho mọi người đăng nhập) — dùng để chia sẻ note nhanh
+app.use('/api/users', requireAuth, usersRouter);
 
 // API quản trị — bắt buộc đăng nhập VÀ là admin
 app.use('/api/admin', requireAuth, requireAdmin, adminRouter);

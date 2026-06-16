@@ -214,3 +214,4 @@ table.admin-table tbody tr:hover { background: var(--bg-hover); }
 
 .admin-num { text-align: right; font-variant-numeric: tabular-nums; }
 .admin-empty { padding: 28px; text-align: center; color: var(--muted); }
+.admin-muted { color: var(--muted); font-style: italic; }

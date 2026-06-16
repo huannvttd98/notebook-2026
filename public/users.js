@@ -13,18 +13,22 @@ function escapeHtml(s) {
 
 function renderRows(users, adminUsername) {
   if (!users.length) {
-    rowsEl.innerHTML = '<tr><td colspan="5" class="admin-empty">Chưa có người dùng nào.</td></tr>';
+    rowsEl.innerHTML = '<tr><td colspan="6" class="admin-empty">Chưa có người dùng nào.</td></tr>';
     return;
   }
   rowsEl.innerHTML = users
     .map((u) => {
       const isAdmin = adminUsername && u.username && u.username.toLowerCase() === adminUsername.toLowerCase();
       const badge = isAdmin ? '<span class="admin-badge">admin</span>' : '';
+      const lastLogin = u.last_login_at
+        ? escapeHtml(u.last_login_at)
+        : '<span class="admin-muted">Chưa đăng nhập</span>';
       return `<tr>
         <td>${u.id}</td>
         <td>${escapeHtml(u.username)}${badge}</td>
         <td>${escapeHtml(u.email)}</td>
         <td>${escapeHtml(u.created_at)}</td>
+        <td>${lastLogin}</td>
         <td class="admin-num">${u.note_count}</td>
       </tr>`;
     })

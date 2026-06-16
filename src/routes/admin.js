@@ -12,6 +12,7 @@ const stmtListUsers = db.prepare(`
     u.username,
     u.email,
     u.created_at,
+    u.last_login_at,
     (SELECT COUNT(*) FROM entries e WHERE e.user_id = u.id) AS note_count
   FROM users u
   ORDER BY u.id ASC

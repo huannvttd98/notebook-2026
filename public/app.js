@@ -82,6 +82,8 @@ const shareInput = document.getElementById('share-input');
 const shareAddBtn = document.getElementById('share-add-btn');
 const shareMsg = document.getElementById('share-msg');
 const shareList = document.getElementById('share-list');
+const sidebarUserList = document.getElementById('sidebar-user-list');
+const userShareStatus = document.getElementById('user-share-status');
 
 // Icon cảm xúc theo mức 1-5
 const FACES = ['😢', '🙁', '😐', '🙂', '😄'];
@@ -603,6 +605,19 @@ function loadMusic(url) {
   markHasMusic(url);
 }
 
+// Thu gọn hàng tùy chọn (ngày, ảnh, nhạc, cảm xúc) — bấm nút để hiện/ẩn
+const docMetaToggle = document.getElementById('doc-meta-toggle');
+const docMetaEl = document.getElementById('doc-meta');
+if (docMetaToggle && docMetaEl) {
+  docMetaToggle.addEventListener('click', () => {
+    const open = docMetaEl.hidden; // đang ẩn -> mở ra
+    docMetaEl.hidden = !open;
+    docMetaToggle.setAttribute('aria-expanded', String(open));
+    docMetaToggle.classList.toggle('active', open);
+    docMetaToggle.title = open ? 'Ẩn tùy chọn' : 'Hiện tùy chọn';
+  });
+}
+
 if (musicToggle) {
   musicToggle.addEventListener('click', () => {
     const open = musicRow.hidden;
@@ -752,6 +767,72 @@ if (shareList) {
   shareList.addEventListener('click', (e) => {
     const btn = e.target.closest('.share-remove');
     if (btn) removeShare(Number(btn.dataset.uid));
+  });
+}
+
+// ===== Danh sách user ở sidebar: bấm để chia sẻ nhanh ghi chú đang mở =====
+let sidebarUsersLoaded = false;
+
+function setUserShareStatus(text, type) {
+  if (!userShareStatus) return;
+  userShareStatus.textContent = text || '';
+  userShareStatus.className = 'user-share-status' + (text ? ' show ' + (type || '') : '');
+}
+
+async function loadSidebarUsers() {
+  if (!sidebarUserList) return;
+  try {
+    const res = await fetch('/api/users');
+    const data = await readJson(res);
+    if (!res.ok) throw new Error(data.error || 'Lỗi');
+    const users = data.users || [];
+    sidebarUsersLoaded = true;
+    if (!users.length) {
+      sidebarUserList.innerHTML = '<p class="note-empty">Chưa có người dùng khác</p>';
+      return;
+    }
+    sidebarUserList.innerHTML = users
+      .map(
+        (u) => `<button type="button" class="user-item" data-username="${escapeHtml(u.username)}">
+          <span class="user-item-icon">👤</span>
+          <span class="user-item-name">${escapeHtml(u.username)}</span>
+          <span class="user-item-share" title="Chia sẻ ghi chú đang mở">＋</span>
+        </button>`
+      )
+      .join('');
+  } catch {
+    sidebarUserList.innerHTML = '<p class="note-empty">Không tải được danh sách</p>';
+  }
+}
+
+async function shareWithUser(username) {
+  if (!currentId) {
+    setUserShareStatus('Mở một ghi chú trước khi chia sẻ', 'error');
+    return;
+  }
+  if (!currentIsOwner) {
+    setUserShareStatus('Chỉ chủ ghi chú mới chia sẻ được', 'error');
+    return;
+  }
+  setUserShareStatus(`Đang chia sẻ với ${username}…`, '');
+  try {
+    const res = await fetch(`/api/entries/${currentId}/shares`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: username }),
+    });
+    const data = await readJson(res);
+    if (!res.ok) throw new Error(data.error || 'Không chia sẻ được');
+    setUserShareStatus(`✓ Đã chia sẻ "${displayTitle({ title: titleEl.value, content: contentEl.value })}" với ${username}`, 'ok');
+  } catch (err) {
+    setUserShareStatus('⚠ ' + err.message, 'error');
+  }
+}
+
+if (sidebarUserList) {
+  sidebarUserList.addEventListener('click', (e) => {
+    const item = e.target.closest('.user-item');
+    if (item) shareWithUser(item.dataset.username);
   });
 }
 
@@ -975,4 +1056,5 @@ function setupAuthUI(me) {
   await showCalendar(); // trang chính: hiển thị lịch tháng hiện tại
   loadCover();
   loadWeather();
+  loadSidebarUsers();
 })();

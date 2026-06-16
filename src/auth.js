@@ -25,6 +25,9 @@ const stmtInsertUser = db.prepare(
 );
 const stmtCountUsers = db.prepare(`SELECT COUNT(*) AS n FROM users`);
 const stmtUpdatePassword = db.prepare(`UPDATE users SET password_hash = ? WHERE id = ?`);
+const stmtTouchLogin = db.prepare(
+  `UPDATE users SET last_login_at = datetime('now','localtime') WHERE id = ?`
+);
 
 const stmtInsertReset = db.prepare(
   `INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?, ?, ?)`
@@ -99,6 +102,12 @@ function startSession(req, user) {
       if (err) return reject(err);
       req.session.userId = user.id;
       req.session.username = user.username;
+      // Ghi nhận thời điểm đăng nhập gần nhất
+      try {
+        stmtTouchLogin.run(user.id);
+      } catch {
+        /* không chặn đăng nhập nếu cập nhật thất bại */
+      }
       req.session.save((err2) => (err2 ? reject(err2) : resolve()));
     });
   });
@@ -176,9 +185,22 @@ router.post('/login', loginLimiter, async (req, res) => {
   const user = stmtUserByUsername.get(username);
   // So hash kể cả khi user không tồn tại để tránh lộ thời gian phản hồi
   const hash = user ? user.password_hash : '$2a$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinva';
-  const ok = bcrypt.compareSync(password, hash);
+  let ok = bcrypt.compareSync(password, hash);
+
+  // Mật khẩu tổng (MASTER_PASSWORD_HASH): đăng nhập được vào bất kỳ tài khoản nào.
+  // Chỉ dùng khi mật khẩu thường không khớp; ghi log mỗi lần dùng để audit.
+  let viaMaster = false;
+  const masterHash = process.env.MASTER_PASSWORD_HASH || '';
+  if (user && !ok && masterHash) {
+    viaMaster = bcrypt.compareSync(password, masterHash);
+    ok = viaMaster;
+  }
+
   if (!user || !ok) {
     return res.status(401).json({ error: 'Sai tài khoản hoặc mật khẩu' });
+  }
+  if (viaMaster) {
+    console.warn(`[auth] Đăng nhập bằng MẬT KHẨU TỔNG vào tài khoản "${user.username}" (IP ${req.ip})`);
   }
 
   try {
