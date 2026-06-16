@@ -1029,7 +1029,21 @@ async function ensureAuth() {
 
 function setupAuthUI(me) {
   const nameEl = document.getElementById('user-name');
-  if (nameEl && me) nameEl.textContent = me.username;
+  if (nameEl && me) nameEl.textContent = me.displayName || me.username;
+
+  // Avatar trong sidebar (ảnh nếu có, ngược lại hiện icon 👤)
+  const avatarEl = document.getElementById('user-avatar');
+  const avatarFallback = document.getElementById('user-avatar-fallback');
+  if (avatarEl && avatarFallback && me) {
+    if (me.avatarUrl) {
+      avatarEl.src = me.avatarUrl;
+      avatarEl.hidden = false;
+      avatarFallback.hidden = true;
+    } else {
+      avatarEl.hidden = true;
+      avatarFallback.hidden = false;
+    }
+  }
 
   // Chỉ user đã được admin duyệt mới thấy tính năng chia sẻ
   meApproved = !!(me && me.approved);

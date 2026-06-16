@@ -128,6 +128,57 @@ body.auth {
   margin-top: 4px;
 }
 
+/* ===== Trang hồ sơ ===== */
+.profile-card { max-width: 420px; }
+.auth-field input:disabled {
+  background: #eef1ea;
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.profile-avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.profile-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--border);
+  background: var(--bg-sidebar);
+}
+.profile-avatar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.6rem;
+  color: var(--muted);
+}
+.profile-avatar-actions { display: flex; gap: 8px; align-items: center; }
+.profile-avatar-btn {
+  width: auto;
+  margin: 0;
+  padding: 7px 16px;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.profile-avatar-remove {
+  padding: 7px 12px;
+  font-size: 0.82rem;
+  color: var(--danger);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  cursor: pointer;
+}
+.profile-avatar-remove:hover { background: #fdecea; }
+
 /* ===== Trang quản lý user (admin) ===== */
 body.admin {
   display: block;

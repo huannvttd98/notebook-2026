@@ -44,7 +44,11 @@
     </div>
 
     <div class="sidebar-user">
-      <span id="user-name" class="user-name" title="Tài khoản đang đăng nhập"></span>
+      <a href="/profile.html" class="user-profile" title="Hồ sơ của bạn">
+        <img id="user-avatar" class="user-avatar" alt="" hidden />
+        <span id="user-avatar-fallback" class="user-avatar user-avatar-fallback">👤</span>
+        <span id="user-name" class="user-name"></span>
+      </a>
       <button type="button" id="logout-btn" class="logout-btn" title="Đăng xuất">Đăng xuất</button>
     </div>
   </aside>

@@ -292,6 +292,31 @@ input, textarea, button { font: inherit; color: inherit; }
   border-radius: 8px;
   font-size: .85rem;
 }
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  min-width: 0;
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+}
+.user-profile:hover .user-name { color: var(--accent-dark); }
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg-hover);
+}
+.user-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .95rem;
+  border: 1px solid var(--border);
+}
 .user-name {
   font-weight: 600;
   color: var(--ink);
@@ -299,7 +324,6 @@ input, textarea, button { font: inherit; color: inherit; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.user-name::before { content: "👤 "; }
 .logout-btn {
   flex-shrink: 0;
   padding: .3rem .6rem;

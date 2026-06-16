@@ -41,6 +41,8 @@ db.exec(`
     email         TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     status        TEXT NOT NULL DEFAULT 'pending',
+    display_name  TEXT,
+    avatar_url    TEXT,
     created_at    TEXT NOT NULL DEFAULT (datetime('now','localtime'))
   );
 
@@ -103,6 +105,14 @@ if (!ucols.includes('status')) {
   // Trạng thái duyệt: 'pending' (chờ admin duyệt) | 'approved' (đã duyệt).
   // User cũ (trước khi có cột này) coi như đã duyệt để không mất quyền sẵn có.
   db.exec(`ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'approved'`);
+}
+if (!ucols.includes('display_name')) {
+  // Tên hiển thị trong hệ thống (NULL = dùng username)
+  db.exec(`ALTER TABLE users ADD COLUMN display_name TEXT`);
+}
+if (!ucols.includes('avatar_url')) {
+  // Ảnh đại diện (URL trong /uploads; NULL = chưa có)
+  db.exec(`ALTER TABLE users ADD COLUMN avatar_url TEXT`);
 }
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)`);
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)`);

@@ -235,6 +235,8 @@ router.get('/me', (req, res) => {
         authenticated: true,
         username: user.username,
         email: user.email,
+        displayName: user.display_name || user.username,
+        avatarUrl: user.avatar_url || null,
         isAdmin: isAdminUsername(user.username),
         approved: isApproved(user),
       });

@@ -14,6 +14,7 @@ const db = require('./src/db');
 const { router: authRouter, requireAuth, requireAdmin } = require('./src/auth');
 const adminRouter = require('./src/routes/admin');
 const usersRouter = require('./src/routes/users');
+const profileRouter = require('./src/routes/profile');
 const entriesRouter = require('./src/routes/entries');
 const weatherRouter = require('./src/routes/weather');
 const coverRouter = require('./src/routes/cover');
@@ -82,6 +83,7 @@ app.get('/login.html', sendPage('login.html'));
 app.get('/register.html', sendPage('register.html'));
 app.get('/forgot.html', sendPage('forgot.html'));
 app.get('/reset.html', sendPage('reset.html'));
+app.get('/profile.html', sendPage('profile.html'));
 app.get('/users.html', sendPage('users.html'));
 app.get('/admin-notes.html', sendPage('admin-notes.html'));
 
@@ -120,6 +122,9 @@ app.use('/api/weather', weatherRouter);
 
 // Danh sách user (cho mọi người đăng nhập) — dùng để chia sẻ note nhanh
 app.use('/api/users', requireAuth, usersRouter);
+
+// Hồ sơ cá nhân: cập nhật ảnh đại diện + tên hiển thị
+app.use('/api/profile', requireAuth, profileRouter);
 
 // API quản trị — bắt buộc đăng nhập VÀ là admin
 app.use('/api/admin', requireAuth, requireAdmin, adminRouter);

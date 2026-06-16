@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hồ sơ — Nhật ký</title>
+  <link rel="stylesheet" href="/auth.css?v=__V__" />
+</head>
+<body class="auth">
+  <main class="auth-card profile-card">
+    <h1 class="auth-brand">📔 Hồ sơ</h1>
+    <p class="auth-title">Cập nhật thông tin của bạn</p>
+
+    <div id="msg" class="auth-msg"></div>
+
+    <div class="profile-avatar-wrap">
+      <img id="avatar-img" class="profile-avatar" alt="Ảnh đại diện" hidden />
+      <div id="avatar-placeholder" class="profile-avatar profile-avatar-empty">👤</div>
+      <div class="profile-avatar-actions">
+        <label class="auth-btn profile-avatar-btn">
+          Đổi ảnh
+          <input type="file" id="avatar-input" accept="image/*" hidden />
+        </label>
+        <button type="button" id="avatar-remove" class="profile-avatar-remove" hidden>Gỡ ảnh</button>
+      </div>
+      <div id="avatar-status" class="auth-hint"></div>
+    </div>
+
+    <form id="profile-form">
+      <div class="auth-field">
+        <label for="display_name">Tên hiển thị</label>
+        <input type="text" id="display_name" name="display_name" maxlength="50"
+               placeholder="Tên hiển thị trong hệ thống" />
+        <div class="auth-hint">Để trống sẽ dùng tài khoản đăng nhập.</div>
+      </div>
+      <div class="auth-field">
+        <label>Tài khoản</label>
+        <input type="text" id="username" disabled />
+      </div>
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="text" id="email" disabled />
+      </div>
+      <button type="submit" class="auth-btn" id="submit-btn">Lưu thay đổi</button>
+    </form>
+
+    <div class="auth-links">
+      <a href="/">← Về trang nhật ký</a>
+    </div>
+  </main>
+  <script src="/profile.js?v=__V__"></script>
+</body>
+</html>
