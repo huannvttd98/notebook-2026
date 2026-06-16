@@ -95,4 +95,28 @@ router.get('/notes', (req, res) => {
   res.json({ notes, total: notes.length, capped: notes.length >= NOTES_CAP });
 });
 
+const stmtNoteById = db.prepare(`
+  SELECT
+    e.id, e.title, e.content, e.created_at, e.updated_at, e.rating, e.music, e.images,
+    e.user_id,
+    o.username AS owner_username,
+    o.email AS owner_email,
+    (SELECT COUNT(*) FROM note_shares s WHERE s.note_id = e.id) AS share_count
+  FROM entries e
+  LEFT JOIN users o ON o.id = e.user_id
+  WHERE e.id = ?
+`);
+
+// GET /api/admin/notes/:id — chi tiết 1 note bất kỳ (chỉ admin)
+router.get('/notes/:id', (req, res) => {
+  const noteId = Number.parseInt(req.params.id, 10);
+  if (!Number.isInteger(noteId) || noteId <= 0) {
+    return res.status(400).json({ error: 'ID ghi chú không hợp lệ' });
+  }
+
+  const note = stmtNoteById.get(noteId);
+  if (!note) return res.status(404).json({ error: 'Không tìm thấy ghi chú' });
+  res.json({ note });
+});
+
 module.exports = router;

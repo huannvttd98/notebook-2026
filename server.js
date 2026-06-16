@@ -88,6 +88,7 @@ app.get('/profile.html', sendPage('profile.html'));
 app.get('/music.html', sendPage('music.html'));
 app.get('/users.html', sendPage('users.html'));
 app.get('/admin-notes.html', sendPage('admin-notes.html'));
+app.get('/admin-note-detail.html', sendPage('admin-note-detail.html'));
 
 // Frontend tĩnh (CSS/JS/ảnh) — không cần session, đặt trước session cho nhẹ
 app.use(express.static(publicDir, { index: false }));

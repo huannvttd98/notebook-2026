@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chi tiết ghi chú — Memory</title>
+  <link rel="stylesheet" href="/auth.css?v=__V__" />
+</head>
+<body class="admin admin-note-page">
+  <div class="admin-wrap note-detail-wrap">
+    <div class="admin-head note-detail-head">
+      <div class="admin-title-block">
+        <h1>🗒️ Chi tiết ghi chú</h1>
+        <p id="detail-subtitle" class="admin-subtitle">Đang tải nội dung ghi chú...</p>
+      </div>
+      <nav class="admin-nav" aria-label="Điều hướng chi tiết ghi chú">
+        <a id="back-to-notes" href="/admin-notes.html" class="admin-back admin-pill-link admin-pill-link-muted">
+          <span class="admin-pill-icon">←</span>
+          <span class="admin-pill-text">
+            <strong>Quay lại danh sách</strong>
+            <small>Về màn quản lý ghi chú</small>
+          </span>
+        </a>
+      </nav>
+    </div>
+
+    <section class="note-detail-card">
+      <div class="note-detail-meta-grid">
+        <div class="note-detail-meta-item">
+          <span class="note-detail-label">Chủ ghi chú</span>
+          <strong id="note-owner">—</strong>
+        </div>
+        <div class="note-detail-meta-item">
+          <span class="note-detail-label">Ngày tạo</span>
+          <strong id="note-created">—</strong>
+        </div>
+        <div class="note-detail-meta-item">
+          <span class="note-detail-label">Cập nhật</span>
+          <strong id="note-updated">—</strong>
+        </div>
+        <div class="note-detail-meta-item">
+          <span class="note-detail-label">Chia sẻ</span>
+          <strong id="note-share-count">—</strong>
+        </div>
+      </div>
+
+      <div class="note-detail-main">
+        <h2 id="note-title" class="note-detail-title">Đang tải...</h2>
+        <div id="note-tags" class="note-detail-tags"></div>
+        <pre id="note-content" class="note-detail-content"></pre>
+      </div>
+    </section>
+  </div>
+
+  <script src="/admin-note-detail.js?v=__V__"></script>
+</body>
+</html>
