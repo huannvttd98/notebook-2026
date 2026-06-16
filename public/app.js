@@ -673,15 +673,20 @@ function renderShareList(users) {
     return;
   }
   shareList.innerHTML = users
-    .map(
-      (u) => `<li class="share-row" data-uid="${u.id}">
+    .map((u) => {
+      const name = u.display_name || u.username;
+      const avatar = u.avatar_url
+        ? `<img class="share-avatar" src="${escapeHtml(u.avatar_url)}" alt="" />`
+        : '<span class="share-avatar share-avatar-empty">👤</span>';
+      return `<li class="share-row" data-uid="${u.id}">
+        ${avatar}
         <span class="share-user">
-          <span class="share-uname">${escapeHtml(u.username)}</span>
+          <span class="share-uname">${escapeHtml(name)}</span>
           <span class="share-uemail">${escapeHtml(u.email)}</span>
         </span>
         <button type="button" class="share-remove" data-uid="${u.id}" title="Gỡ chia sẻ">✕</button>
-      </li>`
-    )
+      </li>`;
+    })
     .join('');
 }
 
@@ -794,13 +799,17 @@ async function loadSidebarUsers() {
       return;
     }
     sidebarUserList.innerHTML = users
-      .map(
-        (u) => `<button type="button" class="user-item" data-username="${escapeHtml(u.username)}">
-          <span class="user-item-icon">👤</span>
-          <span class="user-item-name">${escapeHtml(u.username)}</span>
+      .map((u) => {
+        const name = u.displayName || u.username;
+        const avatar = u.avatarUrl
+          ? `<img class="user-item-avatar" src="${escapeHtml(u.avatarUrl)}" alt="" />`
+          : '<span class="user-item-avatar user-item-avatar-empty">👤</span>';
+        return `<button type="button" class="user-item" data-username="${escapeHtml(u.username)}" title="${escapeHtml(name)} (@${escapeHtml(u.username)})">
+          ${avatar}
+          <span class="user-item-name">${escapeHtml(name)}</span>
           <span class="user-item-share" title="Chia sẻ ghi chú đang mở">＋</span>
-        </button>`
-      )
+        </button>`;
+      })
       .join('');
   } catch {
     sidebarUserList.innerHTML = '<p class="note-empty">Không tải được danh sách</p>';

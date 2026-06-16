@@ -45,9 +45,9 @@ const stmtFindUser = db.prepare(
 );
 const stmtUserForShare = db.prepare(`SELECT username, status FROM users WHERE id = ?`);
 const stmtListShares = db.prepare(
-  `SELECT u.id, u.username, u.email
+  `SELECT u.id, u.username, u.email, u.display_name, u.avatar_url
    FROM note_shares s JOIN users u ON u.id = s.user_id
-   WHERE s.note_id = ? ORDER BY u.username`
+   WHERE s.note_id = ? ORDER BY COALESCE(u.display_name, u.username)`
 );
 const stmtAddShare = db.prepare(
   `INSERT OR IGNORE INTO note_shares (note_id, user_id) VALUES (?, ?)`

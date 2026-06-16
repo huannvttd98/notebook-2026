@@ -1,6 +1,7 @@
 /* ===== Trang nhạc (độc lập) ===== */
 * { box-sizing: border-box; }
 html, body { margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: #e9efe9;
@@ -8,7 +9,10 @@ body {
     radial-gradient(1100px 560px at 75% -12%, rgba(46, 125, 50, .55) 0%, transparent 60%),
     linear-gradient(160deg, #10231a 0%, #0a130e 100%);
   min-height: 100vh;
+  overflow-x: hidden; /* chặn tràn ngang trên điện thoại */
 }
+/* Ảnh / iframe nhúng không bao giờ vượt khung cha */
+img, iframe { max-width: 100%; }
 
 /* Thanh trên */
 .topbar {
@@ -202,4 +206,20 @@ body {
   font-size: .9rem;
   line-height: 1.6;
   padding: 1.5rem 0;
+}
+
+/* ===== Điện thoại ===== */
+@media (max-width: 600px) {
+  .topbar { padding: .7rem .9rem; gap: .6rem; }
+  .brand { font-size: .95rem; }
+
+  .wrap { padding: .9rem; gap: 1rem; }
+
+  .player-card { padding: 1.1rem; border-radius: 16px; }
+  .player-title { font-size: 1.12rem; }
+  .player-note { max-height: 160px; }
+
+  .list-card { padding: 1rem .8rem 1.1rem; border-radius: 16px; }
+  .song-item { padding: .6rem .55rem; gap: .6rem; }
+  .song-index { width: 1.1rem; }
 }

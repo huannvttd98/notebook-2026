@@ -13,6 +13,9 @@
 
 * { box-sizing: border-box; }
 
+/* Đảm bảo thuộc tính hidden luôn ẩn, kể cả khi phần tử có display: flex */
+[hidden] { display: none !important; }
+
 body.auth {
   margin: 0;
   min-height: 100vh;
@@ -140,36 +143,38 @@ body.auth {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 .profile-avatar {
-  width: 96px;
-  height: 96px;
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid var(--border);
+  border: 4px solid #fff;
+  box-shadow: 0 4px 18px rgba(36, 80, 36, 0.18);
   background: var(--bg-sidebar);
 }
 .profile-avatar-empty {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.6rem;
-  color: var(--muted);
+  font-size: 2.8rem;
+  color: var(--accent);
+  background: linear-gradient(160deg, #eef3df, #dde9c9);
 }
 .profile-avatar-actions { display: flex; gap: 8px; align-items: center; }
 .profile-avatar-btn {
   width: auto;
   margin: 0;
-  padding: 7px 16px;
+  padding: 8px 18px;
   font-size: 0.85rem;
   display: inline-flex;
   align-items: center;
   cursor: pointer;
 }
 .profile-avatar-remove {
-  padding: 7px 12px;
+  padding: 8px 14px;
   font-size: 0.82rem;
   color: var(--danger);
   background: transparent;

@@ -352,7 +352,21 @@ input, textarea, button { font: inherit; color: inherit; }
   color: var(--ink);
 }
 .user-item:hover { background: var(--bg-hover); }
-.user-item-icon { font-size: .9rem; flex-shrink: 0; }
+.user-item-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg-hover);
+}
+.user-item-avatar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .8rem;
+  border: 1px solid var(--border);
+}
 .user-item-name {
   flex: 1;
   font-size: .88rem;
@@ -1083,6 +1097,21 @@ input, textarea, button { font: inherit; color: inherit; }
   border-bottom: 1px solid var(--border);
 }
 .share-row:last-child { border-bottom: none; }
+.share-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg-hover);
+}
+.share-avatar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .9rem;
+  border: 1px solid var(--border);
+}
 .share-user { display: flex; flex-direction: column; min-width: 0; }
 .share-uname { font-weight: 600; font-size: .9rem; color: var(--ink); }
 .share-uemail { font-size: .78rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
