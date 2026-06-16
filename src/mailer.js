@@ -52,13 +52,13 @@ async function sendWelcomeEmail(to, username) {
   const text =
     `Xin chào ${username},\n\n` +
     `Tài khoản Notebook của bạn đã được tạo thành công!\n` +
-    `Bạn có thể đăng nhập và bắt đầu viết nhật ký tại:\n${link}\n\n` +
-    `Chúc bạn có những trang nhật ký thật ý nghĩa.`;
+    `Bạn có thể đăng nhập và bắt đầu viết trên Memory tại:\n${link}\n\n` +
+    `Chúc bạn có những trang Memory thật ý nghĩa.`;
   const html =
     `<p>Xin chào <b>${username}</b>,</p>` +
     `<p>Tài khoản Notebook của bạn đã được tạo thành công! 🎉</p>` +
-    `<p><a href="${link}">Đăng nhập và bắt đầu viết nhật ký</a></p>` +
-    `<p>Chúc bạn có những trang nhật ký thật ý nghĩa.</p>`;
+    `<p><a href="${link}">Đăng nhập và bắt đầu viết trên Memory</a></p>` +
+    `<p>Chúc bạn có những trang Memory thật ý nghĩa.</p>`;
 
   if (!transporter) {
     console.log(`\n[mailer] Chưa cấu hình SMTP. Bỏ qua email chào mừng cho ${to}.\n`);

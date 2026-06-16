@@ -1,7 +1,7 @@
 {
   "name": "notebook",
   "version": "1.0.0",
-  "description": "Ứng dụng nhật ký cá nhân (Node.js + Express + SQLite)",
+  "description": "Ứng dụng Memory cá nhân (Node.js + Express + SQLite)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

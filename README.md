@@ -1,11 +1,11 @@
-# 📔 Notebook — Nhật ký cá nhân
+# 📔 Notebook — Memory
 
-Web app ghi nhật ký kiểu Notion. Nhẹ, chạy tốt trên server nhỏ (**1 core / 1GB RAM / 20GB**).
+Web app ghi chép kiểu Notion mang tên Memory. Nhẹ, chạy tốt trên server nhỏ (**1 core / 1GB RAM / 20GB**).
 
 - **Backend:** Node.js + Express
 - **Database:** SQLite (better-sqlite3) — file `db/notebook.db`, không cần DB server riêng
 - **Frontend:** HTML + Vanilla JS (không cần build)
-- **Bảo mật:** helmet + nén gzip + **đăng nhập đa người dùng** (mỗi tài khoản có nhật ký riêng)
+- **Bảo mật:** helmet + nén gzip + **đăng nhập đa người dùng** (mỗi tài khoản có không gian Memory riêng)
 
 ## Tính năng
 
@@ -121,7 +121,7 @@ server.js                 # Điểm vào: Express app (session + serve trang aut
 src/db.js                 # Kết nối SQLite + migration (entries, settings, users, password_resets)
 src/auth.js               # API /api/auth/* : đăng ký, đăng nhập, quên/đặt lại mật khẩu
 src/mailer.js             # Gửi email đặt lại mật khẩu (nodemailer)
-src/routes/entries.js     # API CRUD nhật ký (lọc theo user_id)
+src/routes/entries.js     # API CRUD ghi chú (lọc theo user_id)
 src/routes/weather.js     # Proxy thời tiết Open-Meteo (cache 10 phút)
 src/routes/cover.js       # Upload/lấy ảnh bìa theo từng user (multer)
 public/                   # Frontend: index.html, app.js, style.css

@@ -1,8 +1,8 @@
-# Kế hoạch: Ứng dụng Nhật ký cá nhân (Node.js) + Deploy lên VPS
+# Kế hoạch: Ứng dụng Memory cá nhân (Node.js) + Deploy lên VPS
 
 ## Bối cảnh
 
-Xây dựng một web app **1 trang** để ghi nhật ký, deploy lên server nhỏ
+Xây dựng một web app **1 trang** để ghi chép trên Memory, deploy lên server nhỏ
 (**1 core CPU / 1GB RAM / 20GB ổ cứng**).
 
 Quyết định đã chốt:
@@ -35,7 +35,7 @@ notebook/
 │   ├── db.js                 # Khởi tạo better-sqlite3 + migration (tạo bảng)
 │   ├── auth.js               # Middleware kiểm tra session + route login/logout
 │   └── routes/
-│       └── entries.js        # CRUD API cho nhật ký
+│       └── entries.js        # CRUD API cho ghi chú
 ├── public/                   # Frontend tĩnh (1 trang)
 │   ├── index.html
 │   ├── login.html

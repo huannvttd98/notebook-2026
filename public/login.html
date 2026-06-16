@@ -3,16 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Đăng nhập — Nhật ký</title>
+  <title>Đăng nhập — Memory</title>
   <link rel="stylesheet" href="/auth.css?v=__V__" />
 </head>
-<body class="auth">
-  <div class="auth-layout">
-    <section class="auth-intro">
-      <h1 class="auth-intro-brand">📔 Nhật ký cá nhân</h1>
+<body class="auth auth-login">
+  <div class="auth-layout login-layout">
+    <section class="auth-intro login-intro">
+      <div class="intro-illus" aria-hidden="true">
+        <svg viewBox="0 0 320 220" class="intro-illus-svg" role="img" focusable="false">
+          <defs>
+            <linearGradient id="blobGrad" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#eaf0df" />
+              <stop offset="100%" stop-color="#d7e9be" />
+            </linearGradient>
+            <linearGradient id="bookGrad" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%" stop-color="#5ea34b" />
+              <stop offset="100%" stop-color="#3f8d3a" />
+            </linearGradient>
+          </defs>
+          <path d="M34 164c0-36 20-60 49-66 18-4 32-20 59-22 26-2 45 8 59 23 9 10 27 15 39 31 13 17 18 42 4 58-16 18-53 16-80 20-38 4-74 18-106 9-17-5-24-25-24-53z" fill="url(#blobGrad)"/>
+          <rect x="124" y="72" width="74" height="84" rx="11" fill="url(#bookGrad)"/>
+          <rect x="130" y="80" width="62" height="62" rx="8" fill="#f8fbf3"/>
+          <line x1="142" y1="97" x2="180" y2="97" stroke="#8db184" stroke-width="4" stroke-linecap="round"/>
+          <line x1="142" y1="112" x2="180" y2="112" stroke="#8db184" stroke-width="4" stroke-linecap="round"/>
+          <line x1="142" y1="127" x2="170" y2="127" stroke="#8db184" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="110" cy="101" r="12" fill="#f0c59b"/>
+          <path d="M94 139c4-17 12-28 26-28 15 0 22 11 26 28" fill="#f4a261"/>
+          <rect x="95" y="138" width="44" height="26" rx="9" fill="#f4a261"/>
+          <rect x="84" y="162" width="66" height="11" rx="5" fill="#8db184"/>
+          <rect x="202" y="146" width="30" height="26" rx="8" fill="#6cb56f"/>
+          <rect x="204" y="142" width="9" height="9" rx="3" fill="#bde4ab"/>
+        </svg>
+      </div>
+
       <p class="auth-intro-tag">
-        Ứng dụng viết nhật ký kiểu Notion — nhẹ, riêng tư, gắn ảnh và nhạc cho từng trang.
+        Viết mỗi ngày theo cách của bạn, lưu tự động, xem lại cảm xúc và kỷ niệm theo dòng thời gian.
       </p>
+      <div class="login-stat-row" aria-hidden="true">
+        <span class="login-stat">Tự động lưu</span>
+        <span class="login-stat">Nhẹ cho VPS nhỏ</span>
+        <span class="login-stat">Bảo mật phiên</span>
+      </div>
       <ul class="auth-features">
         <li><span class="feat-ico">📝</span> Trang viết <b>tự động lưu</b>, tìm kiếm nhanh</li>
         <li><span class="feat-ico">📅</span> Lịch tháng theo <b>cảm xúc</b> + ảnh bìa</li>
@@ -22,30 +53,44 @@
       <p class="auth-intro-foot">Đăng nhập hoặc tạo tài khoản để bắt đầu.</p>
     </section>
 
-    <main class="auth-card">
-      <h1 class="auth-brand">📔 Nhật ký</h1>
+    <main class="auth-card login-card">
+      <h1 class="auth-brand">📔 Memory</h1>
       <p class="auth-title">Đăng nhập</p>
 
-    <div id="msg" class="auth-msg"></div>
+      <div id="msg" class="auth-msg"></div>
 
-    <form id="login-form" autocomplete="on">
-      <div class="auth-field">
-        <label for="username">Tài khoản</label>
-        <input type="text" id="username" name="username" autocomplete="username"
-               autocapitalize="none" spellcheck="false" required />
-      </div>
-      <div class="auth-field">
-        <label for="password">Mật khẩu</label>
-        <input type="password" id="password" name="password" autocomplete="current-password" required />
-      </div>
-      <button type="submit" class="auth-btn" id="submit-btn">Đăng nhập</button>
-    </form>
+      <form id="login-form" autocomplete="on">
+        <div class="auth-field">
+          <label for="username">Tài khoản</label>
+          <input type="text" id="username" name="username" autocomplete="username"
+                 autocapitalize="none" spellcheck="false" required />
+        </div>
+        <div class="auth-field">
+          <label for="password">Mật khẩu</label>
+          <input type="password" id="password" name="password" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="auth-btn" id="submit-btn">Đăng nhập</button>
+      </form>
 
-    <div class="auth-links">
-      <a href="/register.html">Tạo tài khoản</a>
-      <span class="auth-sep">·</span>
-      <a href="/forgot.html">Quên mật khẩu?</a>
-    </div>
+      <div class="login-summary" aria-label="Tính năng nổi bật">
+        <p class="login-summary-title">Nổi bật trên Memory</p>
+        <ul class="login-summary-list">
+          <li>✓ Tự động lưu theo từng nhịp gõ</li>
+          <li>✓ Quản lý cảm xúc theo lịch tháng</li>
+          <li>✓ Gắn ảnh, nhạc và chia sẻ linh hoạt</li>
+        </ul>
+      </div>
+
+      <div class="auth-links">
+        <div class="auth-links-row">
+          <a href="/register.html">Tạo tài khoản</a>
+          <span class="auth-sep">·</span>
+          <a href="/forgot.html">Quên mật khẩu?</a>
+        </div>
+        <div class="auth-links-row auth-links-row-muted">
+          <a href="/about.html">Giới thiệu dự án</a>
+        </div>
+      </div>
     </main>
   </div>
   <script src="/auth.js?v=__V__"></script>
