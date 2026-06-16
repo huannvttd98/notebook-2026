@@ -79,8 +79,10 @@
   <main class="doc" hidden>
     <div class="doc-topbar">
       <span id="doc-crumb" class="doc-crumb">Ghi chú</span>
+      <span id="shared-badge" class="shared-badge" hidden></span>
       <span class="doc-tools">
         <span id="save-status" class="save-status"></span>
+        <button type="button" id="share-note" class="doc-tool" hidden>👥 Chia sẻ</button>
         <button type="button" id="delete-note" class="doc-tool danger" hidden>🗑 Xóa</button>
       </span>
     </div>
@@ -133,6 +135,22 @@
   <div id="lightbox" class="lightbox" hidden>
     <button type="button" id="lightbox-close" class="lightbox-close" aria-label="Đóng">✕</button>
     <img id="lightbox-img" class="lightbox-img" alt="Xem ảnh" />
+  </div>
+
+  <!-- Chia sẻ ghi chú: thêm/gỡ user được xem & sửa note hiện tại -->
+  <div id="share-modal" class="share-modal" hidden>
+    <div class="share-modal-card" role="dialog" aria-modal="true" aria-label="Chia sẻ ghi chú">
+      <button type="button" id="share-modal-close" class="share-modal-close" aria-label="Đóng">✕</button>
+      <h3 class="share-modal-title">👥 Chia sẻ ghi chú</h3>
+      <p class="share-modal-hint">Người được chia sẻ có thể <b>xem và sửa</b> ghi chú này (không xóa được).</p>
+      <div class="share-add">
+        <input type="text" id="share-input" class="share-input" placeholder="Nhập tài khoản hoặc email..."
+               autocapitalize="none" spellcheck="false" />
+        <button type="button" id="share-add-btn" class="share-add-btn">Thêm</button>
+      </div>
+      <div id="share-msg" class="share-msg"></div>
+      <ul id="share-list" class="share-list"></ul>
+    </div>
   </div>
 
   <!-- Trang phát nhạc: bấm ▶ ở danh sách ghi chú để mở trình phát toàn màn hình -->

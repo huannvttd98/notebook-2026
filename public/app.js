@@ -74,6 +74,14 @@ const musicRow = document.getElementById('music-row');
 const musicInput = document.getElementById('music-input');
 const musicClear = document.getElementById('music-clear');
 const musicPlayer = document.getElementById('music-player');
+const shareBtn = document.getElementById('share-note');
+const sharedBadge = document.getElementById('shared-badge');
+const shareModal = document.getElementById('share-modal');
+const shareModalClose = document.getElementById('share-modal-close');
+const shareInput = document.getElementById('share-input');
+const shareAddBtn = document.getElementById('share-add-btn');
+const shareMsg = document.getElementById('share-msg');
+const shareList = document.getElementById('share-list');
 
 // Icon cảm xúc theo mức 1-5
 const FACES = ['😢', '🙁', '😐', '🙂', '😄'];
@@ -90,6 +98,8 @@ function todayStr() {
 
 // Ảnh hiện tại của ghi chú đang mở
 let currentImages = [];
+// Ghi chú đang mở có phải của mình không (ảnh hưởng nút Xóa/Chia sẻ)
+let currentIsOwner = true;
 
 // ===== Tiện ích =====
 function escapeHtml(str) {
@@ -156,7 +166,7 @@ function renderNoteList(entries) {
     .map(
       (e) => `
       <button type="button" class="note-item${e.id === currentId ? ' active' : ''}" data-id="${e.id}">
-        <span class="note-icon">📄</span>
+        <span class="note-icon">${e.is_owner === 0 ? '👥' : '📄'}</span>
         <span class="note-name">${escapeHtml(displayTitle(e))}</span>
         ${
           musicEmbed(e.music)
@@ -211,7 +221,18 @@ function loadIntoEditor(entry) {
   dateEl.value = entry.created_at ? entry.created_at.split(' ')[0] : todayStr();
   editedMark.textContent = entry.updated_at ? '(đã sửa)' : '';
   crumbEl.textContent = displayTitle(entry);
-  deleteBtn.hidden = false;
+  // Chủ note mới thấy nút Xóa & Chia sẻ; note được chia sẻ thì hiện badge "của <chủ>"
+  currentIsOwner = entry.is_owner !== 0;
+  deleteBtn.hidden = !currentIsOwner;
+  if (shareBtn) shareBtn.hidden = !currentIsOwner;
+  if (sharedBadge) {
+    if (currentIsOwner) {
+      sharedBadge.hidden = true;
+    } else {
+      sharedBadge.textContent = `👥 Được chia sẻ${entry.owner_username ? ' bởi ' + entry.owner_username : ''}`;
+      sharedBadge.hidden = false;
+    }
+  }
   renderImages(parseEntryImages(entry));
   loadMusic(entry.music);
   autoGrow();
@@ -248,7 +269,10 @@ function newNote() {
   dateEl.value = todayStr();
   editedMark.textContent = '';
   crumbEl.textContent = 'Ghi chú mới';
+  currentIsOwner = true;
   deleteBtn.hidden = true;
+  if (shareBtn) shareBtn.hidden = true; // chỉ chia sẻ được sau khi đã lưu
+  if (sharedBadge) sharedBadge.hidden = true;
   renderImages([]);
   loadMusic('');
   autoGrow();
@@ -310,7 +334,9 @@ async function flush() {
       entry = await res.json();
       currentId = entry.id;
       idEl.value = entry.id;
+      currentIsOwner = true;
       deleteBtn.hidden = false;
+      if (shareBtn) shareBtn.hidden = false;
     }
     crumbEl.textContent = displayTitle(entry);
     setStatus('✓ Đã lưu');
@@ -615,6 +641,119 @@ deleteBtn.addEventListener('click', async () => {
     newNote();
   }
 });
+
+// ===== Chia sẻ ghi chú =====
+function setShareMsg(text, type) {
+  if (!shareMsg) return;
+  shareMsg.textContent = text || '';
+  shareMsg.className = 'share-msg' + (text ? ' show ' + (type || '') : '');
+}
+
+function renderShareList(users) {
+  if (!shareList) return;
+  if (!users.length) {
+    shareList.innerHTML = '<li class="share-empty">Chưa chia sẻ với ai.</li>';
+    return;
+  }
+  shareList.innerHTML = users
+    .map(
+      (u) => `<li class="share-row" data-uid="${u.id}">
+        <span class="share-user">
+          <span class="share-uname">${escapeHtml(u.username)}</span>
+          <span class="share-uemail">${escapeHtml(u.email)}</span>
+        </span>
+        <button type="button" class="share-remove" data-uid="${u.id}" title="Gỡ chia sẻ">✕</button>
+      </li>`
+    )
+    .join('');
+}
+
+async function loadShares() {
+  try {
+    const res = await fetch(`/api/entries/${currentId}/shares`);
+    const data = await readJson(res);
+    if (!res.ok) throw new Error(data.error || 'Lỗi');
+    renderShareList(data.users || []);
+  } catch (err) {
+    setShareMsg(err.message, 'error');
+  }
+}
+
+function openShareModal() {
+  if (!currentId || !currentIsOwner) return;
+  setShareMsg('');
+  if (shareInput) shareInput.value = '';
+  renderShareList([]);
+  shareModal.hidden = false;
+  loadShares();
+  if (shareInput) shareInput.focus();
+}
+
+function closeShareModal() {
+  if (shareModal) shareModal.hidden = true;
+}
+
+async function addShare() {
+  const ident = (shareInput.value || '').trim();
+  if (!ident) return;
+  setShareMsg('');
+  shareAddBtn.disabled = true;
+  try {
+    const res = await fetch(`/api/entries/${currentId}/shares`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: ident }),
+    });
+    const data = await readJson(res);
+    if (!res.ok) throw new Error(data.error || 'Không chia sẻ được');
+    renderShareList(data.users || []);
+    shareInput.value = '';
+    setShareMsg('✓ Đã chia sẻ', 'ok');
+  } catch (err) {
+    setShareMsg('⚠ ' + err.message, 'error');
+  } finally {
+    shareAddBtn.disabled = false;
+    shareInput.focus();
+  }
+}
+
+async function removeShare(userId) {
+  try {
+    const res = await fetch(`/api/entries/${currentId}/shares`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId }),
+    });
+    const data = await readJson(res);
+    if (!res.ok) throw new Error(data.error || 'Lỗi');
+    renderShareList(data.users || []);
+  } catch (err) {
+    setShareMsg('⚠ ' + err.message, 'error');
+  }
+}
+
+if (shareBtn) shareBtn.addEventListener('click', openShareModal);
+if (shareModalClose) shareModalClose.addEventListener('click', closeShareModal);
+if (shareModal) {
+  shareModal.addEventListener('click', (e) => {
+    if (e.target === shareModal) closeShareModal(); // bấm nền mờ để đóng
+  });
+}
+if (shareAddBtn) shareAddBtn.addEventListener('click', addShare);
+if (shareInput) {
+  shareInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addShare();
+    }
+  });
+}
+if (shareList) {
+  shareList.addEventListener('click', (e) => {
+    const btn = e.target.closest('.share-remove');
+    if (btn) removeShare(Number(btn.dataset.uid));
+  });
+}
 
 // ===== Tìm kiếm (debounce) =====
 let searchTimer;

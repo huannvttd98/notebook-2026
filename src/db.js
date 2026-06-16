@@ -53,6 +53,16 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
   );
   CREATE INDEX IF NOT EXISTS idx_resets_token ON password_resets(token_hash);
+
+  -- Chia sẻ ghi chú: 1 dòng = note_id được chia sẻ (xem+sửa) cho user_id.
+  -- Xóa note hoặc xóa user thì tự gỡ chia sẻ (ON DELETE CASCADE).
+  CREATE TABLE IF NOT EXISTS note_shares (
+    note_id    INTEGER NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+    PRIMARY KEY (note_id, user_id)
+  );
+  CREATE INDEX IF NOT EXISTS idx_shares_user ON note_shares(user_id);
 `);
 
 // Migration: thêm cột nếu DB cũ chưa có
