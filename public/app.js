@@ -70,6 +70,7 @@ const sliderPrev = document.getElementById('slider-prev');
 const sliderNext = document.getElementById('slider-next');
 const sliderDots = document.getElementById('slider-dots');
 const musicToggle = document.getElementById('music-toggle');
+const musicSection = document.getElementById('music-section');
 const musicRow = document.getElementById('music-row');
 const musicInput = document.getElementById('music-input');
 const musicClear = document.getElementById('music-clear');
@@ -526,23 +527,129 @@ function musicEmbed(url) {
   return '';
 }
 
-// Vẽ player nhúng từ link hiện trong ô input
-function renderMusic(url) {
+const musicMetaCache = new Map();
+let musicRenderToken = 0;
+
+function musicProvider(url) {
   const embed = musicEmbed(url);
+  if (!embed) return '';
+  return embed.includes('spotify') ? 'spotify' : 'youtube';
+}
+
+function musicFallbackMeta(url) {
+  const provider = musicProvider(url);
+  if (provider === 'spotify') {
+    return {
+      title: 'Bai hat tu Spotify',
+      providerLabel: 'Spotify',
+      thumbnail: '',
+      icon: 'album-spotify',
+    };
+  }
+  if (provider === 'youtube') {
+    const match = (url || '').trim().match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
+    return {
+      title: 'Bai hat tu YouTube',
+      providerLabel: 'YouTube',
+      thumbnail: match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : '',
+      icon: 'album-youtube',
+    };
+  }
+  return {
+    title: 'Nhac dinh kem',
+    providerLabel: 'Nguon nhac',
+    thumbnail: '',
+    icon: 'album-generic',
+  };
+}
+
+async function fetchMusicMeta(url) {
+  const trimmed = (url || '').trim();
+  if (!trimmed) return null;
+  if (musicMetaCache.has(trimmed)) return musicMetaCache.get(trimmed);
+
+  const fallback = musicFallbackMeta(trimmed);
+  const provider = musicProvider(trimmed);
+  let meta = fallback;
+
+  try {
+    if (provider === 'youtube') {
+      const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(trimmed)}&format=json`);
+      if (res.ok) {
+        const data = await res.json();
+        meta = {
+          title: data.title || fallback.title,
+          providerLabel: 'YouTube',
+          thumbnail: data.thumbnail_url || fallback.thumbnail,
+          icon: fallback.icon,
+        };
+      }
+    } else if (provider === 'spotify') {
+      const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(trimmed)}`);
+      if (res.ok) {
+        const data = await res.json();
+        meta = {
+          title: data.title || fallback.title,
+          providerLabel: 'Spotify',
+          thumbnail: data.thumbnail_url || '',
+          icon: fallback.icon,
+        };
+      }
+    }
+  } catch {
+    meta = fallback;
+  }
+
+  musicMetaCache.set(trimmed, meta);
+  return meta;
+}
+
+function renderMusicCard(url, meta) {
+  const title = meta?.title || 'Nhac dinh kem';
+  const providerLabel = meta?.providerLabel || 'Nguon nhac';
+  const hasThumb = !!meta?.thumbnail;
+  const artMarkup = hasThumb
+    ? `<img class="music-art-image" src="${escapeHtml(meta.thumbnail)}" alt="${escapeHtml(title)}" loading="lazy" />`
+    : `<span class="music-art-icon ${escapeHtml(meta?.icon || 'album-generic')}" aria-hidden="true"></span>`;
+  musicPlayer.innerHTML =
+    `<button type="button" class="music-card" data-url="${escapeHtml(url)}" data-title="${escapeHtml(title)}" aria-label="Phat ${escapeHtml(title)}">` +
+      `<span class="music-art">${artMarkup}</span>` +
+      `<span class="music-copy">` +
+        `<span class="music-song-title">${escapeHtml(title)}</span>` +
+        `<span class="music-song-provider">${escapeHtml(providerLabel)}</span>` +
+      `</span>` +
+      `<span class="music-play-btn" aria-hidden="true">▶</span>` +
+    `</button>`;
+  musicPlayer.hidden = false;
+  musicSection.hidden = false;
+}
+
+// Vẽ thẻ nhạc gọn: chỉ tên bài, ảnh/icon album và nút phát.
+async function renderMusic(url) {
+  const trimmed = (url || '').trim();
+  const embed = musicEmbed(trimmed);
+  const token = ++musicRenderToken;
   if (!embed) {
     musicPlayer.innerHTML = '';
     musicPlayer.hidden = true;
+    if (!musicRow || musicRow.hidden) musicSection.hidden = true;
     return;
   }
-  const isSpotify = embed.includes('spotify');
-  const frameStyle = isSpotify
-    ? 'height:152px;width:100%'
-    : 'aspect-ratio:16/9;width:100%;height:auto';
-  musicPlayer.innerHTML =
-    `<iframe src="${escapeHtml(embed)}" style="${frameStyle};border:0;border-radius:12px" ` +
-    `loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" ` +
-    `allow="autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture"></iframe>`;
+
   musicPlayer.hidden = false;
+  musicSection.hidden = false;
+  musicPlayer.innerHTML =
+    '<div class="music-card music-card-loading" aria-live="polite">' +
+      '<span class="music-art"><span class="music-art-icon album-generic" aria-hidden="true"></span></span>' +
+      '<span class="music-copy">' +
+        '<span class="music-song-title">Dang tai thong tin bai hat...</span>' +
+        '<span class="music-song-provider">Dang dong bo du lieu</span>' +
+      '</span>' +
+    '</div>';
+
+  const meta = await fetchMusicMeta(trimmed);
+  if (token !== musicRenderToken) return;
+  renderMusicCard(trimmed, meta);
 }
 
 // ===== Trang phát nhạc (modal toàn màn hình) =====
@@ -591,6 +698,8 @@ if (musicModal) {
 function showMusicRow(open) {
   musicRow.hidden = !open;
   musicToggle.classList.toggle('active', open);
+  const hasPlayer = !musicPlayer.hidden;
+  musicSection.hidden = !open && !hasPlayer;
 }
 
 // Đánh dấu nút 🎵 khi ghi chú có nhạc (kể cả lúc ô link đang ẩn)
@@ -643,6 +752,14 @@ if (musicClear) {
     markHasMusic('');
     scheduleSave();
     musicInput.focus();
+  });
+}
+
+if (musicPlayer) {
+  musicPlayer.addEventListener('click', (e) => {
+    const card = e.target.closest('.music-card[data-url]');
+    if (!card) return;
+    openPlayer(card.dataset.url, card.dataset.title);
   });
 }
 

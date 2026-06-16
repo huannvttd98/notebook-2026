@@ -135,11 +135,16 @@
         </div>
 
         <!-- Dán link YouTube/Spotify để gắn nhạc cho ghi chú -->
-        <div id="music-row" class="music-row" hidden>
-          <input type="url" id="music-input" class="music-input" placeholder="Dán link YouTube hoặc Spotify..." inputmode="url" />
-          <button type="button" id="music-clear" class="music-clear" title="Gỡ nhạc" aria-label="Gỡ nhạc">✕</button>
-        </div>
-        <div id="music-player" class="music-player" hidden></div>
+        <section id="music-section" class="music-section" hidden>
+          <div class="music-section-head">
+            <span class="music-section-label">🎵 Nhạc đính kèm</span>
+            <button type="button" id="music-clear" class="music-clear" title="Gỡ nhạc" aria-label="Gỡ nhạc">✕</button>
+          </div>
+          <div id="music-row" class="music-row" hidden>
+            <input type="url" id="music-input" class="music-input" placeholder="Dán link YouTube hoặc Spotify..." inputmode="url" />
+          </div>
+          <div id="music-player" class="music-player" hidden></div>
+        </section>
 
         <textarea id="content" class="doc-content" placeholder="Bắt đầu viết..."></textarea>
       </div>
