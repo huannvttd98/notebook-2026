@@ -136,13 +136,20 @@ function displayTitle(e) {
   return 'Không có tiêu đề';
 }
 
+let statusHideTimer = null;
 function setStatus(text) {
+  clearTimeout(statusHideTimer);
   statusEl.textContent = text;
   statusEl.className = 'save-status';
   if (!text) return;
-  if (text.includes('✓')) statusEl.classList.add('is-saved');
-  else if (text.includes('⚠') || text.includes('Lỗi') || text.includes('Cần')) statusEl.classList.add('is-error');
-  else statusEl.classList.add('is-saving');
+  if (text.includes('✓')) {
+    statusEl.classList.add('is-saved');
+    statusHideTimer = setTimeout(() => setStatus(''), 300); // báo xong → ẩn sau 0.3s
+  } else if (text.includes('⚠') || text.includes('Lỗi') || text.includes('Cần')) {
+    statusEl.classList.add('is-error');
+  } else {
+    statusEl.classList.add('is-saving');
+  }
 }
 
 function clearShareInline() {
