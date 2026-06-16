@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng ký — Nhật ký</title>
+  <link rel="stylesheet" href="/auth.css?v=__V__" />
+</head>
+<body class="auth">
+  <main class="auth-card">
+    <h1 class="auth-brand">📔 Nhật ký</h1>
+    <p class="auth-title">Tạo tài khoản</p>
+
+    <div id="msg" class="auth-msg"></div>
+
+    <form id="register-form" autocomplete="on">
+      <div class="auth-field">
+        <label for="username">Tài khoản</label>
+        <input type="text" id="username" name="username" autocomplete="username"
+               autocapitalize="none" spellcheck="false" required />
+        <div class="auth-hint">3–30 ký tự, chỉ chữ thường, số, dấu _ và .</div>
+      </div>
+      <div class="auth-field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" autocomplete="email"
+               autocapitalize="none" spellcheck="false" required />
+        <div class="auth-hint">Dùng để khôi phục khi quên mật khẩu</div>
+      </div>
+      <div class="auth-field">
+        <label for="password">Mật khẩu</label>
+        <input type="password" id="password" name="password" autocomplete="new-password" required />
+        <div class="auth-hint">Tối thiểu 8 ký tự</div>
+      </div>
+      <div class="auth-field">
+        <label for="password2">Nhập lại mật khẩu</label>
+        <input type="password" id="password2" name="password2" autocomplete="new-password" required />
+      </div>
+      <button type="submit" class="auth-btn" id="submit-btn">Đăng ký</button>
+    </form>
+
+    <div class="auth-links">
+      Đã có tài khoản? <a href="/login.html">Đăng nhập</a>
+    </div>
+  </main>
+  <script src="/auth.js?v=__V__"></script>
+</body>
+</html>

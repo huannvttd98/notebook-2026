@@ -7,7 +7,11 @@ const fs = require('fs');
 const express = require('express');
 const helmet = require('helmet');
 const compression = require('compression');
+const session = require('express-session');
+const SqliteStore = require('better-sqlite3-session-store')(session);
 
+const db = require('./src/db');
+const { router: authRouter, requireAuth } = require('./src/auth');
 const entriesRouter = require('./src/routes/entries');
 const weatherRouter = require('./src/routes/weather');
 const coverRouter = require('./src/routes/cover');
@@ -15,6 +19,7 @@ const { MAX_FILE_MB } = require('./src/upload');
 
 const app = express();
 const PORT = parseInt(process.env.PORT, 10) || 3100;
+const isProd = process.env.NODE_ENV === 'production';
 
 // Sau Nginx reverse proxy
 app.set('trust proxy', 1);
@@ -39,22 +44,13 @@ app.use(
   })
 );
 app.use(compression());
-app.use(express.json({ limit: '1mb' }));
 
-// API (không cần đăng nhập)
-app.use('/api/entries', entriesRouter);
-app.use('/api/weather', weatherRouter);
-app.use('/api/cover', coverRouter);
-
-// Frontend tĩnh (tắt index để route '/' bên dưới chèn được version)
 const publicDir = path.join(__dirname, 'public');
-app.use(express.static(publicDir, { index: false }));
 
 // Version cache:
 // - Production: dùng ASSET_VERSION trong .env (kiểm soát thủ công khi deploy)
 // - Local/dev: dùng thời gian sửa file CSS/JS để LUÔN tải bản mới (khỏi cache)
 function assetVersion() {
-  const isProd = process.env.NODE_ENV === 'production';
   if (isProd && process.env.ASSET_VERSION) return process.env.ASSET_VERSION;
   try {
     const css = fs.statSync(path.join(publicDir, 'style.css')).mtimeMs;
@@ -65,13 +61,58 @@ function assetVersion() {
   }
 }
 
-// Trang chính — chèn version vào link CSS/JS
-app.get('/', (req, res) => {
-  let html = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
-  html = html.replaceAll('__V__', assetVersion());
-  html = html.replaceAll('__MAX_MB__', String(MAX_FILE_MB));
-  res.type('html').send(html);
-});
+// Trả 1 trang HTML kèm chèn version (và giới hạn upload). Dùng cho mọi trang.
+function sendPage(file) {
+  return (req, res, next) => {
+    fs.readFile(path.join(publicDir, file), 'utf8', (err, raw) => {
+      if (err) return next();
+      const html = raw
+        .replaceAll('__V__', assetVersion())
+        .replaceAll('__MAX_MB__', String(MAX_FILE_MB));
+      res.type('html').send(html);
+    });
+  };
+}
+
+// Các trang HTML (đặt trước static để chèn được version) — không cần session
+app.get('/', sendPage('index.html'));
+app.get('/login.html', sendPage('login.html'));
+app.get('/register.html', sendPage('register.html'));
+app.get('/forgot.html', sendPage('forgot.html'));
+app.get('/reset.html', sendPage('reset.html'));
+
+// Frontend tĩnh (CSS/JS/ảnh) — không cần session, đặt trước session cho nhẹ
+app.use(express.static(publicDir, { index: false }));
+
+// Từ đây trở xuống cần thân request + phiên đăng nhập
+app.use(express.json({ limit: '1mb' }));
+
+// Phiên đăng nhập — lưu vào SQLite để giữ qua các lần restart server
+app.use(
+  session({
+    store: new SqliteStore({
+      client: db,
+      expired: { clear: true, intervalMs: 15 * 60 * 1000 },
+    }),
+    secret: process.env.SESSION_SECRET || 'doi-secret-nay-trong-env',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: isProd,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
+    },
+  })
+);
+
+// API auth (đăng ký / đăng nhập / quên mật khẩu) — không cần đăng nhập trước
+app.use('/api/auth', authRouter);
+
+// API dữ liệu — bắt buộc đăng nhập, mỗi user chỉ thấy dữ liệu của mình
+app.use('/api/entries', requireAuth, entriesRouter);
+app.use('/api/cover', requireAuth, coverRouter);
+app.use('/api/weather', weatherRouter);
 
 app.listen(PORT, () => {
   console.log(`Notebook đang chạy tại http://localhost:${PORT}`);

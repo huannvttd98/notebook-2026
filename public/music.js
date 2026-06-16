@@ -63,6 +63,10 @@ async function loadSongs() {
   let entries = [];
   try {
     const res = await fetch('/api/entries?limit=200');
+    if (res.status === 401) {
+      window.location.href = '/login.html';
+      return;
+    }
     const data = await res.json();
     entries = data.entries || [];
   } catch {

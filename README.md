@@ -5,10 +5,12 @@ Web app ghi nhật ký kiểu Notion. Nhẹ, chạy tốt trên server nhỏ (**
 - **Backend:** Node.js + Express
 - **Database:** SQLite (better-sqlite3) — file `db/notebook.db`, không cần DB server riêng
 - **Frontend:** HTML + Vanilla JS (không cần build)
-- **Bảo mật:** helmet + nén gzip (hiện **không có đăng nhập** — xem mục cuối nếu muốn bật lại)
+- **Bảo mật:** helmet + nén gzip + **đăng nhập đa người dùng** (mỗi tài khoản có nhật ký riêng)
 
 ## Tính năng
 
+- **Tài khoản**: đăng ký (tài khoản + email + mật khẩu), đăng nhập, quên mật khẩu qua email
+- Mỗi user chỉ thấy ghi chú & ảnh bìa của riêng mình
 - Sidebar liệt kê ghi chú + tìm kiếm; trang tài liệu tự động lưu (auto-save)
 - Đánh giá cảm xúc bằng icon 😢🙁😐🙂😄
 - **Lịch tháng**: mỗi ngày hiện cảm xúc của ghi chú; bên cạnh là **ảnh bìa** tải lên từ máy
@@ -22,11 +24,15 @@ Web app ghi nhật ký kiểu Notion. Nhẹ, chạy tốt trên server nhỏ (**
 ```bash
 npm install
 
-# Tạo file .env từ mẫu rồi chỉnh nếu cần (PORT, WEATHER_CITY)
+# Tạo file .env từ mẫu rồi chỉnh nếu cần (PORT, WEATHER_CITY, SESSION_SECRET)
 cp .env.example .env      # Windows: copy .env.example .env
 
-npm start                 # Mở http://localhost:3100
+npm start                 # Mở http://localhost:3100 → tự chuyển sang trang đăng nhập
 ```
+
+> Mở app lần đầu sẽ vào **/login.html**. Bấm **Tạo tài khoản** để đăng ký user đầu tiên
+> (tài khoản này sẽ "nhận" toàn bộ ghi chú & ảnh bìa cũ nếu DB đã có dữ liệu từ trước).
+> Khi dev chưa cấu hình SMTP, link "Quên mật khẩu" được **in ra console** thay vì gửi email.
 
 ---
 
@@ -111,12 +117,15 @@ Crontab backup hằng ngày lúc 2h sáng:
 ## Cấu trúc dự án
 
 ```
-server.js                 # Điểm vào: Express app
-src/db.js                 # Kết nối SQLite + migration (entries, settings)
-src/routes/entries.js     # API CRUD nhật ký (+ rating, tìm kiếm)
+server.js                 # Điểm vào: Express app (session + serve trang auth)
+src/db.js                 # Kết nối SQLite + migration (entries, settings, users, password_resets)
+src/auth.js               # API /api/auth/* : đăng ký, đăng nhập, quên/đặt lại mật khẩu
+src/mailer.js             # Gửi email đặt lại mật khẩu (nodemailer)
+src/routes/entries.js     # API CRUD nhật ký (lọc theo user_id)
 src/routes/weather.js     # Proxy thời tiết Open-Meteo (cache 10 phút)
-src/routes/cover.js       # Upload/lấy ảnh bìa (multer)
+src/routes/cover.js       # Upload/lấy ảnh bìa theo từng user (multer)
 public/                   # Frontend: index.html, app.js, style.css
+public/login.html …       # Trang đăng nhập / đăng ký / quên & đặt lại mật khẩu (+ auth.js, auth.css)
 public/uploads/           # Ảnh người dùng tải lên (gitignored)
 ecosystem.config.js       # Cấu hình PM2
 deploy/nginx.conf         # Mẫu Nginx reverse proxy
@@ -125,14 +134,19 @@ docs/PLAN.md              # Kế hoạch
 
 ---
 
-## Bật lại đăng nhập (tùy chọn)
+## Tài khoản & đăng nhập
 
-Mã đăng nhập vẫn còn trong `src/auth.js` nhưng đang **tắt**. Để bật:
+- **Đăng ký** tại `/register.html`: cần **tài khoản** (3–30 ký tự: chữ thường, số, `_`, `.`),
+  **email** (để khôi phục mật khẩu) và **mật khẩu** (≥ 8 ký tự). Đăng nhập bằng **tài khoản**.
+- Mỗi user chỉ truy cập ghi chú & ảnh bìa của mình; API dữ liệu yêu cầu đăng nhập (trả 401 nếu chưa).
+- **Quên mật khẩu** (`/forgot.html`): nhập email → nhận link đặt lại (hết hạn **1 giờ**, dùng 1 lần).
 
-1. Trong [server.js](server.js): `require` lại `express-session` + `./src/auth`, thêm middleware `session(...)`, mount `app.use('/api', authRouter)` và bọc `requireAuth` cho `/api/entries`.
-2. Tạo mật khẩu: `node scripts/set-password.js "matkhau"` → dán vào `.env`:
-   ```
-   SESSION_SECRET=<chuỗi ngẫu nhiên dài>
-   APP_PASSWORD_HASH=<hash vừa tạo>
-   ```
-3. Thêm lại trang `public/login.html` + `login.js` (đã gỡ).
+### Cấu hình bắt buộc trong `.env`
+
+| Biến | Ý nghĩa |
+|---|---|
+| `SESSION_SECRET` | Chuỗi ngẫu nhiên dài để ký cookie phiên (BẮT BUỘC đổi) |
+| `APP_URL` | URL gốc của app, dùng dựng link reset trong email (vd `https://yourdomain.com`) |
+| `SMTP_HOST/PORT/USER/PASS`, `MAIL_FROM` | Cấu hình gửi email reset. **Bỏ trống `SMTP_HOST`** khi dev → link reset in ra console. |
+
+> Tạo `SESSION_SECRET`: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`

@@ -279,6 +279,39 @@ input, textarea, button { font: inherit; color: inherit; }
 .weather-meta { color: var(--muted); font-size: .8rem; }
 .weather-loading { color: var(--muted); font-style: italic; }
 
+/* Khối tài khoản + đăng xuất ở cuối sidebar */
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-top: .8rem;
+  padding: .55rem .7rem;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: .85rem;
+}
+.user-name {
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.user-name::before { content: "👤 "; }
+.logout-btn {
+  flex-shrink: 0;
+  padding: .3rem .6rem;
+  font-size: .8rem;
+  color: var(--accent-dark);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.logout-btn:hover { background: var(--bg-hover); }
+
 /* ===================== DOCUMENT ===================== */
 .doc {
   flex: 1;

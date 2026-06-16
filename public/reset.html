@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đặt lại mật khẩu — Nhật ký</title>
+  <link rel="stylesheet" href="/auth.css?v=__V__" />
+</head>
+<body class="auth">
+  <main class="auth-card">
+    <h1 class="auth-brand">📔 Nhật ký</h1>
+    <p class="auth-title">Đặt mật khẩu mới</p>
+
+    <div id="msg" class="auth-msg"></div>
+
+    <form id="reset-form" autocomplete="on">
+      <div class="auth-field">
+        <label for="password">Mật khẩu mới</label>
+        <input type="password" id="password" name="password" autocomplete="new-password" required />
+        <div class="auth-hint">Tối thiểu 8 ký tự</div>
+      </div>
+      <div class="auth-field">
+        <label for="password2">Nhập lại mật khẩu mới</label>
+        <input type="password" id="password2" name="password2" autocomplete="new-password" required />
+      </div>
+      <button type="submit" class="auth-btn" id="submit-btn">Đặt lại mật khẩu</button>
+    </form>
+
+    <div class="auth-links">
+      <a href="/login.html">Quay lại đăng nhập</a>
+    </div>
+  </main>
+  <script src="/auth.js?v=__V__"></script>
+</body>
+</html>

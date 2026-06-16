@@ -16,9 +16,12 @@ const setSetting = db.prepare(
    ON CONFLICT(key) DO UPDATE SET value = excluded.value`
 );
 
+// Mỗi user có ảnh bìa riêng — lưu theo key 'cover_image:<userId>'
+const coverKey = (req) => `cover_image:${req.userId}`;
+
 // GET /api/cover — trả URL ảnh hiện tại (null nếu chưa có)
 router.get('/', (req, res) => {
-  const row = getSetting.get('cover_image');
+  const row = getSetting.get(coverKey(req));
   res.json({ url: row ? row.value : null });
 });
 
@@ -32,15 +35,16 @@ router.post('/', (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'Thiếu file ảnh' });
 
     const url = `/uploads/${req.file.filename}`;
+    const key = coverKey(req);
 
     // Xóa ảnh cũ (nếu có) để không phình ổ đĩa
-    const old = getSetting.get('cover_image');
+    const old = getSetting.get(key);
     if (old && old.value) {
       const oldPath = path.join(uploadDir, path.basename(old.value));
       fs.promises.unlink(oldPath).catch(() => {});
     }
 
-    setSetting.run('cover_image', url);
+    setSetting.run(key, url);
     res.json({ url });
   });
 });

@@ -788,8 +788,46 @@ async function loadWeather() {
   }
 }
 
+// ===== Xác thực =====
+// Kiểm tra phiên đăng nhập; nếu chưa đăng nhập thì chuyển sang trang login.
+async function ensureAuth() {
+  try {
+    const res = await fetch('/api/auth/me');
+    const data = await res.json();
+    if (!data.authenticated) {
+      window.location.href = '/login.html';
+      return null;
+    }
+    return data;
+  } catch {
+    window.location.href = '/login.html';
+    return null;
+  }
+}
+
+function setupAuthUI(me) {
+  const nameEl = document.getElementById('user-name');
+  if (nameEl && me) nameEl.textContent = me.username;
+
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } catch {
+        /* vẫn chuyển về login dù lỗi mạng */
+      }
+      window.location.href = '/login.html';
+    });
+  }
+}
+
 // ===== Khởi động =====
 (async function init() {
+  const me = await ensureAuth();
+  if (!me) return; // đã redirect sang login
+
+  setupAuthUI(me);
   await loadNotes();
   await showCalendar(); // trang chính: hiển thị lịch tháng hiện tại
   loadCover();

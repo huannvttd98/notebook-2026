@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng nhập — Nhật ký</title>
+  <link rel="stylesheet" href="/auth.css?v=__V__" />
+</head>
+<body class="auth">
+  <main class="auth-card">
+    <h1 class="auth-brand">📔 Nhật ký</h1>
+    <p class="auth-title">Đăng nhập</p>
+
+    <div id="msg" class="auth-msg"></div>
+
+    <form id="login-form" autocomplete="on">
+      <div class="auth-field">
+        <label for="username">Tài khoản</label>
+        <input type="text" id="username" name="username" autocomplete="username"
+               autocapitalize="none" spellcheck="false" required />
+      </div>
+      <div class="auth-field">
+        <label for="password">Mật khẩu</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required />
+      </div>
+      <button type="submit" class="auth-btn" id="submit-btn">Đăng nhập</button>
+    </form>
+
+    <div class="auth-links">
+      <a href="/register.html">Tạo tài khoản</a>
+      <span class="auth-sep">·</span>
+      <a href="/forgot.html">Quên mật khẩu?</a>
+    </div>
+  </main>
+  <script src="/auth.js?v=__V__"></script>
+</body>
+</html>

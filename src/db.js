@@ -33,6 +33,26 @@ db.exec(`
     key   TEXT PRIMARY KEY,
     value TEXT
   );
+
+  -- Tài khoản người dùng: đăng nhập bằng username, email dùng để reset mật khẩu
+  CREATE TABLE IF NOT EXISTS users (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    username      TEXT NOT NULL UNIQUE,
+    email         TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at    TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+  );
+
+  -- Token đặt lại mật khẩu (chỉ lưu hash của token, hết hạn + dùng 1 lần)
+  CREATE TABLE IF NOT EXISTS password_resets (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    used_at    TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_resets_token ON password_resets(token_hash);
 `);
 
 // Migration: thêm cột nếu DB cũ chưa có
@@ -48,5 +68,23 @@ if (!cols.includes('music')) {
   // Link nhạc (YouTube/Spotify) gắn vào ghi chú — nghe khi mở ghi chú
   db.exec(`ALTER TABLE entries ADD COLUMN music TEXT NOT NULL DEFAULT ''`);
 }
+if (!cols.includes('user_id')) {
+  // Chủ sở hữu ghi chú (NULL = ghi chú cũ chưa gán user). Mỗi user chỉ thấy
+  // ghi chú của mình; xem db.js -> claimOrphanEntries trong auth khi user đầu đăng ký.
+  db.exec(`ALTER TABLE entries ADD COLUMN user_id INTEGER REFERENCES users(id)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_entries_user ON entries(user_id)`);
+}
+
+// Migration: nếu bảng users đã tồn tại từ schema cũ mà thiếu cột, thêm vào.
+// (ALTER thêm cột nullable; ràng buộc unique đảm bảo bằng index bên dưới.)
+const ucols = db.prepare(`PRAGMA table_info(users)`).all().map((c) => c.name);
+if (!ucols.includes('email')) {
+  db.exec(`ALTER TABLE users ADD COLUMN email TEXT`);
+}
+if (!ucols.includes('password_hash')) {
+  db.exec(`ALTER TABLE users ADD COLUMN password_hash TEXT`);
+}
+db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)`);
+db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
 
 module.exports = db;
