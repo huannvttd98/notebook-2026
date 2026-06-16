@@ -529,6 +529,14 @@ function musicEmbed(url) {
 
 const musicMetaCache = new Map();
 let musicRenderToken = 0;
+let musicCollapseTimer = null;
+
+function updateMusicSectionState() {
+  if (!musicSection) return;
+  const hasPlayer = !musicPlayer.hidden;
+  const compact = hasPlayer && musicRow.hidden;
+  musicSection.classList.toggle('compact', compact);
+}
 
 function musicProvider(url) {
   const embed = musicEmbed(url);
@@ -613,15 +621,20 @@ function renderMusicCard(url, meta) {
     : `<span class="music-art-icon ${escapeHtml(meta?.icon || 'album-generic')}" aria-hidden="true"></span>`;
   musicPlayer.innerHTML =
     `<button type="button" class="music-card" data-url="${escapeHtml(url)}" data-title="${escapeHtml(title)}" aria-label="Phat ${escapeHtml(title)}">` +
+      `<span class="music-card-remove" role="button" tabindex="0" aria-label="Go nhac" title="Go nhac">✕</span>` +
       `<span class="music-art">${artMarkup}</span>` +
       `<span class="music-copy">` +
         `<span class="music-song-title">${escapeHtml(title)}</span>` +
-        `<span class="music-song-provider">${escapeHtml(providerLabel)}</span>` +
+        `<span class="music-card-meta">` +
+          `<span class="music-song-provider">${escapeHtml(providerLabel)}</span>` +
+          `<span class="music-card-edit" role="button" tabindex="0" aria-label="Sua link nhac" title="Sua link">Sua</span>` +
+        `</span>` +
       `</span>` +
       `<span class="music-play-btn" aria-hidden="true">▶</span>` +
     `</button>`;
   musicPlayer.hidden = false;
   musicSection.hidden = false;
+  updateMusicSectionState();
 }
 
 // Vẽ thẻ nhạc gọn: chỉ tên bài, ảnh/icon album và nút phát.
@@ -722,6 +735,7 @@ function showMusicRow(open) {
   musicToggle.classList.toggle('active', open);
   const hasPlayer = !musicPlayer.hidden;
   musicSection.hidden = !open && !hasPlayer;
+  updateMusicSectionState();
 }
 
 // Đánh dấu nút 🎵 khi ghi chú có nhạc (kể cả lúc ô link đang ẩn)
@@ -736,6 +750,24 @@ function loadMusic(url) {
   renderMusic(url);
   showMusicRow(false);
   markHasMusic(url);
+}
+
+function clearMusicValue(focusInput = false) {
+  if ((musicInput.value || '').trim() && (musicInput.value || '').trim() === currentPlayingUrl) closePlayer();
+  musicInput.value = '';
+  renderMusic('');
+  markHasMusic('');
+  scheduleSave();
+  showMusicRow(false);
+  if (focusInput) musicInput.focus();
+}
+
+function scheduleMusicCollapse() {
+  clearTimeout(musicCollapseTimer);
+  musicCollapseTimer = setTimeout(() => {
+    if (!musicEmbed(musicInput.value)) return;
+    showMusicRow(false);
+  }, 420);
 }
 
 // Thu gọn hàng tùy chọn (ngày, ảnh, nhạc, cảm xúc) — bấm nút để hiện/ẩn
@@ -764,24 +796,53 @@ if (musicInput) {
     renderMusic(musicInput.value);
     markHasMusic(musicInput.value);
     scheduleSave();
+    if (musicEmbed(musicInput.value)) scheduleMusicCollapse();
   });
-  musicInput.addEventListener('change', () => renderMusic(musicInput.value));
+  musicInput.addEventListener('change', () => {
+    renderMusic(musicInput.value);
+    scheduleMusicCollapse();
+  });
+  musicInput.addEventListener('paste', () => {
+    scheduleMusicCollapse();
+  });
 }
 if (musicClear) {
   musicClear.addEventListener('click', () => {
-    musicInput.value = '';
-    renderMusic('');
-    markHasMusic('');
-    scheduleSave();
-    musicInput.focus();
+    clearMusicValue(true);
   });
 }
 
 if (musicPlayer) {
   musicPlayer.addEventListener('click', (e) => {
+    const removeBtn = e.target.closest('.music-card-remove');
+    if (removeBtn) {
+      e.stopPropagation();
+      clearMusicValue(false);
+      return;
+    }
+    const editBtn = e.target.closest('.music-card-edit');
+    if (editBtn) {
+      e.stopPropagation();
+      showMusicRow(true);
+      musicInput.focus();
+      musicInput.select();
+      return;
+    }
     const card = e.target.closest('.music-card[data-url]');
     if (!card) return;
     openPlayer(card.dataset.url, card.dataset.title);
+  });
+  musicPlayer.addEventListener('keydown', (e) => {
+    const actionBtn = e.target.closest('.music-card-remove, .music-card-edit');
+    if (!actionBtn || (e.key !== 'Enter' && e.key !== ' ')) return;
+    e.preventDefault();
+    if (actionBtn.classList.contains('music-card-remove')) {
+      clearMusicValue(false);
+      return;
+    }
+    showMusicRow(true);
+    musicInput.focus();
+    musicInput.select();
   });
 }
 
