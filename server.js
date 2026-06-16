@@ -39,6 +39,13 @@ app.use(
           'https://www.youtube-nocookie.com',
           'https://open.spotify.com',
         ],
+        'img-src': [
+          "'self'",
+          'data:',
+          'https://i.ytimg.com',
+          'https://i.scdn.co',
+          'https://mosaic.scdn.co',
+        ],
       },
     },
     // Mặc định helmet đặt 'no-referrer' khiến YouTube báo lỗi 153 (không xác
