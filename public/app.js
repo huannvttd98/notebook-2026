@@ -655,28 +655,54 @@ async function renderMusic(url) {
 // ===== Trang phát nhạc (modal toàn màn hình) =====
 const musicModal = document.getElementById('music-modal');
 const musicModalTitle = document.getElementById('music-modal-title');
+const musicModalProvider = document.getElementById('music-modal-provider');
+const musicModalArt = document.getElementById('music-modal-art');
 const musicModalBody = document.getElementById('music-modal-body');
 const musicModalClose = document.getElementById('music-modal-close');
+let currentPlayingUrl = '';
+
+function renderPlayerArt(meta) {
+  if (!musicModalArt) return;
+  const title = meta?.title || 'Nhac dinh kem';
+  if (meta?.thumbnail) {
+    musicModalArt.innerHTML = `<img class="music-art-image" src="${escapeHtml(meta.thumbnail)}" alt="${escapeHtml(title)}" loading="lazy" />`;
+    return;
+  }
+  musicModalArt.innerHTML = `<span class="music-art-icon ${escapeHtml(meta?.icon || 'album-generic')}" aria-hidden="true"></span>`;
+}
 
 function openPlayer(url, title) {
   const embed = musicEmbed(url);
   if (!embed || !musicModal) return;
+  currentPlayingUrl = (url || '').trim();
   const isSpotify = embed.includes('spotify');
   // YouTube: tự phát; Spotify embed có nút play riêng (không tự phát)
   const src = isSpotify ? embed : embed + (embed.includes('?') ? '&' : '?') + 'autoplay=1';
-  const frameStyle = isSpotify ? 'height:352px;width:100%' : 'aspect-ratio:16/9;width:100%;height:auto';
+  const meta = musicMetaCache.get((url || '').trim()) || musicFallbackMeta(url);
   musicModalBody.innerHTML =
-    `<iframe src="${escapeHtml(src)}" style="${frameStyle};border:0" ` +
+    `<iframe class="music-modal-embed ${isSpotify ? 'is-spotify' : 'is-youtube'}" src="${escapeHtml(src)}" ` +
     `loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" ` +
     `allow="autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture"></iframe>`;
-  musicModalTitle.textContent = title || 'Đang phát';
+  musicModalTitle.textContent = meta.title || title || 'Dang phat';
+  if (musicModalProvider) musicModalProvider.textContent = meta.providerLabel || (isSpotify ? 'Spotify' : 'YouTube');
+  renderPlayerArt(meta);
   musicModal.hidden = false;
   document.body.classList.add('player-open');
   closeSidebar(); // đóng menu để xem trình phát rõ hơn (điện thoại)
+
+  fetchMusicMeta(url).then((freshMeta) => {
+    if (musicModal.hidden) return;
+    if ((url || '').trim() !== currentPlayingUrl) return;
+    if (!freshMeta) return;
+    musicModalTitle.textContent = freshMeta.title || title || 'Dang phat';
+    if (musicModalProvider) musicModalProvider.textContent = freshMeta.providerLabel || (isSpotify ? 'Spotify' : 'YouTube');
+    renderPlayerArt(freshMeta);
+  });
 }
 
 function closePlayer() {
   if (!musicModal) return;
+  currentPlayingUrl = '';
   musicModal.hidden = true;
   musicModalBody.innerHTML = ''; // gỡ iframe -> dừng nhạc
   document.body.classList.remove('player-open');
@@ -684,10 +710,6 @@ function closePlayer() {
 
 if (musicModalClose) musicModalClose.addEventListener('click', closePlayer);
 if (musicModal) {
-  // Bấm nền ngoài thẻ để đóng
-  musicModal.addEventListener('click', (e) => {
-    if (e.target === musicModal) closePlayer();
-  });
   // Esc để đóng
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !musicModal.hidden) closePlayer();
