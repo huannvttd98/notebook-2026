@@ -33,20 +33,20 @@ function renderRows(users) {
   }
   rowsEl.innerHTML = users
     .map((u) => {
-      const isAdmin = adminUsername && u.username && u.username.toLowerCase() === adminUsername.toLowerCase();
+      const isAdmin = adminUsername && u.username?.toLowerCase() === adminUsername.toLowerCase();
       const badge = isAdmin ? '<span class="admin-badge">admin</span>' : '';
       const lastLogin = u.last_login_at
         ? escapeHtml(u.last_login_at)
         : '<span class="admin-muted">Chưa đăng nhập</span>';
-      return `<tr>
-        <td>${u.id}</td>
-        <td>${escapeHtml(u.username)}${badge}</td>
-        <td>${escapeHtml(u.email)}</td>
-        <td>${statusCell(u, isAdmin)}</td>
-        <td>${escapeHtml(u.created_at)}</td>
-        <td>${lastLogin}</td>
-        <td class="admin-num">${u.note_count}</td>
-        <td>${actionCell(u, isAdmin)}</td>
+      return `<tr class="admin-user-row">
+        <td data-label="#">${u.id}</td>
+        <td data-label="Tài khoản">${escapeHtml(u.username)}${badge}</td>
+        <td data-label="Email">${escapeHtml(u.email)}</td>
+        <td data-label="Trạng thái">${statusCell(u, isAdmin)}</td>
+        <td data-label="Ngày tạo">${escapeHtml(u.created_at)}</td>
+        <td data-label="Đăng nhập gần nhất">${lastLogin}</td>
+        <td class="admin-num" data-label="Số ghi chú">${u.note_count}</td>
+        <td data-label="Hành động">${actionCell(u, isAdmin)}</td>
       </tr>`;
     })
     .join('');
@@ -56,7 +56,7 @@ async function loadUsers() {
   try {
     const res = await fetch('/api/admin/users');
     if (res.status === 403) {
-      window.location.href = '/';
+      globalThis.location.href = '/';
       return;
     }
     const data = await res.json();
@@ -93,15 +93,15 @@ rowsEl.addEventListener('click', (e) => {
     const res = await fetch('/api/auth/me');
     me = await res.json();
   } catch {
-    window.location.href = '/login.html';
+    globalThis.location.href = '/login.html';
     return;
   }
   if (!me.authenticated) {
-    window.location.href = '/login.html';
+    globalThis.location.href = '/login.html';
     return;
   }
   if (!me.isAdmin) {
-    window.location.href = '/';
+    globalThis.location.href = '/';
     return;
   }
   adminUsername = me.username;
