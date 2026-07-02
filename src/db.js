@@ -66,6 +66,23 @@ db.exec(`
     PRIMARY KEY (note_id, user_id)
   );
   CREATE INDEX IF NOT EXISTS idx_shares_user ON note_shares(user_id);
+
+  -- Lịch sử thay đổi ghi chú: mỗi dòng là 1 bản chụp (snapshot) của ghi chú tại
+  -- thời điểm tạo hoặc mỗi lần cập nhật. edited_by = người thực hiện thay đổi
+  -- (có thể là chủ hoặc người được chia sẻ). Xóa note thì xóa luôn lịch sử.
+  CREATE TABLE IF NOT EXISTS note_revisions (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    note_id    INTEGER NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+    edited_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    action     TEXT NOT NULL DEFAULT 'update', -- 'create' | 'update'
+    title      TEXT,
+    content    TEXT,
+    mood       TEXT,
+    rating     INTEGER NOT NULL DEFAULT 0,
+    music      TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_revisions_note ON note_revisions(note_id, id DESC);
 `);
 
 // Migration: thêm cột nếu DB cũ chưa có

@@ -896,6 +896,153 @@ table.admin-table tbody tr:hover { background: var(--bg-hover); }
   color: var(--ink);
 }
 
+/* ===== Lịch sử thay đổi ghi chú (màn admin) ===== */
+.note-history-card {
+  margin-top: 16px;
+}
+
+.note-history-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.note-history-title {
+  font-size: 1.2rem;
+}
+
+.note-history-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.note-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-item {
+  position: relative;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fcfdf9;
+}
+
+.history-item-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.history-badge {
+  display: inline-flex;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.history-badge-create {
+  background: #e6f4ea;
+  color: #1d7a3a;
+}
+
+.history-badge-update {
+  background: #eef2ff;
+  color: #3949ab;
+}
+
+.history-time {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.history-editor {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.history-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-change {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.history-field {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  padding-top: 2px;
+}
+
+.history-values {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.history-old,
+.history-new {
+  display: inline-block;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.history-old {
+  background: #fdecec;
+  color: #a23b3b;
+  text-decoration: line-through;
+  text-decoration-color: rgba(162, 59, 59, 0.5);
+}
+
+.history-new {
+  background: #e6f4ea;
+  color: #1d7a3a;
+}
+
+.history-arrow {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.history-nochange {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+@media (max-width: 760px) {
+  .history-change {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
 @media (max-width: 760px) {
   body.users-page {
     padding: 14px 10px;

@@ -34,7 +34,6 @@ async function readJson(res) {
 
 // ===== Trạng thái =====
 let currentId = null;       // id ghi chú đang mở (null = bản nháp mới chưa lưu)
-let currentRating = 0;
 let searchTerm = '';
 let saving = false;         // đang gọi API lưu
 let dirty = false;          // có thay đổi chưa lưu
@@ -59,9 +58,12 @@ const editedMark = document.getElementById('edited-mark');
 const crumbEl = document.getElementById('doc-crumb');
 const statusEl = document.getElementById('save-status');
 const deleteBtn = document.getElementById('delete-note');
-const ratingEl = document.getElementById('rating');
-const ratingClearBtn = document.getElementById('rating-clear');
-const faceEls = ratingEl ? Array.from(ratingEl.querySelectorAll('.face')) : [];
+const moodTrigger = document.getElementById('mood-trigger');
+const moodCurrent = document.getElementById('mood-current');
+const moodClearBtn = document.getElementById('mood-clear');
+const emojiPop = document.getElementById('emoji-pop');
+const emojiCats = document.getElementById('emoji-cats');
+const emojiGrid = document.getElementById('emoji-grid');
 const noteImagesEl = document.getElementById('note-images');
 const noteImageInput = document.getElementById('note-image-input');
 const imageStatus = document.getElementById('image-status');
@@ -191,17 +193,102 @@ function renderShareInline(users) {
     .join('');
 }
 
-// ===== Đánh giá cảm xúc (chọn 1 icon) =====
-function paintRating(value) {
-  faceEls.forEach((f) => f.classList.toggle('active', Number(f.dataset.value) === value));
+// ===== Cảm xúc: chọn 1 emoji từ thư viện (lưu vào trường mood) =====
+// Thư viện emoji, chia nhóm để dễ tìm. Nhóm đầu (mặt cười) hiển thị mặc định.
+const EMOJI_LIB = [
+  { key: 'faces', label: '😊', title: 'Cảm xúc',
+    emojis: ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😋','😛','😜','🤪','🤨','🧐','🤓','😎','🥳','🤩','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','😴','🥱','😪','🤒','🤕','🤢','🤮','🥴','😵','🤐','😶'] },
+  { key: 'gestures', label: '👍', title: 'Cử chỉ',
+    emojis: ['👍','👎','👌','✌️','🤞','🤟','🤘','👏','🙌','🙏','💪','🤝','👋','🤙','👊','✊','🫶','🤲','👐','🫰'] },
+  { key: 'hearts', label: '❤️', title: 'Trái tim',
+    emojis: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','♥️'] },
+  { key: 'nature', label: '🌟', title: 'Khác',
+    emojis: ['🔥','⭐','🌟','✨','💫','🎉','🎊','🎈','🌈','☀️','🌙','⛅','🌧️','⛈️','❄️','🌸','🌻','🌹','🌷','🍀','🌿','🐶','🐱','🐰','🦋','☕','🍎','🍰','🎵','🎶'] },
+];
+
+let currentMood = '';   // emoji cảm xúc đang chọn ('' = chưa chọn)
+let emojiBuilt = false;
+
+// Cập nhật hiển thị nút cảm xúc theo emoji đang chọn
+function paintMood() {
+  const has = !!currentMood;
+  moodCurrent.textContent = currentMood;
+  moodCurrent.hidden = !has;
+  moodTrigger.querySelector('.mood-placeholder').hidden = has;
+  moodClearBtn.hidden = !has;
 }
-function setRating(value, save = true) {
-  currentRating = value;
-  paintRating(value);
+function setMood(value, save = true) {
+  currentMood = typeof value === 'string' ? value : '';
+  paintMood();
   if (save) scheduleSave();
 }
-faceEls.forEach((f) => f.addEventListener('click', () => setRating(Number(f.dataset.value))));
-if (ratingClearBtn) ratingClearBtn.addEventListener('click', () => setRating(0));
+
+// Dựng lưới emoji + tab nhóm (chỉ 1 lần)
+function buildEmojiLib() {
+  if (emojiBuilt) return;
+  emojiCats.innerHTML = EMOJI_LIB.map(
+    (cat, i) =>
+      `<button type="button" class="emoji-cat${i === 0 ? ' active' : ''}" role="tab"
+        data-cat="${cat.key}" title="${escapeHtml(cat.title)}" aria-selected="${i === 0}">${cat.label}</button>`
+  ).join('');
+  renderEmojiGrid(EMOJI_LIB[0].key);
+  emojiBuilt = true;
+}
+function renderEmojiGrid(key) {
+  const cat = EMOJI_LIB.find((c) => c.key === key) || EMOJI_LIB[0];
+  emojiGrid.innerHTML = cat.emojis
+    .map((em) => `<button type="button" class="emoji-item" data-emoji="${escapeHtml(em)}">${em}</button>`)
+    .join('');
+}
+
+function openEmojiPop() {
+  buildEmojiLib();
+  emojiPop.hidden = false;
+  moodTrigger.setAttribute('aria-expanded', 'true');
+}
+function closeEmojiPop() {
+  emojiPop.hidden = true;
+  moodTrigger.setAttribute('aria-expanded', 'false');
+}
+function toggleEmojiPop() {
+  if (emojiPop.hidden) openEmojiPop();
+  else closeEmojiPop();
+}
+
+moodTrigger.addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleEmojiPop();
+});
+moodClearBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  setMood('');
+  closeEmojiPop();
+});
+// Chuyển nhóm emoji
+emojiCats.addEventListener('click', (e) => {
+  const btn = e.target.closest('.emoji-cat');
+  if (!btn) return;
+  emojiCats.querySelectorAll('.emoji-cat').forEach((c) => {
+    const on = c === btn;
+    c.classList.toggle('active', on);
+    c.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  renderEmojiGrid(btn.dataset.cat);
+});
+// Chọn 1 emoji
+emojiGrid.addEventListener('click', (e) => {
+  const btn = e.target.closest('.emoji-item');
+  if (!btn) return;
+  setMood(btn.dataset.emoji);
+  closeEmojiPop();
+});
+// Bấm ra ngoài / phím Esc -> đóng thư viện
+document.addEventListener('click', (e) => {
+  if (!emojiPop.hidden && !e.target.closest('#mood-picker')) closeEmojiPop();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !emojiPop.hidden) closeEmojiPop();
+});
 
 // ===== Sidebar: danh sách ghi chú =====
 async function loadNotes() {
@@ -230,7 +317,7 @@ function renderNoteList(entries) {
                  data-music="${escapeHtml(e.music)}" data-title="${escapeHtml(displayTitle(e))}">▶</span>`
             : ''
         }
-        ${e.rating ? `<span class="note-face">${faceFor(e.rating)}</span>` : ''}
+        ${(e.mood || faceFor(e.rating)) ? `<span class="note-face">${escapeHtml(e.mood || faceFor(e.rating))}</span>` : ''}
       </button>`
     )
     .join('');
@@ -273,7 +360,8 @@ function loadIntoEditor(entry) {
   idEl.value = entry.id;
   titleEl.value = entry.title || '';
   contentEl.value = entry.content || '';
-  setRating(entry.rating || 0, false);
+  // Ưu tiên emoji cảm xúc (mood); ghi chú cũ chỉ có rating thì quy đổi sang mặt cười
+  setMood(entry.mood || faceFor(entry.rating), false);
   dateEl.value = entry.created_at ? entry.created_at.split(' ')[0] : todayStr();
   editedMark.textContent = entry.updated_at ? '(đã sửa)' : '';
   crumbEl.textContent = displayTitle(entry);
@@ -323,7 +411,7 @@ function newNote() {
   idEl.value = '';
   titleEl.value = '';
   contentEl.value = '';
-  setRating(0, false);
+  setMood('', false);
   dateEl.value = todayStr();
   editedMark.textContent = '';
   crumbEl.textContent = 'Ghi chú mới';
@@ -370,7 +458,7 @@ async function flush() {
   const payload = {
     title: titleEl.value,
     content: contentEl.value,
-    rating: currentRating,
+    mood: currentMood,
     date: dateEl.value || undefined,
     music: musicInput ? musicInput.value.trim() : '',
   };

@@ -1250,35 +1250,36 @@ input, textarea, button { font: inherit; color: inherit; }
   border-left: 12px solid var(--accent);
   filter: drop-shadow(0 2px 4px rgba(58, 138, 54, .18));
 }
-.rating { display: flex; align-items: center; gap: .15rem; }
-.rating .face {
-  background: none;
-  border: none;
-  line-height: 1;
-  cursor: pointer;
-  border-radius: 6px;
-  padding: .1rem .2rem;
-  font-size: 1.3rem;
-  filter: grayscale(1);
-  opacity: .45;
-  transition: opacity .12s, transform .12s, filter .12s;
-}
 @keyframes music-wave {
   0%, 100% { transform: scaleY(.55); opacity: .55; }
   50% { transform: scaleY(1); opacity: 1; }
 }
-.rating .face:hover { opacity: .85; filter: grayscale(.3); }
-.rating .face.active {
-  filter: none;
-  opacity: 1;
-  transform: scale(1.18);
-  background: var(--bg-hover);
+
+/* ===== Cảm xúc: chọn emoji từ thư viện ===== */
+.mood-picker { position: relative; display: inline-flex; align-items: center; gap: .15rem; }
+.mood-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: .12rem .5rem;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--muted);
+  transition: background .12s, border-color .12s;
 }
-.rating-clear {
+.mood-trigger:hover { background: var(--bg-hover); border-color: var(--border); }
+.mood-trigger[aria-expanded="true"] { background: var(--bg-hover); border-color: var(--border); }
+.mood-current { font-size: 1.35rem; line-height: 1; }
+.mood-placeholder { display: inline-flex; align-items: center; gap: .25rem; font-size: .82rem; color: var(--muted); }
+.mood-placeholder .mood-face { font-size: 1.05rem; filter: grayscale(1); opacity: .7; }
+.mood-clear {
   background: none;
   border: none;
   color: var(--muted);
-  margin-left: .25rem;
   padding: .15rem .3rem;
   cursor: pointer;
   border-radius: 4px;
@@ -1286,7 +1287,61 @@ input, textarea, button { font: inherit; color: inherit; }
   align-items: center;
   justify-content: center;
 }
-.rating-clear:hover { background: var(--bg-hover); color: var(--ink); }
+.mood-clear:hover { background: var(--bg-hover); color: var(--ink); }
+
+/* Popover thư viện emoji */
+.emoji-pop {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 60;
+  width: 288px;
+  max-width: 86vw;
+  background: var(--bg-panel, #fff);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 34px rgba(20, 40, 20, .16);
+  padding: 8px;
+}
+.emoji-cats {
+  display: flex;
+  gap: 4px;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.emoji-cat {
+  flex: 1;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: .3rem 0;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: .55;
+  transition: background .12s, opacity .12s;
+}
+.emoji-cat:hover { background: var(--bg-hover); opacity: .9; }
+.emoji-cat.active { background: var(--bg-hover); opacity: 1; }
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  max-height: 216px;
+  overflow-y: auto;
+}
+.emoji-item {
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: .25rem 0;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .1s, transform .1s;
+}
+.emoji-item:hover { background: var(--bg-hover); transform: scale(1.18); }
 
 /* ===================== LỊCH THÁNG ===================== */
 .calendar-view {

@@ -173,13 +173,19 @@
           </label>
           <button type="button" id="music-toggle" class="add-music-icon" title="Thêm nhạc" aria-label="Thêm nhạc"><span class="ui-ico meta-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6.5l10-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></span></button>
           <span id="edited-mark" class="doc-date"></span>
-          <div id="rating" class="rating" role="radiogroup" aria-label="Cảm xúc">
-            <button type="button" class="face" data-value="1" aria-label="Rất buồn">😢</button>
-            <button type="button" class="face" data-value="2" aria-label="Buồn">🙁</button>
-            <button type="button" class="face" data-value="3" aria-label="Bình thường">😐</button>
-            <button type="button" class="face" data-value="4" aria-label="Vui">🙂</button>
-            <button type="button" class="face" data-value="5" aria-label="Rất vui">😄</button>
-            <button type="button" id="rating-clear" class="rating-clear" title="Xóa cảm xúc"><span class="ui-ico close-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>
+          <!-- Cảm xúc: chọn 1 emoji bất kỳ từ thư viện (lưu vào trường mood) -->
+          <div id="mood-picker" class="mood-picker">
+            <button type="button" id="mood-trigger" class="mood-trigger" aria-haspopup="dialog"
+              aria-expanded="false" title="Chọn cảm xúc">
+              <span id="mood-current" class="mood-current" hidden></span>
+              <span class="mood-placeholder"><span class="mood-face">🙂</span> Cảm xúc</span>
+            </button>
+            <button type="button" id="mood-clear" class="mood-clear" title="Xóa cảm xúc" hidden><span class="ui-ico close-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>
+            <!-- Thư viện emoji (dựng nội dung bằng JS) -->
+            <div id="emoji-pop" class="emoji-pop" role="dialog" aria-label="Thư viện cảm xúc" hidden>
+              <div id="emoji-cats" class="emoji-cats" role="tablist" aria-label="Nhóm cảm xúc"></div>
+              <div id="emoji-grid" class="emoji-grid"></div>
+            </div>
           </div>
           <span id="image-status" class="cover-status muted"></span>
         </div>

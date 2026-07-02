@@ -33,13 +33,13 @@ function renderRows(notes) {
   }
   rowsEl.innerHTML = notes
     .map((n) => {
-      const face = n.rating >= 1 && n.rating <= 5 ? FACES[n.rating - 1] : '';
+      const face = n.mood?.trim() || (n.rating >= 1 && n.rating <= 5 ? FACES[n.rating - 1] : '');
       const music = n.music ? ' 🎵' : '';
       const owner = n.owner_username || '(không rõ)';
       return `<tr class="admin-note-row" data-id="${n.id}" title="Bấm để xem chi tiết ghi chú">
         <td>${n.id}</td>
         <td>${escapeHtml(owner)}</td>
-        <td>${escapeHtml(titleOf(n))}${face} ${music}</td>
+        <td>${escapeHtml(titleOf(n))}${escapeHtml(face)} ${music}</td>
         <td class="note-preview">${escapeHtml(preview(n.content))}</td>
         <td>${escapeHtml(n.created_at)}</td>
         <td class="admin-num">${n.share_count || 0}</td>

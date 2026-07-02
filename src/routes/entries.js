@@ -41,6 +41,32 @@ const stmtUpdateImages = db.prepare(`UPDATE entries SET images = ? WHERE id = ?`
 // Xóa: chỉ chủ note
 const stmtDelete = db.prepare(`DELETE FROM entries WHERE id = ? AND user_id = ?`);
 
+// ===== Lịch sử thay đổi =====
+// Chụp lại trạng thái ghi chú (title/content/mood/rating/music) mỗi lần tạo hoặc
+// cập nhật, kèm người thực hiện. Xem lại/quản lý ở màn admin.
+const stmtInsertRevision = db.prepare(
+  `INSERT INTO note_revisions (note_id, edited_by, action, title, content, mood, rating, music)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+);
+function recordRevision(entry, editedBy, action) {
+  if (!entry) return;
+  try {
+    stmtInsertRevision.run(
+      entry.id,
+      editedBy || null,
+      action,
+      entry.title,
+      entry.content,
+      entry.mood,
+      entry.rating,
+      entry.music
+    );
+  } catch (err) {
+    // Không chặn thao tác chính nếu ghi lịch sử thất bại
+    console.error('Ghi lịch sử ghi chú thất bại:', err.message);
+  }
+}
+
 // ===== Chia sẻ note =====
 const stmtFindUser = db.prepare(
   `SELECT id, username, email, status FROM users WHERE username = ? OR email = ?`
@@ -60,7 +86,10 @@ const stmtRemoveShare = db.prepare(`DELETE FROM note_shares WHERE note_id = ? AN
 function parseBody(body) {
   const title = typeof body.title === 'string' ? body.title.trim() : '';
   const content = typeof body.content === 'string' ? body.content.trim() : '';
-  const mood = typeof body.mood === 'string' ? body.mood.trim() : '';
+  // Cảm xúc: 1 emoji chọn từ thư viện. Cắt ngắn để tránh lạm dụng
+  // (emoji ghép ZWJ có thể dài vài ký tự); giá trị dài bất thường bị bỏ qua.
+  let mood = typeof body.mood === 'string' ? body.mood.trim() : '';
+  if (mood.length > 20) mood = '';
   let rating = Number.parseInt(body.rating, 10);
   if (Number.isNaN(rating) || rating < 0) rating = 0;
   if (rating > 5) rating = 5;
@@ -235,7 +264,9 @@ router.post('/', (req, res) => {
   } else {
     info = stmtInsert.run(title || null, content, mood || null, rating, music, req.userId);
   }
-  res.status(201).json(withOwner(stmtGetOwned.get(info.lastInsertRowid, req.userId), req.userId));
+  const created = stmtGetOwned.get(info.lastInsertRowid, req.userId);
+  recordRevision(created, req.userId, 'create');
+  res.status(201).json(withOwner(created, req.userId));
 });
 
 // PUT /api/entries/:id — cập nhật (chủ hoặc người được chia sẻ đều sửa được)
@@ -251,7 +282,9 @@ router.put('/:id', (req, res) => {
   } else {
     stmtUpdate.run(title || null, content, mood || null, rating, music, req.params.id);
   }
-  res.json(withOwner(stmtGetAccessible.get(req.params.id, req.userId, req.userId), req.userId));
+  const updated = stmtGetAccessible.get(req.params.id, req.userId, req.userId);
+  recordRevision(updated, req.userId, 'update');
+  res.json(withOwner(updated, req.userId));
 });
 
 // POST /api/entries/:id/images — đính kèm 1 ảnh (chủ hoặc người được chia sẻ)
